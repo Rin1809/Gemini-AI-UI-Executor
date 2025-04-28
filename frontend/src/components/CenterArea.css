@@ -34,7 +34,7 @@
 
 .top-bar {
   padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit) * 3);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid #131314;
   background-color: var(--bg-primary);
   flex-shrink: 0;
   display: flex;

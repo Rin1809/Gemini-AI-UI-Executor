@@ -1,6 +1,6 @@
 // frontend/src/components/InteractionBlock.tsx
 import React from 'react';
-// Thêm FiTerminal nếu chưa có
+
 import { FiUser, FiCode, FiPlay, FiEye, FiAlertTriangle, FiTool, FiCheckCircle, FiLoader, FiCopy, FiDownload, FiTerminal } from 'react-icons/fi';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -10,7 +10,7 @@ import ExpandableOutput from './ExpandableOutput';
 // Thêm InstallationResult
 import { ConversationBlock, ExecutionResult, ReviewResult, DebugResult, InstallationResult } from '../App';
 import { toast } from 'react-toastify';
-import './CenterArea.css'; // Đảm bảo CSS được import
+import './CenterArea.css';
 
 // --- Interface (Thêm onInstallPackage) ---
 interface InteractionBlockProps {
@@ -20,10 +20,10 @@ interface InteractionBlockProps {
     onExecute: (codeToExecute: string) => void;
     onDebug: (codeToDebug: string, executionResult: ExecutionResult) => void;
     onApplyCorrectedCode: (code: string) => void;
-    onInstallPackage: (packageName: string) => Promise<void>; // <-- THÊM PROP MỚI
+    onInstallPackage: (packageName: string) => Promise<void>;
     expandedOutputs: Record<string, { stdout: boolean; stderr: boolean }>;
     onToggleOutputExpand: (blockId: string, type: 'stdout' | 'stderr') => void;
-    'data-block-id'?: string; // Thêm prop này cho querySelector
+    'data-block-id'?: string; 
 }
 // -----------------------------------------
 
@@ -43,7 +43,7 @@ const MarkdownComponents = {
     code({ node, inline, className, children, ...props }: any) {
       const match = /language-(\w+)/.exec(className || '');
       const codeString = String(children ?? '').replace(/\n$/, '');
-      const handleCopyMdCode = () => { navigator.clipboard.writeText(codeString).then(() => toast.info("Copied Markdown code!")); };
+      const handleCopyMdCode = () => { navigator.clipboard.writeText(codeString).then(() => toast.info("Đã Copy Markdown code!")); };
       return !inline && match ? (
         <div className="markdown-code-block">
             <div className="code-block-header">
@@ -55,8 +55,6 @@ const MarkdownComponents = {
               language={match[1]}
               PreTag="div"
               {...props}
-              // customStyle={{ margin: '0', borderRadius: '0 0 var(--border-radius-small) var(--border-radius-small)', fontSize: '0.8rem', backgroundColor: 'transparent' }}
-              // codeTagProps={{ style: { fontFamily: 'var(--code-font-family)' } }} // Dùng style mặc định của lib tốt hơn
             >
                 {codeString}
             </SyntaxHighlighter>
@@ -65,13 +63,13 @@ const MarkdownComponents = {
         <code className={`inline-code ${className || ''}`} {...props}>{children}</code>
       );
     }
-    // Thêm các component khác nếu cần
+
 };
 // -------------------------
 
 const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
     block, isBusy, onReview, onExecute, onDebug, onApplyCorrectedCode,
-    onInstallPackage, // <-- Lấy prop mới
+    onInstallPackage,
     expandedOutputs, onToggleOutputExpand
  }) => {
   const { type, data, id, timestamp, isNew } = block;
@@ -79,7 +77,7 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
   // --- Handlers Copy/Download ---
   const handleCopy = (text: string | null | undefined) => {
     if (typeof text === 'string') {
-      navigator.clipboard.writeText(text).then(() => toast.info("Code copied!"));
+      navigator.clipboard.writeText(text).then(() => toast.info("Đã copy code!"));
     }
   };
   const handleDownload = (filename: string, text: string | null | undefined) => {
@@ -128,7 +126,7 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
                         <button onClick={() => handleDownload("script.py", codeStr)} className="icon-button subtle small" title="Download"><FiDownload /></button>
                     </div>
                 </div>
-                <SyntaxHighlighter language="python" style={vscDarkPlus as any} className="main-code-block" /*codeTagProps={{ style: { fontFamily: 'var(--code-font-family)' } }}*/>
+                <SyntaxHighlighter language="python" style={vscDarkPlus as any} className="main-code-block">
                     {codeStr}
                 </SyntaxHighlighter>
              </div>

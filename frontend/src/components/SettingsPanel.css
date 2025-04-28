@@ -1,10 +1,10 @@
 /* frontend/src/components/SettingsPanel.css */
-.settings-panel { background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3); overflow-y: auto; max-height: 40vh; }
+.settings-panel { background-color: #000000; border-bottom: 1px solid var(--border-color); padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3); overflow-y: auto; max-height: 40vh; }
 
 .settings-content { display: flex; flex-direction: column; gap: calc(var(--spacing-unit) * 2); max-width: 850px; margin: 0 auto; }
 .settings-section { display: flex; flex-direction: column; gap: calc(var(--spacing-unit) * 0.5); }
 .settings-section label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-.settings-panel input[type="text"], .settings-panel input[type="number"], .settings-panel select { background-color: var(--bg-primary); border: 1px solid var(--border-color); font-size: 0.875rem; padding: calc(var(--spacing-unit) * 0.75) var(--spacing-unit); border-radius: var(--border-radius-small); }
+.settings-panel input[type="text"], .settings-panel input[type="number"], .settings-panel select { background-color: #1e1f20; border: 1px solid var(--border-color); font-size: 0.875rem; padding: calc(var(--spacing-unit) * 0.75) var(--spacing-unit); border-radius: var(--border-radius-small); }
 .model-select-group { display: flex; align-items: center; gap: var(--spacing-unit); }
 .model-input { flex-grow: 1; }
 .save-button { background-color: var(--bg-tertiary); border: 1px solid var(--border-color) !important; }
@@ -15,7 +15,7 @@
 .slider-container input[type="range"] { flex-grow: 1; cursor: pointer; height: 6px; background-color: var(--bg-tertiary); border-radius: 3px; -webkit-appearance: none; appearance: none; padding: 0; margin: 0;}
 .slider-container input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; background: var(--text-accent); border-radius: 50%; cursor: pointer; border: 2px solid var(--bg-secondary); margin-top: -4px; }
 .slider-container input[type="range"]::-moz-range-thumb { width: 10px; height: 10px; background: var(--text-accent); border-radius: 50%; cursor: pointer; border: 2px solid var(--bg-secondary); }
-.slider-value { font-size: 0.8rem; color: var(--text-muted); min-width: 30px; text-align: right; background-color: var(--bg-primary); padding: 3px 6px; border-radius: var(--border-radius-small); border: 1px solid var(--border-color); }
+.slider-value { font-size: 0.8rem; color: var(--text-muted); min-width: 30px; text-align: right; background-color: #1e1f20; padding: 3px 6px; border-radius: var(--border-radius-small); border: 1px solid var(--border-color); }
 .topk-input { text-align: right; padding-right: var(--spacing-unit); }
 .advanced-settings-section { margin-top: var(--spacing-unit); padding-top: var(--spacing-unit); border-top: 1px solid var(--border-color); }
 .advanced-settings-section h4 { display: flex; align-items: center; gap: var(--spacing-unit); font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: var(--spacing-unit); }

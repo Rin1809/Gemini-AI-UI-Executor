@@ -1,7 +1,7 @@
 // frontend/src/components/UserInput.tsx
 import React, { KeyboardEvent, useRef, useEffect } from 'react';
 import { FiSend } from 'react-icons/fi';
-import './UserInput.css'; // CSS riêng
+import './UserInput.css'; 
 
 interface UserInputProps {
   prompt: string;
@@ -35,7 +35,7 @@ const UserInput: React.FC<UserInputProps> = ({ prompt, setPrompt, onSend, isLoad
       <div className="user-input-area">
         <textarea
           ref={textareaRef}
-          placeholder="Type something (Ctrl+Enter to send)..."
+          placeholder="Cần gì đó (Ctrl+Enter để gửi)..."
           rows={1}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
@@ -52,7 +52,7 @@ const UserInput: React.FC<UserInputProps> = ({ prompt, setPrompt, onSend, isLoad
         </button>
       </div>
        <div className="input-footer-text">
-            Gemini Executor can make mistakes. This model is experimental.
+            Là một phiên bản thử nghiệm, sẽ có nhiều lỗi. ᓚᘏᗢ
         </div>
     </div>
   );

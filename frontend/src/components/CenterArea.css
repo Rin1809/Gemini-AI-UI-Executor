@@ -21,41 +21,47 @@
 .settings-toggle-button:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
 
 .interaction-container {
-  flex-grow: 1;
+  flex-grow: 1; /* Cho phép scroll */
   overflow-y: auto;
-  padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3); /* Giảm padding chút */
+  padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 4); /* Giảm padding dọc */
   display: flex;
   flex-direction: column;
-  gap: 0; /* Bỏ gap ở đây, xử lý bằng margin/padding của round */
+  gap: 0; /* Bỏ gap ở đây, xử lý bằng margin/padding của round/block */
 }
 
 /* --- Interaction Round --- */
 .interaction-round {
-  padding-bottom: calc(var(--spacing-unit) * 1.5); /* Padding dưới */
-  margin-bottom: calc(var(--spacing-unit) * 1.5); /* Margin dưới */
-  border-bottom: 1px solid var(--border-color-secondary);
-  position: relative;
+    padding-bottom: calc(var(--spacing-unit) * 1.5);
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
+    border-bottom: 1px solid var(--border-color-secondary);
+    position: relative;
 }
-.interaction-round:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
+.interaction-round:last-child { border-bottom: none; margin-bottom: 0; }
+.expanded-round {
+    /* Có thể thêm style nền nhẹ nếu muốn */
+    /* background-color: rgba(255, 255, 255, 0.02); */
+    /* border-radius: var(--border-radius); */
 }
 
-/* --- Interaction Block Styling (Chung) --- */
+
+/* --- Interaction Block Styling --- */
 .interaction-block {
-  display: flex;
-  gap: var(--spacing-unit);
-  align-items: flex-start;
-  max-width: 850px;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  position: relative; /* Cho header */
-   padding-bottom: var(--spacing-unit); /* Khoảng cách dưới mỗi block */
+    display: flex;
+    gap: var(--spacing-unit);
+    align-items: flex-start;
+    max-width: 850px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    /* Thêm margin bottom cho các block con trong round */
+    margin-bottom: calc(var(--spacing-unit) * 2);
 }
 .interaction-block:last-child {
-    padding-bottom: 0; /* Block cuối trong round không cần padding dưới */
+    margin-bottom: 0; /* Block cuối cùng trong round không cần margin bottom */
+}
+/* User block không cần margin bottom vì nó là header của round */
+.interaction-block.block-type-user {
+    margin-bottom: 0;
 }
 
 .block-avatar { margin-top: calc(var(--spacing-unit)*0.25); flex-shrink: 0; }
@@ -68,35 +74,34 @@
 .block-icon.debug-icon svg { color: var(--warning-color); }
 .block-icon.error-icon svg { color: var(--danger-color); }
 
-.block-main-content { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: calc(var(--spacing-unit) * 0.5); /* Giảm gap chút */ }
+.block-main-content { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: calc(var(--spacing-unit) * 0.5); /* Giảm gap nội bộ */}
 
-/* --- Block Header (chứa timestamp) --- */
-.block-header {
+/* --- Block Header (chỉ cho User Block) --- */
+.block-header.user-header {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
-    /* margin-bottom: calc(var(--spacing-unit) * 0.5); */ /* Bỏ margin, dùng gap của .block-main-content */
-    height: 1.2em; /* Tăng nhẹ chiều cao */
-    position: absolute; /* Để lên trên góc phải */
-    top: calc(var(--spacing-unit)*0.25); /* Căn trên cùng avatar */
-    right: 0;
+    /* margin-bottom: calc(var(--spacing-unit) * 0.75); */ /* Margin đã có ở block-main-content gap */
+    height: auto;
+}
+.user-header-title {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
 }
 .block-timestamp {
-    font-size: 0.7rem; /* Nhỏ hơn */
+    font-size: 0.75rem;
     color: var(--text-muted);
     font-family: var(--code-font-family);
-    background-color: rgba(var(--bg-tertiary-rgb, 42, 43, 44), 0.7); /* Nền mờ */
-    padding: 1px 4px;
-    border-radius: var(--border-radius-small);
 }
 
-.block-content-area { padding-top: 1.5em; /* Đẩy content xuống để không bị header che */ border-radius: var(--border-radius); }
-.block-type-user .block-content-area { background-color: transparent; border: none; padding-top: 0; } /* User không cần padding top vì không có header */
-.block-type-user .prompt-text { color: var(--text-primary); font-size: 1rem; line-height: 1.6; white-space: pre-wrap; font-weight: 500; padding: calc(var(--spacing-unit)*0.25) 0; }
+.block-content-area { padding: 0; border-radius: var(--border-radius); }
+.block-type-user .block-content-area { background-color: transparent; border: none; }
+.block-type-user .prompt-text { color: var(--text-primary); font-size: 1rem; line-height: 1.6; white-space: pre-wrap; font-weight: 500; padding: 0; } /* Bỏ padding cũ */
 
 /* AI Code Block & Debug Code Block */
 .block-type-ai-code .block-content-area,
-.block-type-debug .block-content-area .code-block-container { background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius); overflow: hidden; padding-top: 0; /* Reset padding top cho các block có border */ }
+.block-type-debug .block-content-area .code-block-container { background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius); overflow: hidden; }
 .code-block-container { border-radius: inherit; overflow: hidden; }
 .code-block-header { display: flex; justify-content: space-between; align-items: center; padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit) calc(var(--spacing-unit)*0.75) calc(var(--spacing-unit)*1.5) ; background-color: var(--bg-tertiary); color: var(--text-muted); font-size: 0.8rem; font-family: var(--code-font-family); border-bottom: 1px solid var(--border-color); }
 .code-block-header > div { display: flex; gap: calc(var(--spacing-unit)*0.5); }
@@ -106,7 +111,7 @@
 .main-code-block code { font-family: var(--code-font-family) !important; }
 
 /* Review Block */
-.block-type-review .block-content-area { background-color: var(--bg-secondary); border: 1px solid var(--border-color); padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); padding-top: calc(1.5em + var(--spacing-unit)*1.5); /* Padding top lớn hơn để tránh header */ }
+.block-type-review .block-content-area { background-color: var(--bg-secondary); border: 1px solid var(--border-color); padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); }
 .markdown-content { font-size: 0.9rem; line-height: 1.7; color: var(--text-secondary); }
 .markdown-content p { margin-bottom: var(--spacing-unit); }
 .markdown-content ul, .markdown-content ol { margin-left: calc(var(--spacing-unit) * 2); margin-bottom: var(--spacing-unit); }
@@ -116,7 +121,8 @@
 .markdown-content a:hover { text-decoration: underline; }
 .markdown-content blockquote { border-left: 3px solid var(--border-color); padding-left: var(--spacing-unit); margin: var(--spacing-unit) 0; color: var(--text-muted); font-style: italic; }
 .markdown-code-block { margin: var(--spacing-unit) 0; background-color: var(--code-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius-small); overflow: hidden; }
-.markdown-code-block .code-block-header { padding: calc(var(--spacing-unit)*0.5) var(--spacing-unit) calc(var(--spacing-unit)*0.5) calc(var(--spacing-unit)*1); font-size: 0.75rem; }
+.markdown-code-block .code-block-header { display: flex; justify-content: space-between; align-items: center; padding: calc(var(--spacing-unit)*0.5) var(--spacing-unit) calc(var(--spacing-unit)*0.5) calc(var(--spacing-unit)*1); background-color: var(--bg-tertiary); color: var(--text-muted); font-size: 0.75rem; font-family: var(--code-font-family); border-bottom: 1px solid var(--border-color); }
+.markdown-code-block .code-block-header > div { display: flex; gap: calc(var(--spacing-unit)*0.5); }
 .markdown-code-block .code-block-header .copy-button { color: var(--text-muted); font-size: 0.9rem; padding: calc(var(--spacing-unit)*0.5); background: none; border: none; cursor: pointer; }
 .markdown-code-block .code-block-header .copy-button:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
 .markdown-code-block .syntax-highlighter pre { margin: 0 !important; padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit) !important; border-radius: 0 !important; font-size: 0.8rem !important; background-color: transparent !important; line-height: 1.4 !important; }
@@ -124,36 +130,34 @@
 .inline-code { background-color: var(--bg-tertiary); color: var(--text-accent); padding: 0.1em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; font-family: var(--code-font-family); border: 1px solid var(--border-color); white-space: nowrap; }
 
 /* Execution Block */
-.block-type-execution .block-content-area { background-color: var(--bg-secondary); border: 1px solid var(--border-color); padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); padding-top: calc(1.5em + var(--spacing-unit)*1.5); }
+.block-type-execution .block-content-area { background-color: var(--bg-secondary); border: 1px solid var(--border-color); padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); }
 .execution-content { font-size: 0.85rem; }
-.execution-content.error { /* Giữ nguyên border left error */ }
-.output-section { margin-top: var(--spacing-unit); border-left: 3px solid transparent; padding-left: calc(var(--spacing-unit)); transition: border-color 0.2s ease; }
-.output-section.stdout-section { border-left-color: var(--info-color); }
-.output-section.stderr-section { border-left-color: var(--danger-color); }
+.execution-content.error { /* border-left: 3px solid var(--danger-color); padding-left: calc(var(--spacing-unit)*1.5 - 3px); */ /* Bỏ border ở đây */ }
+.output-section { margin-top: var(--spacing-unit); }
 .output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
 .output-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; display: block; }
 .expand-output-button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 4px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; border-radius: var(--border-radius-small); }
 .expand-output-button:hover { background-color: var(--bg-tertiary); color: var(--text-primary); }
 .expand-output-button svg { font-size: 0.8rem; }
 .output-section pre.output-pre { background-color: var(--bg-tertiary); border: 1px solid var(--border-color-secondary); color: var(--text-secondary); padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit); margin-top: 0; border-radius: var(--border-radius-small); overflow: hidden; white-space: pre-wrap; word-break: break-all; font-family: var(--code-font-family); font-size: 0.8rem; transition: max-height 0.3s ease-in-out; max-height: 7.5em; /* ~5 dòng */ }
-.output-section pre.output-pre.expanded { max-height: 500px; /* Giá trị lớn hoặc JS tính */ overflow-y: auto; /* Hiện scroll nếu quá cao */ }
+.output-section pre.output-pre.expanded { max-height: 500px; overflow-y: auto; }
 .output-section.stderr-section pre.output-pre { color: var(--danger-color); background-color: rgba(242, 139, 130, 0.05); border-color: rgba(242, 139, 130, 0.2); }
 .return-code { margin-top: var(--spacing-unit); font-weight: 500; color: var(--text-muted); font-size: 0.8rem; }
 .exec-message { font-style: italic; color: var(--text-muted); margin-bottom: var(--spacing-unit); font-size: 0.85rem;}
 
 /* Debug Block */
-.block-type-debug .block-content-area { background-color: var(--bg-secondary); border: 1px solid var(--border-color); padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); padding-top: calc(1.5em + var(--spacing-unit)*1.5); }
+.block-type-debug .block-content-area { background-color: var(--bg-secondary); border: 1px solid var(--border-color); padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); }
 .debug-content h4 { font-size: 0.9rem; color: var(--text-secondary); margin: calc(var(--spacing-unit)*1.5) 0 var(--spacing-unit) 0; font-weight: 600; }
 .explanation-content { margin-bottom: calc(var(--spacing-unit) * 2); }
-.corrected-code { /* Không cần style riêng */ }
+.corrected-code { /* class cho syntax highlighter */ }
 
 /* Loading Block */
-.block-type-loading .block-content-area { background-color: transparent; border: none; padding-top: 0; }
+.block-type-loading .block-content-area { background-color: transparent; border: none; }
 .loading-content { display: flex; align-items: center; gap: var(--spacing-unit); color: var(--text-muted); font-style: italic; font-size: 0.9rem; padding: var(--spacing-unit) 0; }
 .loading-content svg { font-size: 1rem; }
 
 /* Error Block */
-.block-type-error .block-content-area { background-color: transparent; border: none; padding-top: 0; }
+.block-type-error .block-content-area { background-color: transparent; border: none; }
 
 /* --- Block Actions Area --- */
 .block-actions-area { padding: 0; display: flex; gap: var(--spacing-unit); flex-wrap: wrap; justify-content: flex-start; margin-top: var(--spacing-unit); }
@@ -167,109 +171,132 @@
 .block-actions-area button.apply-code { color: var(--info-color); border-color: rgba(0, 168, 252, 0.3); }
 .block-actions-area button.apply-code:hover:not(:disabled) { background-color: rgba(0, 168, 252, 0.2); border-color: rgba(0, 168, 252, 0.5); }
 
+/* --- Collapsed Section Block (Appearance) --- */
+.collapsed-section-block {
+background-color: var(--bg-secondary);
+border: 1px solid var(--border-color);
+border-radius: var(--border-radius);
+padding: calc(var(--spacing-unit) * 1.25) calc(var(--spacing-unit) * 1.5); /* Điều chỉnh padding */
+margin-bottom: var(--spacing-unit) * 1.5; /* Tăng khoảng cách */
+cursor: pointer;
+transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
+display: flex;
+flex-direction: column;
+gap: calc(var(--spacing-unit)* 0.75); /* Giảm gap */
+}
+.collapsed-section-block.interactive:hover {
+background-color: var(--bg-tertiary);
+border-color: #444;
+}
 
-/* --- Styles cho Collapsed Block --- */
-.collapsed-block {
-  border: 1px solid transparent; /* Bỏ border mặc định */
-  border-radius: var(--border-radius);
-  padding: calc(var(--spacing-unit)*0.5) var(--spacing-unit); /* Giảm padding */
-  cursor: pointer;
-  transition: background-color 0.15s ease-out;
-  margin-bottom: var(--spacing-unit); /* Khoảng cách giữa các block thu gọn */
+.collapsed-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-.collapsed-block.interactive:hover {
-  background-color: var(--bg-tertiary); /* Chỉ đổi nền khi hover */
-}
-.collapsed-summary {
+.collapsed-title-group {
   display: flex;
   align-items: center;
-  gap: var(--spacing-unit);
-  flex-grow: 1;
-  overflow: hidden;
-  padding: calc(var(--spacing-unit) * 0.25) 0;
+  gap: calc(var(--spacing-unit) * 0.75);
 }
-.summary-icon {
-    color: var(--text-accent);
-    font-size: 1rem;
-    flex-shrink: 0;
-    margin-left: calc(var(--spacing-unit) * 0.5);
+.collapsed-sparkle-icon {
+  color: var(--text-accent);
+  font-size: 1.1rem;
 }
-.collapsed-prompt-text {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-grow: 1;
-  margin-right: auto;
+.collapsed-title-text {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
 }
 .block-timestamp.collapsed-timestamp {
-    margin-left: auto;
-    margin-right: var(--spacing-unit);
-    font-size: 0.7rem;
-    flex-shrink: 0; /* Ngăn co lại */
+   font-size: 0.75rem;
+   margin-left: auto;
+   color: var(--text-muted);
+}
+
+.collapsed-section-body { }
+.collapsed-prompt-summary {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1; /* Chỉ hiện 1 dòng tóm tắt */
+  -webkit-box-orient: vertical;
+  margin: 0;
+}
+
+.collapsed-section-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: calc(var(--spacing-unit) * 0.5);
+}
+.expand-prompt-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 .expand-icon {
   color: var(--text-muted);
   font-size: 1.1rem;
-  flex-shrink: 0;
-  margin-right: var(--spacing-unit);
 }
 
-/* --- Animation cho khối con --- */
+/* --- Animation cho khối con (Collapsible Content) --- */
 .collapsible-content {
-  overflow: hidden;
-  transition: max-height 0.35s ease-in-out, opacity 0.3s ease-in-out, padding-top 0.35s ease-in-out, margin-top 0.35s ease-in-out;
-  display: flex;
-  flex-direction: column;
-  /* Bỏ gap ở đây, dùng padding-bottom của InteractionBlock */
-  gap: 0;
-  margin-left: calc(32px + var(--spacing-unit)); /* Thụt lề */
-  padding-top: var(--spacing-unit); /* Padding trên khi mở */
-  margin-top: var(--spacing-unit); /* Margin trên khi mở */
-  max-height: 2000px; /* Giá trị lớn */
-  opacity: 1;
+overflow: hidden;
+transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+            opacity 0.3s ease-out,
+            padding-top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+            margin-top 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+display: flex;
+flex-direction: column;
+/* Bỏ gap ở đây, dùng margin của interaction-block bên trong */
+/* gap: calc(var(--spacing-unit) * 3); */
+margin-left: calc(32px + var(--spacing-unit)); /* Thụt lề trái */
+padding-top: 0;
+max-height: 0px;
+opacity: 0;
+will-change: max-height, opacity;
+margin-top: 0; /* Bắt đầu không có margin top */
 }
-.collapsible-content.collapsed {
-  max-height: 0px !important;
-  opacity: 0;
-  padding-top: 0;
-  margin-top: 0;
-  /* Thêm visibility để đảm bảo ẩn hoàn toàn khỏi layout */
-   visibility: hidden;
-   transition: max-height 0.35s ease-in-out, opacity 0.2s ease-in-out, visibility 0s linear 0.35s, padding-top 0.35s ease-in-out, margin-top 0.35s ease-in-out;
+
+.collapsible-content.expanded {
+padding-top: var(--spacing-unit); /* Padding khi mở */
+margin-top: var(--spacing-unit); /* Margin top khi mở */
+max-height: 3000px; /* Giá trị đủ lớn */
+opacity: 1;
 }
- .collapsible-content.expanded {
-    visibility: visible;
-    transition: max-height 0.35s ease-in-out, opacity 0.3s ease-in-out 0.1s, padding-top 0.35s ease-in-out, margin-top 0.35s ease-in-out; /* Delay opacity khi mở */
- }
+/* Áp dụng margin-bottom cho các block con bên trong content */
+.collapsible-content > .interaction-block {
+  margin-bottom: calc(var(--spacing-unit) * 2);
+}
+.collapsible-content > .interaction-block:last-child {
+  margin-bottom: 0; /* Block cuối cùng không cần */
+}
 
 
-/* --- Nút Collapse Round MỚI --- */
+/* --- Nút Collapse Round (Cập nhật giao diện) --- */
 .collapse-round-wrapper {
-  text-align: center;
-  margin-top: calc(var(--spacing-unit) * 1.5); /* Giảm margin */
-  padding-top: var(--spacing-unit);
-  border-top: 1px dashed var(--border-color-secondary);
-  margin-left: calc(32px + var(--spacing-unit)); /* Thụt lề */
+  text-align: left;
+  margin-top: calc(var(--spacing-unit) * 1.5);
+  padding-top: calc(var(--spacing-unit) * 1.5);
+  border-top: 1px solid var(--border-color-secondary);
+  margin-left: 0; /* Vẫn nằm trong .collapsible-content */
 }
 .collapse-round-button {
   background: none;
-  border: 1px solid var(--border-color);
+  border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: calc(var(--spacing-unit)*0.5) var(--spacing-unit);
-  font-size: 0.8rem;
+  padding: calc(var(--spacing-unit)*0.5) 0;
+  font-size: 0.85rem;
   display: inline-flex;
   align-items: center;
   gap: calc(var(--spacing-unit)*0.5);
   border-radius: var(--border-radius-small);
-  transition: all 0.2s ease-out;
+  transition: color 0.2s ease-out;
 }
 .collapse-round-button:hover {
-  background-color: var(--bg-tertiary);
-  border-color: var(--text-muted);
   color: var(--text-primary);
 }
 .collapse-round-button svg {

@@ -1,20 +1,15 @@
 // frontend/src/components/CenterArea.tsx
 import React, { useRef, useEffect, useState, ChangeEvent } from 'react';
-import { FiSend, FiCode, FiPlay, FiEye, FiAlertTriangle, FiTool, FiCheckCircle, FiLoader, FiUser, FiCopy, FiDownload, FiSettings, FiX, FiChevronUp } from 'react-icons/fi';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { ConversationBlock, ModelConfig, ExecutionResult } from '../App'; // Import ConversationBlock
+import { FiSettings, FiX, FiChevronUp } from 'react-icons/fi'; // Icons cần thiết
+// Các imports khác
 import UserInput from './UserInput';
 import SettingsPanel from './SettingsPanel';
-import InteractionBlock from './InteractionBlock'; // Import component block đầy đủ
-import CollapsedInteractionBlock from './CollapsedInteractionBlock'; // Import component thu gọn
-import { toast } from 'react-toastify';
-import './CenterArea.css';
+import InteractionBlock from './InteractionBlock';
+import CollapsedInteractionBlock from './CollapsedInteractionBlock';
+import { ConversationBlock, ModelConfig, ExecutionResult, ReviewResult, DebugResult } from '../App';
+import './CenterArea.css'; // Import CSS
 
-
-// Interface Props cho CenterArea
+// Interface Props (Đã bao gồm các props mới)
 interface CenterAreaProps {
   conversation: Array<ConversationBlock>;
   isLoading: boolean;
@@ -29,14 +24,12 @@ interface CenterAreaProps {
   modelConfig: ModelConfig;
   onConfigChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onSaveSettings: () => void;
-  // Props mới
   collapsedStates: Record<string, boolean>;
   onToggleCollapse: (id: string) => void;
   expandedOutputs: Record<string, { stdout: boolean; stderr: boolean }>;
   onToggleOutputExpand: (blockId: string, type: 'stdout' | 'stderr') => void;
 }
 
-// --- Component Chính CenterArea ---
 const CenterArea: React.FC<CenterAreaProps> = (props) => {
   const {
     conversation, isLoading, isBusy,
@@ -47,79 +40,46 @@ const CenterArea: React.FC<CenterAreaProps> = (props) => {
 
   const [showSettings, setShowSettings] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const contentRefs = useRef<Record<string, HTMLDivElement | null>>({}); // Ref cho content để tính chiều cao
 
-  // Scroll to bottom on new message or loading state change
+  // Scroll Effect (Đã cập nhật dependencies)
   useEffect(() => {
     if (scrollRef.current) {
-        // Delay slightly to allow DOM updates
-        const timer = setTimeout(() => {
-            if (scrollRef.current) {
-                 scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-            }
-        }, 50);
-        return () => clearTimeout(timer); // Cleanup timer
-    }
-}, [conversation, isLoading]); // Trigger on conversation change or loading
-
-// --- Animate Collapsible Content Height ---
-useEffect(() => {
-    Object.keys(contentRefs.current).forEach(key => {
-      const element = contentRefs.current[key];
-      const isUserBlock = conversation.find(b => b.id === key)?.type === 'user';
-      if (element && isUserBlock) { // Chỉ animate cho user block rounds
-        const isCollapsed = collapsedStates[key] ?? false;
-        // Force reflow before changing max-height for smooth transition
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const _ = element.offsetHeight;
-
-        if (!isCollapsed) {
-           element.style.maxHeight = element.scrollHeight + "px";
-           element.style.opacity = '1';
-           element.style.marginTop = 'var(--spacing-unit)'; // Reset margin-top
-           element.style.paddingTop = 'var(--spacing-unit)'; // Reset padding-top
-        } else {
-           element.style.maxHeight = "0px";
-           element.style.opacity = '0';
-           element.style.marginTop = '0';
-           element.style.paddingTop = '0';
+      const timer = setTimeout(() => {
+        if (scrollRef.current) {
+             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-      }
-    });
-}, [collapsedStates, conversation]); // Re-run when collapse state or conversation changes
-// ---------------------------------------------------------
-
+      }, 100);
+       return () => clearTimeout(timer);
+    }
+  }, [conversation, isLoading, expandedOutputs, collapsedStates]); // Thêm collapsedStates
 
   const renderConversation = () => {
-    // --- Logic gom rounds ---
+    // Logic gom rounds
     const rounds: { userBlock: ConversationBlock; childrenBlocks: ConversationBlock[] }[] = [];
-     let currentUserBlock: ConversationBlock | null = null;
-     let currentRoundBlocks: ConversationBlock[] = [];
-     for (const block of conversation) {
-       if (block.type === 'user') {
-         if (currentUserBlock) rounds.push({ userBlock: currentUserBlock, childrenBlocks: currentRoundBlocks });
-         currentUserBlock = block;
-         currentRoundBlocks = [];
-       } else if (currentUserBlock) {
-         currentRoundBlocks.push(block);
-       } else {
-         // Xử lý block lẻ không thuộc round nào
-          rounds.push({ userBlock: { type: 'placeholder', data: null, id: block.id + '_placeholder', timestamp: block.timestamp || new Date().toISOString()}, childrenBlocks: [block] });
-       }
-     }
-     if (currentUserBlock) rounds.push({ userBlock: currentUserBlock, childrenBlocks: currentRoundBlocks });
-    // --- Kết thúc logic gom rounds ---
+    let currentUserBlock: ConversationBlock | null = null;
+    let currentRoundBlocks: ConversationBlock[] = [];
+    for (const block of conversation) {
+      if (block.type === 'user') {
+        if (currentUserBlock) rounds.push({ userBlock: currentUserBlock, childrenBlocks: currentRoundBlocks });
+        currentUserBlock = block;
+        currentRoundBlocks = [];
+      } else if (currentUserBlock) {
+        currentRoundBlocks.push(block);
+      } else {
+         rounds.push({ userBlock: { type: 'placeholder', data: null, id: block.id + '_placeholder', timestamp: block.timestamp}, childrenBlocks: [block] });
+      }
+    }
+    if (currentUserBlock) rounds.push({ userBlock: currentUserBlock, childrenBlocks: currentRoundBlocks });
 
-
+    // Render rounds
     return rounds.map((round, index) => {
       const userBlockId = round.userBlock.id;
-      const isPlaceholder = round.userBlock.type === 'placeholder';
-      // Round cuối cùng hoặc placeholder sẽ không bao giờ bị collapsed bởi logic tự động
+      // Mặc định không collapse round cuối cùng
       const isLastRound = index === rounds.length - 1;
-      const isCollapsed = !isPlaceholder && !isLastRound && (collapsedStates[userBlockId] ?? false);
+      const isCollapsed = (round.userBlock.type !== 'placeholder' && !isLastRound) ? (collapsedStates[userBlockId] ?? false) : false;
 
-      if (isPlaceholder) {
-         // Render các block lẻ không có user prompt
+      if (round.userBlock.type === 'placeholder') {
+         // Render block lẻ (nếu có)
          return (
              <React.Fragment key={userBlockId + "-frag"}>
                 {round.childrenBlocks.map(childBlock => (
@@ -139,34 +99,37 @@ useEffect(() => {
          );
       }
       else if (isCollapsed) {
+          // Render Collapsed Block
           return (
             <CollapsedInteractionBlock
               key={userBlockId}
               promptText={round.userBlock.data}
               blockId={userBlockId}
-              timestamp={round.userBlock.timestamp} // Truyền timestamp
+              timestamp={round.userBlock.timestamp}
               onToggleCollapse={onToggleCollapse}
             />
           );
       } else {
         // Render Expanded Round
         return (
-          <div key={userBlockId + "-round"} className="interaction-round expanded">
+          // Key quan trọng cho React nhận biết thay đổi để CSS transition hoạt động
+          <div key={userBlockId + '-expanded'}
+               className="interaction-round expanded-round">
+            {/* User Block Header */}
             <InteractionBlock
               key={userBlockId}
               block={round.userBlock}
-              isBusy={isBusy}
-              onReview={onReview}
+              isBusy={isBusy} // Không cần isBusy ở đây nữa nếu user block chỉ là header
+              onReview={onReview} // Không cần các action handler ở user block
               onExecute={onExecute}
               onDebug={onDebug}
               onApplyCorrectedCode={onApplyCorrectedCode}
-              expandedOutputs={expandedOutputs}
-              onToggleOutputExpand={onToggleOutputExpand}
+              expandedOutputs={expandedOutputs} // Không cần thiết ở user block
+              onToggleOutputExpand={onToggleOutputExpand} // Không cần thiết ở user block
             />
-            {/* Container cho các block con (để animate) */}
+            {/* Container cho các block con (Animation bằng CSS) */}
             <div
-              ref={el => contentRefs.current[userBlockId] = el} // Gán ref
-              className={`collapsible-content ${isCollapsed ? 'collapsed' : 'expanded'}`}
+              className={`collapsible-content ${isCollapsed ? 'collapsed' : 'expanded'}`} // Class 'expanded' được thêm khi không collapsed
             >
               {round.childrenBlocks.map(childBlock => (
                 <InteractionBlock
@@ -181,7 +144,7 @@ useEffect(() => {
                   onToggleOutputExpand={onToggleOutputExpand}
                 />
               ))}
-               {/* Nút Collapse Round (Chỉ hiển thị nếu không phải round cuối cùng) */}
+               {/* Nút Collapse Round ở cuối (chỉ hiển thị nếu không phải round cuối) */}
                {!isLastRound && (
                     <div className="collapse-round-wrapper">
                         <button
@@ -189,7 +152,7 @@ useEffect(() => {
                             className="collapse-round-button"
                             title="Collapse conversation round"
                         >
-                           <FiChevronUp /> Collapse Section
+                           <FiChevronUp /> Collapse section
                         </button>
                     </div>
                )}
@@ -202,13 +165,13 @@ useEffect(() => {
 
   return (
     <main className="center-area-wrapper">
-      <div className="main-header">
-        <h2>Gemini Executor</h2>
-        <button onClick={() => setShowSettings(!showSettings)} className="icon-button subtle settings-toggle-button" title={showSettings ? "Hide Settings" : "Show Settings"}>
-            {showSettings ? <FiX /> : <FiSettings />}
-        </button>
-      </div>
-      {showSettings && ( <SettingsPanel modelConfig={modelConfig} onConfigChange={onConfigChange} onSaveSettings={onSaveSettings} isDisabled={isBusy} /> )}
+        <div className="main-header">
+            <h2>Gemini Executor</h2>
+            <button onClick={() => setShowSettings(!showSettings)} className="icon-button subtle settings-toggle-button" title={showSettings ? "Hide Settings" : "Show Settings"}>
+                {showSettings ? <FiX /> : <FiSettings />}
+            </button>
+        </div>
+         {showSettings && ( <SettingsPanel modelConfig={modelConfig} onConfigChange={onConfigChange} onSaveSettings={onSaveSettings} isDisabled={isBusy} /> )}
       <div className="interaction-container" ref={scrollRef}>
         {renderConversation()}
       </div>

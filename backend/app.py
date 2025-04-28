@@ -70,20 +70,8 @@ Sử dụng try-except để xử lý lỗi cơ bản nếu có thể. In thông
 Ví dụ yêu cầu: Mở Control Panel
 Mã trả về (ví dụ cho Windows):
 ```python
-import subprocess
-import sys
+# logic code....
 
-try:
-    if sys.platform == "win32":
-        subprocess.run(['control'], check=True)
-        print("Đã mở Control Panel.")
-    elif sys.platform == "darwin": # macOS
-        subprocess.run(['open', '-a', 'System Preferences'], check=True)
-        print("Đã mở System Preferences.")
-    else: # Linux (thường không có lệnh tương đương trực tiếp, có thể mở settings)
-        try:
-            # Thử mở gnome-control-center hoặc tương đương
-            subprocess.run(['gnome-control-center'], check=True)
             print("Đã thử mở control center.")
         except FileNotFoundError:
              print("Lệnh 'gnome-control-center' không tìm thấy. Hãy mở cài đặt hệ thống thủ công.")
@@ -100,23 +88,8 @@ except Exception as e:
 Ví dụ yêu cầu: Tạo thư mục 'temp_folder' trên Desktop
 Mã trả về (ví dụ cho Windows):
 ```python
-import os
-import sys
+# logic code...
 
-try:
-    if sys.platform == "win32":
-        desktop_path = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
-    elif sys.platform == "darwin":
-        desktop_path = os.path.join(os.path.expanduser('~'), 'Desktop')
-    else: # Linux
-        desktop_path = os.path.join(os.path.expanduser('~'), 'Desktop')
-        # Đảm bảo thư mục Desktop tồn tại trên Linux, nếu không thì tạo ở home
-        if not os.path.isdir(desktop_path):
-            desktop_path = os.path.expanduser('~')
-            print("Thư mục Desktop không tồn tại, sẽ tạo trong thư mục home.")
-
-    temp_dir = os.path.join(desktop_path, 'temp_folder')
-    os.makedirs(temp_dir, exist_ok=True) # exist_ok=True sẽ không báo lỗi nếu thư mục đã tồn tại
     print(f"Đã tạo hoặc đã tồn tại thư mục: {{temp_dir}}")
 except Exception as e:
     print(f"Lỗi khi tạo thư mục: {{e}}")
@@ -136,13 +109,14 @@ Bạn là một chuyên gia đánh giá code Python. Hãy phân tích đoạn m�
 2.  **Tính đúng đắn:** Mã có thực hiện đúng yêu cầu dự kiến không? Lỗi?
 3.  **Tính hiệu quả/Tối ưu:** Có cách viết tốt hơn không?
 4.  **Khả năng tương thích:** Chạy được trên các OS khác không?
+5.  **Không cần đưa code cải tiến**
 
 Đoạn mã cần đánh giá:
 ```python
 {code_to_review}
 ```
 
-**QUAN TRỌNG:** Chỉ trả về phần văn bản nhận xét/đánh giá bằng Markdown. KHÔNG bao gồm các câu dẫn như "Đây là đánh giá của tôi:", "Phân tích code:", hoặc các bước suy nghĩ/trung gian. Bắt đầu trực tiếp bằng nội dung đánh giá. Định dạng các khối mã ví dụ (nếu có) trong Markdown bằng ```python ... ```.
+**QUAN TRỌNG:** Chỉ trả về phần văn bản nhận xét/đánh giá bằng Markdown, có dòng quan trọng cuối cùng là 'Mức độ an toàn: An toàn/Ổn/Nguy hiểm'. KHÔNG bao gồm các câu dẫn như "Đây là đánh giá của tôi:", "Phân tích code:", hoặc các bước suy nghĩ/trung gian. Bắt đầu trực tiếp bằng nội dung đánh giá. Định dạng các khối mã ví dụ (nếu có) trong Markdown bằng ```python ... ```.
 """
     return prompt
 

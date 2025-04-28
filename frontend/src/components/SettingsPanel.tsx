@@ -131,7 +131,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <div className="settings-section advanced-settings-section">
           <h4><FiSettings/> Cài đặt Nâng cao</h4>
           {/* Chọn mức độ an toàn */}
-          <label htmlFor="safetySetting">Cài đặt an toàn</label>
+          <label htmlFor="safetySetting">ᓚᘏᗢ | Safe Settings</label>
           <select id="safetySetting" name="safetySetting" value={modelConfig.safetySetting} onChange={onConfigChange} disabled={isDisabled} >
             <option value="BLOCK_NONE">BLOCK_NONE (Rủi ro)</option>
             <option value="BLOCK_ONLY_HIGH">BLOCK_ONLY_HIGH</option>

@@ -1,33 +1,31 @@
 // frontend/src/components/InteractionBlock.tsx
 import React from 'react';
-
 import { FiUser, FiCode, FiPlay, FiEye, FiAlertTriangle, FiTool, FiCheckCircle, FiLoader, FiCopy, FiDownload, FiTerminal } from 'react-icons/fi';
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import remarkGfm from 'remark-gfm'; // Plugin cho GitHub Flavored Markdown (tables, strikethrough, etc.)
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import ExpandableOutput from './ExpandableOutput';
-// Thêm InstallationResult
-import { ConversationBlock, ExecutionResult, ReviewResult, DebugResult, InstallationResult } from '../App';
-import { toast } from 'react-toastify';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'; // Chọn theme tối
+import ExpandableOutput from './ExpandableOutput'; // Component hiển thị output mở rộng được
+import { ConversationBlock, ExecutionResult, ReviewResult, DebugResult, InstallationResult } from '../App'; // Import các kiểu dữ liệu
+import { toast } from 'react-toastify'; // Thư viện hiển thị thông báo
 import './CenterArea.css';
 
-// --- Interface (Thêm onInstallPackage) ---
+// --- Props Interface ---
 interface InteractionBlockProps {
-    block: ConversationBlock;
-    isBusy: boolean;
-    onReview: (codeToReview: string) => void;
-    onExecute: (codeToExecute: string) => void;
-    onDebug: (codeToDebug: string, executionResult: ExecutionResult) => void;
-    onApplyCorrectedCode: (code: string) => void;
-    onInstallPackage: (packageName: string) => Promise<void>;
-    expandedOutputs: Record<string, { stdout: boolean; stderr: boolean }>;
-    onToggleOutputExpand: (blockId: string, type: 'stdout' | 'stderr') => void;
-    'data-block-id'?: string; 
+    block: ConversationBlock; // Dữ liệu của khối này
+    isBusy: boolean;          // Trạng thái bận của ứng dụng (để disable nút)
+    onReview: (codeToReview: string) => void;       // Hàm xử lý khi nhấn nút Review
+    onExecute: (codeToExecute: string) => void;     // Hàm xử lý khi nhấn nút Execute
+    onDebug: (codeToDebug: string, executionResult: ExecutionResult) => void; // Hàm xử lý khi nhấn nút Debug
+    onApplyCorrectedCode: (code: string) => void; // Hàm xử lý khi áp dụng code đã sửa
+    onInstallPackage: (packageName: string) => Promise<void>; // Hàm xử lý cài đặt package
+    expandedOutputs: Record<string, { stdout: boolean; stderr: boolean }>; // State mở rộng output từ App
+    onToggleOutputExpand: (blockId: string, type: 'stdout' | 'stderr') => void; // Hàm thay đổi state mở rộng output
+    'data-block-id'?: string; // Thuộc tính data để hỗ trợ cuộn tới khối này
 }
-// -----------------------------------------
+// ------------------------
 
-// --- Helper format timestamp ---
+// --- Hàm định dạng thời gian ---
 const formatTimestamp = (isoString: string): string => {
     try {
         const date = new Date(isoString);
@@ -36,315 +34,331 @@ const formatTimestamp = (isoString: string): string => {
         return '';
     }
 };
-// -----------------------------
+// ---------------------------
 
-// --- Markdown Components ---
+// --- Component tùy chỉnh cho Markdown (để highlight code) ---
 const MarkdownComponents = {
+    // Tùy chỉnh cách hiển thị thẻ <code>
     code({ node, inline, className, children, ...props }: any) {
-      const match = /language-(\w+)/.exec(className || '');
-      const codeString = String(children ?? '').replace(/\n$/, '');
-      const handleCopyMdCode = () => { navigator.clipboard.writeText(codeString).then(() => toast.info("Đã Copy Markdown code!")); };
+      const match = /language-(\w+)/.exec(className || ''); // Tìm ngôn ngữ (vd: language-python)
+      const codeString = String(children ?? '').replace(/\n$/, ''); // Lấy nội dung code
+
+      // Hàm copy code bên trong Markdown
+      const handleCopyMdCode = () => {
+          navigator.clipboard.writeText(codeString).then(() => toast.info("Đã sao chép mã Markdown!"));
+      };
+
+      // Nếu là khối code (không phải inline) và có ngôn ngữ được xác định
       return !inline && match ? (
         <div className="markdown-code-block">
+            {/* Header của khối code Markdown */}
             <div className="code-block-header">
-                <span>{match[1]}</span>
-                <button onClick={handleCopyMdCode} className="icon-button subtle small copy-button" title="Copy code"><FiCopy /></button>
+                <span>{match[1]}</span> {/* Hiển thị tên ngôn ngữ */}
+                <button onClick={handleCopyMdCode} className="icon-button subtle small copy-button" title="Sao chép mã"><FiCopy /></button>
              </div>
+             {/* Dùng SyntaxHighlighter để tô màu */}
             <SyntaxHighlighter
-              style={vscDarkPlus as any}
-              language={match[1]}
-              PreTag="div"
-              {...props}
+              style={vscDarkPlus as any} // Áp dụng theme
+              language={match[1]}        // Ngôn ngữ
+              PreTag="div"               // Dùng div thay vì pre mặc định
+              {...props}                 // Các props khác
             >
                 {codeString}
             </SyntaxHighlighter>
         </div>
       ) : (
+        // Nếu là code inline (ví dụ: `variable_name`)
         <code className={`inline-code ${className || ''}`} {...props}>{children}</code>
       );
     }
-
 };
-// -------------------------
+// -------------------------------------------------------
 
+// --- Component InteractionBlock ---
 const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
     block, isBusy, onReview, onExecute, onDebug, onApplyCorrectedCode,
     onInstallPackage,
     expandedOutputs, onToggleOutputExpand
  }) => {
-  const { type, data, id, timestamp, isNew } = block;
+  const { type, data, id, timestamp, isNew } = block; // Lấy thông tin từ props
 
-  // --- Handlers Copy/Download ---
+  // --- Hàm xử lý Sao chép / Tải xuống code ---
   const handleCopy = (text: string | null | undefined) => {
     if (typeof text === 'string') {
-      navigator.clipboard.writeText(text).then(() => toast.info("Đã copy code!"));
+      navigator.clipboard.writeText(text).then(() => toast.info("Đã sao chép mã!"));
     }
   };
   const handleDownload = (filename: string, text: string | null | undefined) => {
     if (typeof text === 'string') {
       const element = document.createElement("a");
-      const file = new Blob([text], {type: 'text/plain;charset=utf-8'});
-      element.href = URL.createObjectURL(file);
-      element.download = filename;
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-      URL.revokeObjectURL(element.href); // Giải phóng bộ nhớ
+      const file = new Blob([text], {type: 'text/plain;charset=utf-8'}); // Tạo Blob UTF-8
+      element.href = URL.createObjectURL(file); // Tạo URL object
+      element.download = filename; // Đặt tên file
+      document.body.appendChild(element); // Thêm vào DOM để có thể click
+      element.click(); // Giả lập click để tải
+      document.body.removeChild(element); // Xóa khỏi DOM
+      URL.revokeObjectURL(element.href); // Giải phóng URL object
     }
   };
-  // -----------------------------
+  // -----------------------------------------
 
-  // --- Helper kiểm tra lỗi cho execution block ---
+  // --- Hàm kiểm tra dấu hiệu lỗi trong kết quả thực thi ---
   const hasErrorSignal = (execData: any): boolean => {
       if (!execData) return false;
-      const hasStdErr = !!execData.error?.trim();
-      const nonZeroReturn = execData.return_code !== 0;
+      const hasStdErr = !!execData?.error?.trim();
+      const nonZeroReturn = execData?.return_code !== 0;
       const stdoutErrorKeywords = ['lỗi', 'error', 'fail', 'cannot', 'unable', 'traceback', 'exception', 'not found', 'không tìm thấy', 'invalid'];
-      const stdoutLooksError = !!execData.output?.trim() && stdoutErrorKeywords.some(kw => execData.output!.toLowerCase().includes(kw));
+      const stdoutLooksError = !!execData?.output?.trim() && stdoutErrorKeywords.some(kw => execData.output!.toLowerCase().includes(kw));
       return !!(nonZeroReturn || hasStdErr || stdoutLooksError);
   };
-  // -------------------------------------------
+  // ------------------------------------------------------
 
+  // --- Hàm render nội dung chính của khối tùy theo type ---
   const renderContent = () => {
-    // Kiểm tra data cơ bản (trừ loading và user có thể có data là string rỗng)
+    // Kiểm tra dữ liệu không hợp lệ (trừ loading và user rỗng)
     if (!data && type !== 'loading' && !(type === 'user' && data === '')) {
-        return <div className="error-inline">Error: Invalid or missing block data for type '{type}'</div>;
+        return <div className="error-inline">Lỗi: Dữ liệu khối không hợp lệ hoặc bị thiếu cho loại '{type}'</div>;
     }
 
     switch (type) {
+      // --- Khối User ---
       case 'user':
         return <div className="prompt-text">{String(data ?? '')}</div>;
 
+      // --- Khối AI Code ---
       case 'ai-code':
-        const codeStr = String(data ?? '').trim();
-        return codeStr ? (
+        const codeStr = String(data ?? '').trim(); // Lấy code, bỏ khoảng trắng thừa
+        return codeStr ? ( // Chỉ render nếu có code
             <div className="code-block-container">
+                 {/* Header với tên ngôn ngữ và nút Copy/Download */}
                  <div className="code-block-header">
                     <span>python</span>
                     <div>
-                        <button onClick={() => handleCopy(codeStr)} className="icon-button subtle small" title="Copy"><FiCopy /></button>
-                        <button onClick={() => handleDownload("script.py", codeStr)} className="icon-button subtle small" title="Download"><FiDownload /></button>
+                        <button onClick={() => handleCopy(codeStr)} className="icon-button subtle small" title="Sao chép"><FiCopy /></button>
+                        <button onClick={() => handleDownload("script.py", codeStr)} className="icon-button subtle small" title="Tải xuống"><FiDownload /></button>
                     </div>
                 </div>
+                {/* Highlight code */}
                 <SyntaxHighlighter language="python" style={vscDarkPlus as any} className="main-code-block">
                     {codeStr}
                 </SyntaxHighlighter>
              </div>
-         ) : <p className="error-inline">Empty code block received.</p>;
+         ) : <p className="error-inline">Nhận được khối mã rỗng.</p>; // Thông báo nếu code rỗng
 
+      // --- Khối Review ---
       case 'review':
          const reviewData = data as ReviewResult;
         return (
             <div className="markdown-content review-content">
-                {reviewData?.error ? (
+                {reviewData?.error ? ( // Hiển thị lỗi nếu có
                     <p className="error-inline">{reviewData.error}</p>
-                 ) : (
+                 ) : ( // Hiển thị nội dung review dạng Markdown
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
-                        {reviewData?.review || '(No review content)'}
+                        {reviewData?.review || '(Không có nội dung đánh giá)'}
                     </ReactMarkdown>
                  )}
             </div>
         );
 
+      // --- Khối Execution ---
       case 'execution':
-        const execData = data as (ExecutionResult & { codeThatFailed?: string });
-        const currentOutputStateExec = expandedOutputs[id] || { stdout: false, stderr: false };
-        const execHasError = hasErrorSignal(execData);
+        const execData = data as (ExecutionResult & { codeThatFailed?: string }); // Cast type, bao gồm code gốc
+        const currentOutputStateExec = expandedOutputs[id] || { stdout: false, stderr: false }; // Lấy trạng thái mở rộng output
+        const execHasError = hasErrorSignal(execData); // Kiểm tra dấu hiệu lỗi
         return (
           <div className={`execution-content ${execHasError ? 'error' : ''}`}>
-            {/* Chỉ hiển thị message nếu nó không phải là thông báo mặc định */}
+             {/* Hiển thị cảnh báo từ backend (nếu có) */}
+             {execData?.warning && (
+                 <p className="exec-warning error-inline"> {/* Dùng style cảnh báo */}
+                    <FiAlertTriangle style={{ marginRight: '5px', verticalAlign: 'middle' }}/> {execData.warning}
+                 </p>
+             )}
+            {/* Hiển thị thông báo chính (nếu khác mặc định) */}
             {execData?.message && !execData.message.startsWith("Thực thi") && <p className="exec-message">{execData.message}</p>}
+            {/* Output chuẩn (stdout) */}
             <ExpandableOutput
-              text={execData?.output}
-              label="stdout"
-              isExpanded={currentOutputStateExec.stdout}
-              onToggleExpand={() => onToggleOutputExpand(id, 'stdout')}
-              className="stdout-section"
+              text={execData?.output} label="stdout" isExpanded={currentOutputStateExec.stdout}
+              onToggleExpand={() => onToggleOutputExpand(id, 'stdout')} className="stdout-section"
             />
+            {/* Output lỗi (stderr) */}
             <ExpandableOutput
-              text={execData?.error}
-              label="stderr"
-              isExpanded={currentOutputStateExec.stderr}
-              onToggleExpand={() => onToggleOutputExpand(id, 'stderr')}
-              className="stderr-section"
+              text={execData?.error} label="stderr" isExpanded={currentOutputStateExec.stderr}
+              onToggleExpand={() => onToggleOutputExpand(id, 'stderr')} className="stderr-section"
             />
-            <p className="return-code">Return Code: {execData?.return_code ?? 'N/A'}</p>
+            {/* Mã trả về */}
+            <p className="return-code">Mã trả về: {execData?.return_code ?? 'N/A'}</p>
           </div>
         );
 
+      // --- Khối Debug ---
       case 'debug':
         const debugData = data as DebugResult;
-        const correctedCode = debugData?.corrected_code?.trim();
-        const suggestedPackage = debugData?.suggested_package; // Lấy package
+        const correctedCode = debugData?.corrected_code?.trim(); // Code đã sửa
+        const suggestedPackage = debugData?.suggested_package; // Package đề xuất cài
         return (
             <div className="debug-content">
-                {/* Hiển thị lỗi từ Gemini (nếu có) */}
+                {/* Hiển thị lỗi nếu debug thất bại */}
                 {debugData?.error && <p className="error-inline">{debugData.error}</p>}
-
-                {/* Phần giải thích */}
+                {/* Hiển thị giải thích */}
                 {debugData?.explanation && (
                     <div className="markdown-content explanation-content">
-                        <h4>Explanation & Suggestion</h4>
+                        <h4>Giải thích & Đề xuất</h4>
                         <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
                             {debugData.explanation}
                         </ReactMarkdown>
                     </div>
                  )}
-
-                 {/* ---->>> Nút Install Package <<<---- */}
+                 {/* Hiển thị nút cài đặt nếu có đề xuất */}
                  {suggestedPackage && (
-                     <div className="install-suggestion-area block-actions-area"> {/* Dùng chung style hoặc tạo mới */}
-                         <button
-                             onClick={() => onInstallPackage(suggestedPackage)}
-                             disabled={isBusy} // Disable khi có bất kỳ action nào đang chạy
-                             className="install-package-button" // Class riêng để style
-                             title={`Install the '${suggestedPackage}' package using pip`}
-                         >
-                             <FiDownload /> Install <code>{suggestedPackage}</code>
+                     <div className="install-suggestion-area block-actions-area"> {/* Dùng chung style với action */}
+                         <button onClick={() => onInstallPackage(suggestedPackage)} disabled={isBusy}
+                             className="install-package-button" title={`Cài đặt package '${suggestedPackage}' bằng pip`} >
+                             <FiDownload /> Cài đặt <code>{suggestedPackage}</code>
                          </button>
                      </div>
                  )}
-                 {/* ----------------------------------- */}
-
-                 {/* Phần code đã sửa */}
+                 {/* Hiển thị code đã sửa nếu có */}
                  {correctedCode && (
                     <>
-                        <h4>Suggested Code</h4>
+                        <h4>Mã đề xuất</h4>
                         <div className="code-block-container">
                             <div className="code-block-header">
-                                <span>python (corrected)</span>
-                                <div> {/* Wrap buttons */}
-                                    <button onClick={() => handleCopy(correctedCode)} className="icon-button subtle small" title="Copy Corrected Code"><FiCopy /></button>
-                                    <button onClick={() => handleDownload("corrected_script.py", correctedCode)} className="icon-button subtle small" title="Download Corrected Code"><FiDownload /></button>
+                                <span>python (đã sửa)</span>
+                                <div>
+                                    <button onClick={() => handleCopy(correctedCode)} className="icon-button subtle small" title="Sao chép mã đã sửa"><FiCopy /></button>
+                                    <button onClick={() => handleDownload("corrected_script.py", correctedCode)} className="icon-button subtle small" title="Tải xuống mã đã sửa"><FiDownload /></button>
                                 </div>
                             </div>
                             <SyntaxHighlighter language="python" style={vscDarkPlus as any} className="main-code-block corrected-code">
                                 {correctedCode}
                             </SyntaxHighlighter>
-                            {/* Nút Apply Code chỉ hiển thị khi có code sửa lỗi */}
+                            {/* Nút áp dụng code đã sửa */}
                             <div className="block-actions-area apply-action-area">
-                                <button onClick={() => onApplyCorrectedCode(correctedCode)} disabled={isBusy} className="apply-code" title="Apply Corrected Code">Use This Code</button>
+                                <button onClick={() => onApplyCorrectedCode(correctedCode)} disabled={isBusy} className="apply-code" title="Sử dụng mã này">Sử dụng Mã Này</button>
                             </div>
                         </div>
                     </>
                  )}
-
-                 {/* Thông báo nếu không có giải thích, không có code sửa, không có package */}
+                 {/* Thông báo nếu không có gì được trả về */}
                  {!debugData?.error && !debugData?.explanation && !correctedCode && !suggestedPackage && (
-                    <p className="info-inline">(No specific suggestions or corrected code provided by the debugger.)</p>
+                    <p className="info-inline">(Không có đề xuất hoặc mã sửa lỗi cụ thể từ trình gỡ rối.)</p>
                  )}
             </div>
          );
 
-      // --- THÊM CASE MỚI CHO INSTALLATION ---
+      // --- Khối Installation ---
       case 'installation':
         const installData = data as InstallationResult;
-        const currentOutputStateInst = expandedOutputs[id] || { stdout: false, stderr: false };
+        const currentOutputStateInst = expandedOutputs[id] || { stdout: false, stderr: false }; // State mở rộng output pip
         return (
             <div className={`installation-content ${!installData.success ? 'error' : ''}`}>
+                {/* Thông báo thành công/thất bại */}
                 <p className="install-message">
-                    {/* Icon dựa trên success */}
                     {installData.success
                        ? <FiCheckCircle style={{ color: 'var(--success-color)', marginRight: '8px', flexShrink: 0 }}/>
                        : <FiAlertTriangle style={{ color: 'var(--danger-color)', marginRight: '8px', flexShrink: 0 }}/>
                      }
-                     {/* Thêm tên package vào message */}
-                    Install <strong>{installData.package_name || 'package'}</strong>: {installData.message}
+                    Cài đặt <strong>{installData.package_name || 'package'}</strong>: {installData.message}
                 </p>
-                {/* Luôn hiển thị output/error để xem log cài đặt */}
+                {/* Output từ pip */}
                 <ExpandableOutput
-                  text={installData?.output}
-                  label="pip output"
-                  isExpanded={currentOutputStateInst.stdout}
-                  onToggleExpand={() => onToggleOutputExpand(id, 'stdout')}
-                  className="stdout-section installation-output" // Thêm class để style nếu cần
+                  text={installData?.output} label="pip output" isExpanded={currentOutputStateInst.stdout}
+                  onToggleExpand={() => onToggleOutputExpand(id, 'stdout')} className="stdout-section installation-output"
                 />
+                {/* Lỗi từ pip (stderr) */}
                 <ExpandableOutput
-                  text={installData?.error}
-                  label="pip error"
-                  isExpanded={currentOutputStateInst.stderr}
-                  onToggleExpand={() => onToggleOutputExpand(id, 'stderr')}
-                  className="stderr-section installation-error" // Thêm class
+                  text={installData?.error} label="pip error" isExpanded={currentOutputStateInst.stderr}
+                  onToggleExpand={() => onToggleOutputExpand(id, 'stderr')} className="stderr-section installation-error"
                 />
             </div>
         );
-      // --------------------------------------
 
+      // --- Khối Loading ---
       case 'loading':
-         return <div className="loading-content"><FiLoader className="spinner" /> <p>{String(data ?? 'Loading...')}</p></div>;
+         return <div className="loading-content"><FiLoader className="spinner" /> <p>{String(data ?? 'Đang tải...')}</p></div>;
 
+      // --- Khối Error ---
       case 'error':
-          return <div className="error-inline">{String(data ?? 'An unknown error occurred.')}</div>;
+          return <div className="error-inline">{String(data ?? 'Đã xảy ra lỗi không xác định.')}</div>;
 
+      // --- Trường hợp mặc định (lỗi không xác định type) ---
       default:
-         // Thử log ra để debug type lạ
-         console.warn("Encountered unknown block type:", type, block);
-         return <div className="unknown-block error-inline">Unknown block type: {type}</div>;
+         console.warn("Gặp phải loại khối không xác định:", type, block);
+         return <div className="unknown-block error-inline">Loại khối không xác định: {type}</div>;
     }
   };
+  // ---------------------------------------------------
 
-
+  // --- Hàm render icon cho từng loại khối ---
   const renderIcon = () => {
        switch(type) {
            case 'user': return <span className="block-icon user-icon"><FiUser/></span>;
            case 'ai-code': return <span className="block-icon ai-icon"><FiCode/></span>;
            case 'review': return <span className="block-icon review-icon"><FiEye/></span>;
            case 'execution':
-               const execHasErr = hasErrorSignal(data);
+               const execHasErr = hasErrorSignal(data); // Kiểm tra lỗi
+               // Icon xanh lá nếu thành công, đỏ nếu lỗi
                return <span className={`block-icon execution-icon ${execHasErr ? 'error' : 'success'}`}>{execHasErr ? <FiAlertTriangle/> : <FiCheckCircle/>}</span>;
            case 'debug': return <span className="block-icon debug-icon"><FiTool/></span>;
            case 'loading': return <span className="block-icon loading-icon"><FiLoader className="spinner"/></span>;
            case 'error': return <span className="block-icon error-icon"><FiAlertTriangle/></span>;
-           // --- THÊM ICON CHO INSTALLATION ---
            case 'installation':
-                const installSuccess = data?.success;
+                const installSuccess = (data as InstallationResult)?.success;
+                // Icon xanh lá nếu thành công, icon terminal đỏ nếu lỗi
                 return <span className={`block-icon installation-icon ${installSuccess ? 'success' : 'error'}`}>{installSuccess ? <FiCheckCircle/> : <FiTerminal/>}</span>;
-           // ----------------------------------
            default: return <span className="block-icon unknown-icon">?</span>;
        }
    };
+  // ---------------------------------------
 
-   // --- Actions Area (Render các nút chính) ---
+   // --- Hàm render các nút hành động (Review, Execute, Debug) ---
    const renderActions = () => {
         const actions = [];
+        // Nếu là khối AI code và có dữ liệu code
         if (type === 'ai-code' && data) {
-            actions.push(<button key="review" onClick={() => onReview(data)} disabled={isBusy} title="Review Code"><FiEye /> Review</button>);
-            actions.push(<button key="execute" onClick={() => onExecute(data)} disabled={isBusy} className="execute" title="Execute Code"><FiPlay /> Execute</button>);
+            actions.push(<button key="review" onClick={() => onReview(data)} disabled={isBusy} title="Đánh giá mã"><FiEye /> Đánh giá</button>);
+            actions.push(<button key="execute" onClick={() => onExecute(data)} disabled={isBusy} className="execute" title="Thực thi mã"><FiPlay /> Thực thi</button>);
         }
+        // Nếu là khối execution và có lỗi
         if (type === 'execution' && hasErrorSignal(data)) {
-            const codeThatFailed = data?.codeThatFailed;
-            if (codeThatFailed) {
-                 actions.push(<button key="debug" onClick={() => onDebug(codeThatFailed, data as ExecutionResult)} disabled={isBusy} className="debug" title="Debug Error"><FiTool /> Debug</button>);
+            const codeThatFailed = (data as ExecutionResult)?.codeThatFailed; // Lấy code đã chạy gây lỗi
+            if (codeThatFailed) { // Chỉ hiển thị nút Debug nếu lấy được code gốc
+                 actions.push(<button key="debug" onClick={() => onDebug(codeThatFailed, data as ExecutionResult)} disabled={isBusy} className="debug" title="Gỡ lỗi"><FiTool /> Gỡ lỗi</button>);
             }
         }
-        // Nút Apply Code bây giờ được render bên trong case 'debug' của renderContent nếu có corrected_code
-        // Nút Install bây giờ được render bên trong case 'debug' của renderContent nếu có suggested_package
+        // Trả về mảng các nút hoặc null nếu không có action nào
         return actions.length > 0 ? actions : null;
    };
-   // ----------------------------------------
+   // --------------------------------------------------------
 
+   // Xác định xem có nên hiển thị khu vực action chính không
+   const showActionsArea = type === 'ai-code' || (type === 'execution' && hasErrorSignal(data));
+
+  // --- Render JSX ---
   return (
-    // Thêm data-block-id để scroll tới được
+    // Thêm data-block-id để cuộn tới khối này
     <div className={`interaction-block block-type-${type} ${isNew ? 'newly-added' : ''}`} data-block-id={id}>
+      {/* Avatar / Icon */}
       <div className="block-avatar"> {renderIcon()} </div>
+      {/* Nội dung chính */}
       <div className="block-main-content">
-         {/* Header cho User Block */}
+         {/* Header riêng cho khối User */}
          {type === 'user' && (
             <div className="block-header user-header">
-               <span className="user-header-title">Prompt</span>
+               <span className="user-header-title">Yêu cầu</span>
                <span className="block-timestamp">{formatTimestamp(timestamp)}</span>
             </div>
          )}
-        {/* Nội dung chính */}
+         {/* Khu vực nội dung (code, markdown, output, ...) */}
         <div className="block-content-area">{renderContent()}</div>
 
-        {/* Khu vực Actions (chỉ render nếu có actions và không phải các type đặc biệt) */}
-        {type !== 'user' && type !== 'loading' && type !== 'installation' && type !== 'debug' && ( // Loại bỏ debug vì nút Apply/Install render bên trong content
+        {/* Khu vực chứa các nút hành động chính */}
+        {showActionsArea && (
              <div className="block-actions-area">{renderActions()}</div>
         )}
       </div>
     </div>
    );
-});
+}); // Sử dụng React.memo để tối ưu hóa render nếu props không đổi
 
 export default InteractionBlock;

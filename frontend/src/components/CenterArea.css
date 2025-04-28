@@ -389,3 +389,17 @@
     padding-top: var(--spacing-unit);
     border-top: 1px solid var(--border-color-secondary);
 }
+
+/* --- Thêm style cho execution warning --- */
+.exec-warning {
+    color: var(--warning-color); /* Màu vàng */
+    background-color: rgba(253, 214, 99, 0.1); /* Nền vàng nhạt */
+    border: 1px solid rgba(253, 214, 99, 0.2); /* Viền vàng nhạt */
+    /* Kế thừa các style khác từ error-inline nếu muốn */
+    padding: var(--spacing-unit);
+    border-radius: var(--border-radius-small);
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-unit); /* Thêm margin dưới nếu cần */
+    display: flex; /* Để căn icon với text */
+    align-items: center;
+ }

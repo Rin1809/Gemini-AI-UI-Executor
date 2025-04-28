@@ -1,6 +1,6 @@
 /* frontend/src/components/SettingsPanel.css */
 .settings-panel { background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3); overflow-y: auto; max-height: 40vh; }
-/* @keyframes slideDown { from { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; } to { opacity: 1; max-height: 40vh; padding-top: calc(var(--spacing-unit) * 2); padding-bottom: calc(var(--spacing-unit) * 2); } } */
+
 .settings-content { display: flex; flex-direction: column; gap: calc(var(--spacing-unit) * 2); max-width: 850px; margin: 0 auto; }
 .settings-section { display: flex; flex-direction: column; gap: calc(var(--spacing-unit) * 0.5); }
 .settings-section label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }

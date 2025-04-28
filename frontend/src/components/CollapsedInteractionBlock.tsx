@@ -1,8 +1,8 @@
 // frontend/src/components/CollapsedInteractionBlock.tsx
 import React from 'react';
 import { FiChevronDown } from 'react-icons/fi';
-import { PiSparkleFill } from "react-icons/pi"; // Import icon sparkle
-import './CenterArea.css'; // Dùng chung CSS
+import { PiSparkleFill } from "react-icons/pi"; 
+import './CenterArea.css'; 
 
 interface CollapsedInteractionBlockProps {
   promptText: string;
@@ -27,10 +27,9 @@ const CollapsedInteractionBlock: React.FC<CollapsedInteractionBlockProps> = ({
   timestamp,
   onToggleCollapse,
 }) => {
-  // Chỉ lấy dòng đầu tiên của prompt
+
   const firstLinePrompt = promptText.split('\n')[0];
-  // Giới hạn độ dài nếu cần, nhưng có thể không cần nếu CSS xử lý tốt
-  // const summarizedPrompt = firstLinePrompt.length > 80 ? firstLinePrompt.substring(0, 80) + '...' : firstLinePrompt;
+
 
   return (
     <div className="collapsed-section-block interactive" onClick={() => onToggleCollapse(blockId)} title="Expand conversation">

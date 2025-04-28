@@ -9,11 +9,9 @@ from dotenv import load_dotenv
 import codecs
 import re
 
-# Tải biến môi trường (.env phải nằm cùng cấp với backend/ và frontend/)
 load_dotenv(dotenv_path='../.env')
 
 app = Flask(__name__)
-# Cho phép CORS từ frontend (thay đổi port nếu cần)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 
 # --- Cấu hình Gemini ---
@@ -29,7 +27,7 @@ except Exception as e:
     sys.exit(1)
 # -----------------------
 
-# --- Mapping Safety Settings (Định dạng Dictionary) ---
+# --- mapping safety settings ---
 SAFETY_SETTINGS_MAP = {
     "BLOCK_NONE": [
         {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
@@ -156,7 +154,7 @@ d.  **Sửa lỗi Code:** Nếu lỗi có thể sửa trực tiếp trong mã Py
 def generate_response_from_gemini(full_prompt, model_config, is_for_review_or_debug=False):
     try:
         model_name = model_config.get('model_name', 'gemini-1.5-flash')
-        if not model_name: # Fallback nếu người dùng xóa trắng
+        if not model_name:
             model_name = 'gemini-1.5-flash'
             print("Cảnh báo: Tên model rỗng, sử dụng model mặc định 'gemini-1.5-flash'.")
 
@@ -222,7 +220,7 @@ def generate_response_from_gemini(full_prompt, model_config, is_for_review_or_de
     except Exception as e:
         error_message = str(e)
         print(f"Lỗi khi gọi Gemini API ({model_name}): {error_message}", file=sys.stderr)
-        # Cung cấp thông báo lỗi rõ ràng hơn cho người dùng
+        # rõ bug hơn2
         if "API key not valid" in error_message:
              return "Lỗi cấu hình: API key không hợp lệ. Vui lòng kiểm tra file .env."
         elif "Could not find model" in error_message or "permission denied" in error_message.lower():
@@ -275,11 +273,10 @@ def handle_generate():
     if raw_response and not raw_response.startswith("Lỗi:"):
         generated_code = extract_python_code(raw_response)
 
-        # Kiểm tra lại xem có phải code không (rất cơ bản)
+        # Kiểm tra lại xem có phải code không / này cho python thôi
         if not generated_code.strip() or ("```" in generated_code and not generated_code.startswith("import ") and not generated_code.startswith("#")):
              print(f"Trích xuất code có thể không thành công. Kết quả: {generated_code}")
-             # Vẫn trả về để người dùng xem, nhưng có thể thêm cảnh báo
-             # return jsonify({"error": f"Model trả về định dạng không mong đợi. Nội dung:\n{raw_response}"}), 400
+
 
         # Kiểm tra từ khóa nguy hiểm (cơ bản)
         potentially_dangerous = ["rm ", "del ", "format ", "shutdown ", "reboot ", "sys.exit(", "rmdir"]
@@ -293,7 +290,7 @@ def handle_generate():
     elif raw_response: # Lỗi từ Gemini
         status_code = 400 if ("Lỗi cấu hình" in raw_response or "Lỗi: Phản hồi bị chặn" in raw_response) else 500
         return jsonify({"error": raw_response}), status_code
-    else: # Lỗi không xác định
+    else: 
         return jsonify({"error": "Không thể tạo mã hoặc có lỗi không xác định xảy ra."}), 500
 
 # --- Endpoint Review ---
@@ -394,11 +391,11 @@ def handle_debug():
 
     full_prompt = create_debug_prompt(original_prompt, failed_code, stdout, stderr)
 
-    # Gọi Gemini (dùng is_for_review_or_debug=True để có thể dọn dẹp tiền tố)
+  
     raw_response = generate_response_from_gemini(full_prompt, model_config, is_for_review_or_debug=True)
 
     if raw_response and not raw_response.startswith("Lỗi:"):
-        explanation_part = raw_response # Ban đầu giả sử toàn bộ là giải thích
+        explanation_part = raw_response # Ban đầu giả sử toàn bộ là giải thích và...
         corrected_code = None
 
         # Tìm khối code cuối cùng (Python hoặc generic)
@@ -407,7 +404,7 @@ def handle_debug():
         if python_matches:
             last_code_block_match = python_matches[-1]
         else:
-            # Chỉ tìm generic block nếu không có python block
+        
             generic_matches = list(re.finditer(r"```\s*([\s\S]*?)\s*```", raw_response))
             if generic_matches:
                  # Kiểm tra xem có phải là khối lệnh đề xuất (bash, sh, cmd, powershell) không
@@ -425,11 +422,10 @@ def handle_debug():
             if potential_explanation: # Chỉ tách nếu có nội dung trước khối code
                  explanation_part = potential_explanation
                  corrected_code = last_code_block_match.group(1).strip()
-            else: # Nếu không có gì trước khối code, coi như toàn bộ là code (ít xảy ra với prompt debug)
+            else: # Nếu không có gì trước khối code, coi như toàn bộ là code 
                  explanation_part = "(AI chỉ trả về code, không có giải thích)"
                  corrected_code = last_code_block_match.group(1).strip()
         else:
-             # Phần explanation_part đã là toàn bộ raw_response
              pass
 
 
@@ -439,12 +435,12 @@ def handle_debug():
 
         return jsonify({
             "explanation": explanation_part if explanation_part else "(Không có giải thích)",
-            "corrected_code": corrected_code # Sẽ là None nếu không tìm thấy
+            "corrected_code": corrected_code # không tìm thấy thì cho none
         })
     elif raw_response: # Lỗi từ Gemini
         status_code = 400 if ("Lỗi cấu hình" in raw_response or "Lỗi: Phản hồi bị chặn" in raw_response) else 500
         return jsonify({"error": raw_response}), status_code
-    else: # Lỗi không xác định
+    else:
         return jsonify({"error": "Không thể thực hiện debug hoặc có lỗi không xác định xảy ra."}), 500
 # --------------------
 

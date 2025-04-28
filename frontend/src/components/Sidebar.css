@@ -1,0 +1,105 @@
+/* frontend/src/components/Sidebar.css */
+
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 998; /* Dưới sidebar nhưng trên content */
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    pointer-events: none; /* Không bắt click khi ẩn */
+  }
+  
+  /* Hiện overlay khi sidebar mở */
+  .sidebar-overlay.visible {
+    opacity: 1;
+    pointer-events: auto; /* Bắt click khi hiện */
+  }
+  
+  
+  .sidebar-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0; 
+    width: 320px; 
+    max-width: 90vw; /* Giới hạn trên màn hình nhỏ */
+    background-color: var(--bg-secondary); /* Nền chính của sidebar */
+    border-left: 1px solid var(--border-color);
+    box-shadow: -2px 0 15px rgba(0, 0, 0, 0.3);
+    z-index: 999; /* Luôn trên cùng */
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%); /* Ẩn bên phải */
+    transition: transform 0.3s ease-in-out;
+    overflow: hidden;
+  }
+  
+  .sidebar-container.open {
+    transform: translateX(0); /* Hiện ra */
+  }
+  
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit) * 2);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0; /* Header không co lại */
+    background-color: var(--bg-primary); 
+  }
+  
+  .sidebar-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  
+  .sidebar-header .close-sidebar-button {
+    color: var(--text-muted);
+  }
+  .sidebar-header .close-sidebar-button:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-tertiary);
+  }
+  
+  .sidebar-content {
+    flex-grow: 1;
+    overflow-y: auto;
+ 
+  }
+  
+  /* --- Điều chỉnh SettingsPanel bên trong Sidebar --- */
+  .sidebar-content .settings-panel {
+    border-bottom: none; 
+    padding: calc(var(--spacing-unit) * 2); 
+    max-height: none; 
+    background-color: transparent; 
+    box-shadow: none;
+    border: none; 
+  }
+  
+  /* Đảm bảo nội dung bên trong settings panel không bị giới hạn chiều rộng */
+  .sidebar-content .settings-content {
+    max-width: none;
+    margin: 0;
+    gap: calc(var(--spacing-unit) * 1.5); 
+  }
+  
+
+  .sidebar-content .settings-section label {
+      font-size: 0.75rem;
+  }
+  .sidebar-content .settings-panel input[type="text"],
+  .sidebar-content .settings-panel input[type="number"],
+  .sidebar-content .settings-panel select {
+      font-size: 0.85rem;
+      padding: calc(var(--spacing-unit)*0.65) var(--spacing-unit);
+  }
+  .sidebar-content .model-select-group .save-button {
+      padding: calc(var(--spacing-unit)*0.65); /* Điều chỉnh padding nút save */
+  }

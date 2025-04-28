@@ -1,15 +1,15 @@
 // frontend/src/components/ExpandableOutput.tsx
 import React, { useRef } from 'react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import './CenterArea.css'; // Dùng chung CSS
+import './CenterArea.css'; 
 
 interface ExpandableOutputProps {
   text: string | null | undefined;
   label: string; // "stdout" hoặc "stderr"
   isExpanded: boolean;
   onToggleExpand: () => void;
-  previewLineCount?: number; // Số dòng hiển thị khi thu gọn
-  className?: string; // Cho phép thêm class (vd: stderr-section)
+  previewLineCount?: number; 
+  className?: string; 
 }
 
 const ExpandableOutput: React.FC<ExpandableOutputProps> = ({

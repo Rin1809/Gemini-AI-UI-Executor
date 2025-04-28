@@ -1,19 +1,18 @@
 // frontend/src/components/CenterArea.tsx
 import React, { useRef, useEffect, useState, ChangeEvent } from 'react';
-import { FiSettings, FiX, FiChevronUp } from 'react-icons/fi'; // Icons cần thiết
-// Các imports khác
+import { FiSettings, FiX, FiChevronUp } from 'react-icons/fi';
 import UserInput from './UserInput';
 import SettingsPanel from './SettingsPanel';
 import InteractionBlock from './InteractionBlock';
 import CollapsedInteractionBlock from './CollapsedInteractionBlock';
-import { ConversationBlock, ModelConfig, ExecutionResult, ReviewResult, DebugResult } from '../App';
-import './CenterArea.css'; // Import CSS
+import { ConversationBlock, ModelConfig, ExecutionResult } from '../App'; // Import interfaces
+import './CenterArea.css'; // CSS chính cho component này
 
-// Interface Props (Đã bao gồm các props mới)
+// Interface Props cho CenterArea
 interface CenterAreaProps {
   conversation: Array<ConversationBlock>;
-  isLoading: boolean;
-  isBusy: boolean;
+  isLoading: boolean; // Generate loading
+  isBusy: boolean; // Trạng thái busy chung
   prompt: string;
   setPrompt: (value: string) => void;
   onGenerate: (prompt: string) => void;
@@ -24,12 +23,14 @@ interface CenterAreaProps {
   modelConfig: ModelConfig;
   onConfigChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onSaveSettings: () => void;
+  // Props cho collapse/expand
   collapsedStates: Record<string, boolean>;
   onToggleCollapse: (id: string) => void;
   expandedOutputs: Record<string, { stdout: boolean; stderr: boolean }>;
   onToggleOutputExpand: (blockId: string, type: 'stdout' | 'stderr') => void;
 }
 
+// --- Component Chính CenterArea ---
 const CenterArea: React.FC<CenterAreaProps> = (props) => {
   const {
     conversation, isLoading, isBusy,
@@ -40,97 +41,117 @@ const CenterArea: React.FC<CenterAreaProps> = (props) => {
 
   const [showSettings, setShowSettings] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true); // Cờ để tránh scroll khi mount lần đầu
 
-  // Scroll Effect (Đã cập nhật dependencies)
+  // --- Scroll Effect ---
   useEffect(() => {
     if (scrollRef.current) {
-      const timer = setTimeout(() => {
-        if (scrollRef.current) {
-             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        const scrollTarget = scrollRef.current;
+
+        // Tìm block mới nhất có isNew=true (nếu có)
+        const newBlockElement = conversation.find(b => b.isNew) ? scrollTarget.querySelector('.interaction-block.newly-added:last-of-type') : null;
+
+        // Chỉ scroll khi có block mới hoặc output được expand/collapse gần cuối màn hình
+        const shouldScroll = newBlockElement !== null; // || isOutputToggleNearBottom(); // Logic kiểm tra output toggle có thể phức tạp
+
+        if (shouldScroll) {
+            const timer = setTimeout(() => {
+                if (scrollTarget) {
+                    scrollTarget.scrollTo({ top: scrollTarget.scrollHeight, behavior: 'smooth' });
+                }
+            }, 50); // Delay nhỏ cho render/animation
+            return () => clearTimeout(timer);
         }
-      }, 100);
-       return () => clearTimeout(timer);
     }
-  }, [conversation, isLoading, expandedOutputs, collapsedStates]); // Thêm collapsedStates
+    isInitialMount.current = false; // Đánh dấu đã mount xong
+}, [conversation, expandedOutputs]); // Chạy khi conversation hoặc trạng thái output thay đổi
+  // ---------------------------
 
   const renderConversation = () => {
-    // Logic gom rounds
+    // Gom các block thành các "vòng" tương tác
     const rounds: { userBlock: ConversationBlock; childrenBlocks: ConversationBlock[] }[] = [];
     let currentUserBlock: ConversationBlock | null = null;
     let currentRoundBlocks: ConversationBlock[] = [];
+
     for (const block of conversation) {
       if (block.type === 'user') {
-        if (currentUserBlock) rounds.push({ userBlock: currentUserBlock, childrenBlocks: currentRoundBlocks });
+        if (currentUserBlock) {
+          rounds.push({ userBlock: currentUserBlock, childrenBlocks: currentRoundBlocks });
+        }
         currentUserBlock = block;
         currentRoundBlocks = [];
       } else if (currentUserBlock) {
         currentRoundBlocks.push(block);
       } else {
-         rounds.push({ userBlock: { type: 'placeholder', data: null, id: block.id + '_placeholder', timestamp: block.timestamp}, childrenBlocks: [block] });
+        // Xử lý block lẻ không thuộc round nào (ví dụ lỗi ban đầu)
+        rounds.push({
+            userBlock: { type: 'placeholder', data: null, id: `placeholder-${block.id}`, timestamp: block.timestamp }, // Placeholder user block
+            childrenBlocks: [block]
+        });
       }
     }
-    if (currentUserBlock) rounds.push({ userBlock: currentUserBlock, childrenBlocks: currentRoundBlocks });
+    // Đẩy round cuối cùng vào
+    if (currentUserBlock) {
+      rounds.push({ userBlock: currentUserBlock, childrenBlocks: currentRoundBlocks });
+    }
 
-    // Render rounds
+    // Render từng round
     return rounds.map((round, index) => {
       const userBlockId = round.userBlock.id;
-      // Mặc định không collapse round cuối cùng
+      const isPlaceholder = round.userBlock.type === 'placeholder';
       const isLastRound = index === rounds.length - 1;
-      const isCollapsed = (round.userBlock.type !== 'placeholder' && !isLastRound) ? (collapsedStates[userBlockId] ?? false) : false;
+      // Một round được coi là collapsed nếu nó không phải round cuối VÀ state của nó là collapsed
+      const isCollapsed = !isLastRound && !isPlaceholder && (collapsedStates[userBlockId] ?? false);
 
-      if (round.userBlock.type === 'placeholder') {
-         // Render block lẻ (nếu có)
-         return (
-             <React.Fragment key={userBlockId + "-frag"}>
-                {round.childrenBlocks.map(childBlock => (
-                     <InteractionBlock
-                        key={childBlock.id}
-                        block={childBlock}
-                        isBusy={isBusy}
-                        onReview={onReview}
-                        onExecute={onExecute}
-                        onDebug={onDebug}
-                        onApplyCorrectedCode={onApplyCorrectedCode}
-                        expandedOutputs={expandedOutputs}
-                        onToggleOutputExpand={onToggleOutputExpand}
-                    />
-                ))}
-             </React.Fragment>
-         );
+      if (isPlaceholder) {
+          // Render các block lẻ
+          return (
+              <div key={userBlockId} className="interaction-round placeholder-round">
+                  {round.childrenBlocks.map(childBlock => (
+                      <InteractionBlock
+                          key={childBlock.id}
+                          block={childBlock}
+                          isBusy={isBusy}
+                          onReview={onReview}
+                          onExecute={onExecute}
+                          onDebug={onDebug}
+                          onApplyCorrectedCode={onApplyCorrectedCode}
+                          expandedOutputs={expandedOutputs}
+                          onToggleOutputExpand={onToggleOutputExpand}
+                      />
+                  ))}
+              </div>
+          );
       }
       else if (isCollapsed) {
-          // Render Collapsed Block
-          return (
-            <CollapsedInteractionBlock
-              key={userBlockId}
-              promptText={round.userBlock.data}
-              blockId={userBlockId}
-              timestamp={round.userBlock.timestamp}
-              onToggleCollapse={onToggleCollapse}
-            />
-          );
+        // Render Collapsed Block
+        return (
+          <CollapsedInteractionBlock
+            key={userBlockId}
+            promptText={round.userBlock.data}
+            blockId={userBlockId}
+            timestamp={round.userBlock.timestamp}
+            onToggleCollapse={onToggleCollapse}
+          />
+        );
       } else {
         // Render Expanded Round
         return (
-          // Key quan trọng cho React nhận biết thay đổi để CSS transition hoạt động
-          <div key={userBlockId + '-expanded'}
-               className="interaction-round expanded-round">
-            {/* User Block Header */}
+          <div key={userBlockId + '-expanded'} className="interaction-round expanded-round">
+            {/* User Block */}
             <InteractionBlock
               key={userBlockId}
               block={round.userBlock}
-              isBusy={isBusy} // Không cần isBusy ở đây nữa nếu user block chỉ là header
-              onReview={onReview} // Không cần các action handler ở user block
+              isBusy={isBusy}
+              onReview={onReview} // Có thể không cần thiết ở đây
               onExecute={onExecute}
               onDebug={onDebug}
               onApplyCorrectedCode={onApplyCorrectedCode}
-              expandedOutputs={expandedOutputs} // Không cần thiết ở user block
-              onToggleOutputExpand={onToggleOutputExpand} // Không cần thiết ở user block
+              expandedOutputs={expandedOutputs}
+              onToggleOutputExpand={onToggleOutputExpand}
             />
             {/* Container cho các block con (Animation bằng CSS) */}
-            <div
-              className={`collapsible-content ${isCollapsed ? 'collapsed' : 'expanded'}`} // Class 'expanded' được thêm khi không collapsed
-            >
+            <div className={`collapsible-content ${isCollapsed ? 'collapsed' : 'expanded'}`}>
               {round.childrenBlocks.map(childBlock => (
                 <InteractionBlock
                   key={childBlock.id}
@@ -144,14 +165,10 @@ const CenterArea: React.FC<CenterAreaProps> = (props) => {
                   onToggleOutputExpand={onToggleOutputExpand}
                 />
               ))}
-               {/* Nút Collapse Round ở cuối (chỉ hiển thị nếu không phải round cuối) */}
+               {/* Nút Collapse Round ở cuối (chỉ khi không phải round cuối) */}
                {!isLastRound && (
                     <div className="collapse-round-wrapper">
-                        <button
-                            onClick={() => onToggleCollapse(userBlockId)}
-                            className="collapse-round-button"
-                            title="Collapse conversation round"
-                        >
+                        <button onClick={() => onToggleCollapse(userBlockId)} className="collapse-round-button">
                            <FiChevronUp /> Collapse section
                         </button>
                     </div>

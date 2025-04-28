@@ -1,10 +1,35 @@
 /* frontend/src/components/CenterArea.css */
+
+/* --- Base Variables (from App.css or here) --- */
+:root {
+  /* ... (các biến màu, font, spacing) ... */
+  --border-radius: 8px;
+  --border-radius-small: 4px;
+  --spacing-unit: 8px;
+  --border-color: #303030;
+  --border-color-secondary: #202123;
+  --bg-primary: #131314;
+  --bg-secondary: #1e1f20;
+  --bg-tertiary: #2a2b2c;
+  --text-primary: #e3e3e3;
+  --text-secondary: #bdc1c6;
+  --text-muted: #85888c;
+  --text-accent: #8ab4f8;
+  --code-bg: #161617;
+  --code-font-family: 'Roboto Mono', monospace;
+  --success-color: #81c995;
+  --danger-color: #f28b82;
+  --warning-color: #fdd663;
+  --info-color: #78c9f5;
+}
+
+/* --- Main Layout --- */
 .center-area-wrapper {
-  display: flex; flex-direction: column;
-  height: 100%; /* Quan trọng: Để CenterArea chiếm hết chiều cao flex item trong App */
-  background-color: var(--bg-primary);
-  overflow: hidden;
-  width: 100%; max-width: 100%;
+    display: flex; flex-direction: column;
+    height: 100%;
+    background-color: var(--bg-primary);
+    overflow: hidden;
+    width: 100%; max-width: 100%;
 }
 
 .main-header {
@@ -16,102 +41,232 @@
     justify-content: space-between;
     align-items: center;
 }
-.main-header h2 { color: var(--text-primary); font-size: 1.1rem; font-weight: 600; }
+.main-header h2 { color: var(--text-primary); font-size: 1.1rem; font-weight: 600; margin: 0; }
 .settings-toggle-button { color: var(--text-muted); }
 .settings-toggle-button:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
 
 .interaction-container {
-  flex-grow: 1; /* Cho phép scroll */
-  overflow-y: auto;
-  padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 4); /* Giảm padding dọc */
-  display: flex;
-  flex-direction: column;
-  gap: 0; /* Bỏ gap ở đây, xử lý bằng margin/padding của round/block */
+    flex-grow: 1;
+    overflow-y: auto;
+    /* Padding được xử lý bởi interaction-block và collapsed-section-block */
+    padding: 0 calc(var(--spacing-unit) * 3);
+    display: flex;
+    flex-direction: column;
+    gap: 0; /* No gap here, margin/padding on children */
 }
 
-/* --- Interaction Round --- */
+/* --- Interaction Round & Placeholder --- */
 .interaction-round {
-    padding-bottom: calc(var(--spacing-unit) * 1.5);
-    margin-bottom: calc(var(--spacing-unit) * 1.5);
+    /* Border bottom phân cách */
     border-bottom: 1px solid var(--border-color-secondary);
-    position: relative;
+    margin: 0; /* Reset margin */
+    padding: 0; /* Reset padding */
 }
-.interaction-round:last-child { border-bottom: none; margin-bottom: 0; }
-.expanded-round {
-    /* Có thể thêm style nền nhẹ nếu muốn */
-    /* background-color: rgba(255, 255, 255, 0.02); */
-    /* border-radius: var(--border-radius); */
+.interaction-round:last-child { border-bottom: none; }
+.placeholder-round { /* Style cho các block không có user prompt */
+     border-bottom: 1px solid var(--border-color-secondary);
 }
+.placeholder-round:last-child { border-bottom: none; }
 
 
-/* --- Interaction Block Styling --- */
+/* --- General Interaction Block --- */
 .interaction-block {
     display: flex;
     gap: var(--spacing-unit);
     align-items: flex-start;
-    max-width: 850px;
+    max-width: 850px; /* Giới hạn chiều rộng */
     margin-left: auto;
     margin-right: auto;
     width: 100%;
-    /* Thêm margin bottom cho các block con trong round */
-    margin-bottom: calc(var(--spacing-unit) * 2);
+    padding: calc(var(--spacing-unit) * 1.5) 0; /* Padding dọc cho khoảng cách */
+    position: relative; /* For potential absolute elements inside */
 }
-.interaction-block:last-child {
-    margin-bottom: 0; /* Block cuối cùng trong round không cần margin bottom */
+
+/* Animation cho block mới xuất hiện */
+@keyframes slideInUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-/* User block không cần margin bottom vì nó là header của round */
-.interaction-block.block-type-user {
-    margin-bottom: 0;
+
+.interaction-block.newly-added {
+  /* Áp dụng animation */
+  animation: slideInUpFade 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 .block-avatar { margin-top: calc(var(--spacing-unit)*0.25); flex-shrink: 0; }
-.block-icon { font-size: 1.1rem; color: var(--text-muted); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background-color: var(--bg-secondary); border: 1px solid var(--border-color); }
+.block-icon {
+    font-size: 1.1rem; color: var(--text-muted);
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; background-color: var(--bg-secondary); border: 1px solid var(--border-color);
+}
+/* Icon styles per type */
 .block-icon.user-icon { background-color: var(--accent-primary); color: var(--bg-primary); }
 .block-icon.ai-icon { background-color: #9333ea; color: white; }
-.block-icon.review-icon, .block-icon.execution-icon, .block-icon.debug-icon, .block-icon.loading-icon, .block-icon.error-icon { background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-muted); }
+.block-icon.review-icon { background-color: #34a853; color: white;} /* Green */
+.block-icon.execution-icon.success { background-color: var(--bg-tertiary); }
 .block-icon.execution-icon.success svg { color: var(--success-color); }
+.block-icon.execution-icon.error { background-color: var(--bg-tertiary); }
 .block-icon.execution-icon.error svg { color: var(--danger-color); }
-.block-icon.debug-icon svg { color: var(--warning-color); }
+.block-icon.debug-icon { background-color: #fbbc04; color: var(--bg-primary);} /* Yellow */
+.block-icon.loading-icon { background-color: var(--bg-tertiary); }
+.block-icon.error-icon { background-color: var(--bg-tertiary); }
 .block-icon.error-icon svg { color: var(--danger-color); }
 
-.block-main-content { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: calc(var(--spacing-unit) * 0.5); /* Giảm gap nội bộ */}
+.block-main-content { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: calc(var(--spacing-unit) * 1); } /* Tăng gap nhẹ */
+.block-content-area { padding: 0; border-radius: var(--border-radius); }
 
-/* --- Block Header (chỉ cho User Block) --- */
-.block-header.user-header {
+/* --- User Block Specific Styles --- */
+.block-type-user .block-header.user-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* margin-bottom: calc(var(--spacing-unit) * 0.75); */ /* Margin đã có ở block-main-content gap */
-    height: auto;
+    margin-bottom: calc(var(--spacing-unit) * 0.5);
 }
 .user-header-title {
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-weight: 500; /* Normal weight */
+    color: var(--text-primary); /* Màu chính */
     font-size: 0.9rem;
+    text-transform: none; /* Bỏ uppercase */
+    letter-spacing: normal;
 }
-.block-timestamp {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    font-family: var(--code-font-family);
-}
-
-.block-content-area { padding: 0; border-radius: var(--border-radius); }
+.block-timestamp { font-size: 0.75rem; color: var(--text-muted); }
 .block-type-user .block-content-area { background-color: transparent; border: none; }
-.block-type-user .prompt-text { color: var(--text-primary); font-size: 1rem; line-height: 1.6; white-space: pre-wrap; font-weight: 500; padding: 0; } /* Bỏ padding cũ */
+.block-type-user .prompt-text { color: var(--text-primary); font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; font-weight: 400; padding: 0; }
 
-/* AI Code Block & Debug Code Block */
+/* --- Collapsed Section Block --- */
+.collapsed-section-block {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-unit) calc(var(--spacing-unit) * 1.5);
+  margin-bottom: var(--spacing-unit); /* Khoảng cách với block/round dưới */
+  cursor: pointer;
+  transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-unit) * 0.5);
+  /* Thêm padding top/bottom để tạo khoảng cách bên trong */
+  padding-top: calc(var(--spacing-unit)*1.25);
+  padding-bottom: calc(var(--spacing-unit)*1.25);
+}
+.collapsed-section-block:hover {
+  background-color: var(--bg-tertiary);
+  border-color: #444;
+}
+.collapsed-section-header { display: flex; justify-content: space-between; align-items: center; }
+.collapsed-title-group { display: flex; align-items: center; gap: calc(var(--spacing-unit) * 0.75); }
+.collapsed-sparkle-icon { color: var(--text-accent); font-size: 1rem; }
+.collapsed-title-text { font-weight: 500; color: var(--text-primary); font-size: 0.9rem; }
+.block-timestamp.collapsed-timestamp { font-size: 0.75rem; margin-left: auto; }
+.collapsed-section-body { margin-top: 2px; /* Khoảng cách nhỏ với header */ }
+.collapsed-prompt-summary {
+    color: var(--text-secondary); font-size: 0.9rem; /* Tăng size */
+    line-height: 1.5; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    margin: 0;
+    padding-left: calc(1rem + var(--spacing-unit) * 0.75); /* Thụt lề */
+}
+.collapsed-section-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: calc(var(--spacing-unit) * 0.75); /* Tăng margin */
+    padding-left: calc(1rem + var(--spacing-unit) * 0.75);
+}
+.expand-prompt-text { font-size: 0.8rem; color: var(--text-muted); }
+.expand-icon { color: var(--text-muted); font-size: 1rem; }
+
+/* --- Collapsible Content & Animation --- */
+.collapsible-content {
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease-out, border-top-color 0.35s ease-out, margin-top 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding-top 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Padding của InteractionBlock sẽ tạo khoảng cách */
+  margin-left: calc(32px + var(--spacing-unit)); /* Indent content */
+  padding-top: 0;
+  max-height: 0px;
+  opacity: 0;
+  will-change: max-height, opacity;
+  border-top: 1px solid transparent; /* Transparent border initially */
+  margin-top: 0; /* No margin when collapsed */
+}
+
+.collapsible-content.expanded {
+  padding-top: 0; /* Padding được xử lý bởi block con đầu tiên */
+  max-height: 3000px; /* Or a sufficiently large value */
+  opacity: 1;
+  border-top-color: var(--border-color-secondary);
+  margin-top: calc(var(--spacing-unit) * 1.5); /* Margin khi mở rộng */
+}
+
+
+/* --- Collapse Round Button --- */
+.collapse-round-wrapper {
+    text-align: left;
+    margin-top: calc(var(--spacing-unit) * 1.5); /* Space above button */
+    padding-top: calc(var(--spacing-unit) * 1.5); /* Space above the line */
+    border-top: 1px solid var(--border-color-secondary);
+    margin-left: 0; /* Reset indent */
+    /* Add padding bottom to give space after the button */
+    padding-bottom: var(--spacing-unit);
+}
+.collapse-round-button {
+    background: none; border: none; color: var(--text-muted);
+    cursor: pointer; padding: calc(var(--spacing-unit)*0.5) 0; font-size: 0.8rem;
+    display: inline-flex; align-items: center; gap: calc(var(--spacing-unit)*0.5);
+    border-radius: var(--border-radius-small); transition: color 0.2s ease-out;
+}
+.collapse-round-button:hover { color: var(--text-primary); }
+.collapse-round-button svg { font-size: 0.9rem; }
+
+
+/* --- AI Code Block, Review, Debug Styles --- */
+/* AI Code Block & Debug Code Block Container */
 .block-type-ai-code .block-content-area,
-.block-type-debug .block-content-area .code-block-container { background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius); overflow: hidden; }
+.block-type-debug .block-content-area .code-block-container {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    overflow: hidden; /* Clip content */
+}
 .code-block-container { border-radius: inherit; overflow: hidden; }
-.code-block-header { display: flex; justify-content: space-between; align-items: center; padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit) calc(var(--spacing-unit)*0.75) calc(var(--spacing-unit)*1.5) ; background-color: var(--bg-tertiary); color: var(--text-muted); font-size: 0.8rem; font-family: var(--code-font-family); border-bottom: 1px solid var(--border-color); }
+.code-block-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit) calc(var(--spacing-unit)*0.75) calc(var(--spacing-unit)*1.5);
+    background-color: var(--bg-tertiary); color: var(--text-muted);
+    font-size: 0.8rem; font-family: var(--code-font-family);
+    border-bottom: 1px solid var(--border-color);
+}
 .code-block-header > div { display: flex; gap: calc(var(--spacing-unit)*0.5); }
-.code-block-header .icon-button.subtle.small { color: var(--text-muted); font-size: 0.9rem; padding: calc(var(--spacing-unit)*0.5); }
-.code-block-header .icon-button.subtle.small:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
-.main-code-block pre { margin: 0 !important; padding: var(--spacing-unit) calc(var(--spacing-unit)*1.5) !important; border-radius: 0 !important; font-size: 0.875rem !important; background-color: transparent !important; line-height: 1.45 !important; }
+.code-block-header .icon-button.subtle.small {
+    color: var(--text-muted); font-size: 0.9rem;
+    padding: calc(var(--spacing-unit)*0.5);
+}
+.code-block-header .icon-button.subtle.small:hover {
+    color: var(--text-primary); background-color: var(--bg-secondary);
+}
+/* Syntax Highlighter Styles */
+.main-code-block pre {
+    margin: 0 !important;
+    padding: var(--spacing-unit) calc(var(--spacing-unit)*1.5) !important;
+    border-radius: 0 !important; /* Remove radius as container handles it */
+    font-size: 0.875rem !important;
+    background-color: transparent !important; /* Use container background */
+    line-height: 1.45 !important;
+}
 .main-code-block code { font-family: var(--code-font-family) !important; }
 
-/* Review Block */
-.block-type-review .block-content-area { background-color: var(--bg-secondary); border: 1px solid var(--border-color); padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); }
+/* Review Block Styles */
+.block-type-review .block-content-area {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2);
+    border-radius: var(--border-radius);
+}
 .markdown-content { font-size: 0.9rem; line-height: 1.7; color: var(--text-secondary); }
 .markdown-content p { margin-bottom: var(--spacing-unit); }
 .markdown-content ul, .markdown-content ol { margin-left: calc(var(--spacing-unit) * 2); margin-bottom: var(--spacing-unit); }
@@ -120,48 +275,118 @@
 .markdown-content a { color: var(--text-accent); text-decoration: none; }
 .markdown-content a:hover { text-decoration: underline; }
 .markdown-content blockquote { border-left: 3px solid var(--border-color); padding-left: var(--spacing-unit); margin: var(--spacing-unit) 0; color: var(--text-muted); font-style: italic; }
-.markdown-code-block { margin: var(--spacing-unit) 0; background-color: var(--code-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius-small); overflow: hidden; }
-.markdown-code-block .code-block-header { display: flex; justify-content: space-between; align-items: center; padding: calc(var(--spacing-unit)*0.5) var(--spacing-unit) calc(var(--spacing-unit)*0.5) calc(var(--spacing-unit)*1); background-color: var(--bg-tertiary); color: var(--text-muted); font-size: 0.75rem; font-family: var(--code-font-family); border-bottom: 1px solid var(--border-color); }
-.markdown-code-block .code-block-header > div { display: flex; gap: calc(var(--spacing-unit)*0.5); }
-.markdown-code-block .code-block-header .copy-button { color: var(--text-muted); font-size: 0.9rem; padding: calc(var(--spacing-unit)*0.5); background: none; border: none; cursor: pointer; }
+/* Markdown Code Block (inside review/debug) */
+.markdown-code-block {
+    margin: var(--spacing-unit) 0;
+    background-color: var(--code-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
+    overflow: hidden;
+}
+.markdown-code-block .code-block-header { /* Inherits from .code-block-header, adjust if needed */
+    padding: calc(var(--spacing-unit)*0.5) var(--spacing-unit) calc(var(--spacing-unit)*0.5) calc(var(--spacing-unit)*1);
+    font-size: 0.75rem;
+}
+.markdown-code-block .code-block-header .copy-button { /* Style copy button inside markdown */
+    color: var(--text-muted); font-size: 0.9rem; padding: calc(var(--spacing-unit)*0.5);
+    background: none; border: none; cursor: pointer;
+}
 .markdown-code-block .code-block-header .copy-button:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
-.markdown-code-block .syntax-highlighter pre { margin: 0 !important; padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit) !important; border-radius: 0 !important; font-size: 0.8rem !important; background-color: transparent !important; line-height: 1.4 !important; }
+.markdown-code-block .syntax-highlighter pre {
+    margin: 0 !important;
+    padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit) !important;
+    border-radius: 0 !important;
+    font-size: 0.8rem !important;
+    background-color: transparent !important;
+    line-height: 1.4 !important;
+}
 .markdown-code-block .syntax-highlighter code { font-family: var(--code-font-family) !important; }
-.inline-code { background-color: var(--bg-tertiary); color: var(--text-accent); padding: 0.1em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; font-family: var(--code-font-family); border: 1px solid var(--border-color); white-space: nowrap; }
+.inline-code {
+    background-color: var(--bg-tertiary); color: var(--text-accent);
+    padding: 0.1em 0.4em; border-radius: var(--border-radius-small);
+    font-size: 0.85em; font-family: var(--code-font-family);
+    border: 1px solid var(--border-color); white-space: nowrap;
+}
 
-/* Execution Block */
-.block-type-execution .block-content-area { background-color: var(--bg-secondary); border: 1px solid var(--border-color); padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); }
+/* Execution Block Styles */
+.block-type-execution .block-content-area {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2);
+    border-radius: var(--border-radius);
+}
 .execution-content { font-size: 0.85rem; }
-.execution-content.error { /* border-left: 3px solid var(--danger-color); padding-left: calc(var(--spacing-unit)*1.5 - 3px); */ /* Bỏ border ở đây */ }
+.execution-content.error { /* No extra border needed if using section borders */ }
+.exec-message { font-style: italic; color: var(--text-muted); font-size: 0.85rem; margin-bottom: var(--spacing-unit);}
+/* Output Section (stdout/stderr wrapper) */
 .output-section { margin-top: var(--spacing-unit); }
 .output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
 .output-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; display: block; }
-.expand-output-button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 4px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; border-radius: var(--border-radius-small); }
+.expand-output-button {
+    background: none; border: none; color: var(--text-muted); cursor: pointer;
+    padding: 2px 4px; font-size: 0.75rem; display: inline-flex;
+    align-items: center; gap: 4px; border-radius: var(--border-radius-small);
+}
 .expand-output-button:hover { background-color: var(--bg-tertiary); color: var(--text-primary); }
 .expand-output-button svg { font-size: 0.8rem; }
-.output-section pre.output-pre { background-color: var(--bg-tertiary); border: 1px solid var(--border-color-secondary); color: var(--text-secondary); padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit); margin-top: 0; border-radius: var(--border-radius-small); overflow: hidden; white-space: pre-wrap; word-break: break-all; font-family: var(--code-font-family); font-size: 0.8rem; transition: max-height 0.3s ease-in-out; max-height: 7.5em; /* ~5 dòng */ }
-.output-section pre.output-pre.expanded { max-height: 500px; overflow-y: auto; }
-.output-section.stderr-section pre.output-pre { color: var(--danger-color); background-color: rgba(242, 139, 130, 0.05); border-color: rgba(242, 139, 130, 0.2); }
+/* Preformatted Output (stdout/stderr content) */
+.output-section pre.output-pre {
+    background-color: var(--bg-tertiary); border: 1px solid var(--border-color-secondary);
+    color: var(--text-secondary); padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit);
+    margin-top: 0; border-radius: var(--border-radius-small);
+    overflow: hidden; /* Hide overflow initially */
+    white-space: pre-wrap; word-break: break-all;
+    font-family: var(--code-font-family); font-size: 0.8rem;
+    transition: max-height 0.3s ease-in-out;
+    max-height: var(--preview-height, 7.5em); /* Use CSS var or default */
+}
+.output-section pre.output-pre.expanded {
+   max-height: 500px; /* Max height when expanded */
+   overflow-y: auto; /* Add scroll if still exceeds max-height */
+}
+.output-section.stderr-section pre.output-pre { /* Specific styles for stderr */
+   color: var(--danger-color);
+   background-color: rgba(242, 139, 130, 0.05);
+   border-color: rgba(242, 139, 130, 0.2);
+}
 .return-code { margin-top: var(--spacing-unit); font-weight: 500; color: var(--text-muted); font-size: 0.8rem; }
-.exec-message { font-style: italic; color: var(--text-muted); margin-bottom: var(--spacing-unit); font-size: 0.85rem;}
 
-/* Debug Block */
-.block-type-debug .block-content-area { background-color: var(--bg-secondary); border: 1px solid var(--border-color); padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); }
+/* Debug Block Styles */
+.block-type-debug .block-content-area {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2);
+    border-radius: var(--border-radius);
+}
 .debug-content h4 { font-size: 0.9rem; color: var(--text-secondary); margin: calc(var(--spacing-unit)*1.5) 0 var(--spacing-unit) 0; font-weight: 600; }
 .explanation-content { margin-bottom: calc(var(--spacing-unit) * 2); }
-.corrected-code { /* class cho syntax highlighter */ }
+/* .corrected-code uses .main-code-block style */
 
-/* Loading Block */
-.block-type-loading .block-content-area { background-color: transparent; border: none; }
-.loading-content { display: flex; align-items: center; gap: var(--spacing-unit); color: var(--text-muted); font-style: italic; font-size: 0.9rem; padding: var(--spacing-unit) 0; }
+/* Loading & Error Block Styles */
+.block-type-loading .block-content-area { background-color: transparent; border: none; padding: 0; }
+.loading-content { display: flex; align-items: center; gap: var(--spacing-unit); color: var(--text-muted); font-style: italic; font-size: 0.9rem; padding: calc(var(--spacing-unit)*0.5) 0; }
 .loading-content svg { font-size: 1rem; }
+.block-type-error .block-content-area { background-color: transparent; border: none; padding: 0; }
+.error-inline {
+    color: var(--danger-color); background-color: rgba(242, 139, 130, 0.1);
+    border: 1px solid rgba(242, 139, 130, 0.2);
+    padding: var(--spacing-unit); border-radius: var(--border-radius-small);
+    font-size: 0.875rem;
+    /* margin-top: var(--spacing-unit); Removed as block has padding */
+}
 
-/* Error Block */
-.block-type-error .block-content-area { background-color: transparent; border: none; }
 
-/* --- Block Actions Area --- */
-.block-actions-area { padding: 0; display: flex; gap: var(--spacing-unit); flex-wrap: wrap; justify-content: flex-start; margin-top: var(--spacing-unit); }
-.block-actions-area button { background-color: var(--bg-tertiary); border: 1px solid var(--border-color); padding: calc(var(--spacing-unit)*0.6) var(--spacing-unit); font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); }
+/* Block Actions Area */
+.block-actions-area {
+    padding: 0; display: flex; gap: var(--spacing-unit); flex-wrap: wrap;
+    justify-content: flex-start; margin-top: calc(var(--spacing-unit) * 1); /* Consistent margin */
+}
+.block-actions-area button {
+    background-color: var(--bg-tertiary); border: 1px solid var(--border-color);
+    padding: calc(var(--spacing-unit)*0.6) var(--spacing-unit); font-size: 0.8rem;
+    font-weight: 500; color: var(--text-secondary);
+    transition: all 0.15s ease-out;
+}
 .block-actions-area button:hover:not(:disabled) { background-color: #40444b; border-color: #50555b; color: var(--text-primary); }
 .block-actions-area button svg { font-size: 0.9rem; margin-right: calc(var(--spacing-unit)*0.5);}
 .block-actions-area button.execute { color: var(--success-color); border-color: rgba(67, 181, 129, 0.3); }
@@ -170,135 +395,3 @@
 .block-actions-area button.debug:hover:not(:disabled) { background-color: rgba(250, 166, 26, 0.2); border-color: rgba(250, 166, 26, 0.5); }
 .block-actions-area button.apply-code { color: var(--info-color); border-color: rgba(0, 168, 252, 0.3); }
 .block-actions-area button.apply-code:hover:not(:disabled) { background-color: rgba(0, 168, 252, 0.2); border-color: rgba(0, 168, 252, 0.5); }
-
-/* --- Collapsed Section Block (Appearance) --- */
-.collapsed-section-block {
-background-color: var(--bg-secondary);
-border: 1px solid var(--border-color);
-border-radius: var(--border-radius);
-padding: calc(var(--spacing-unit) * 1.25) calc(var(--spacing-unit) * 1.5); /* Điều chỉnh padding */
-margin-bottom: var(--spacing-unit) * 1.5; /* Tăng khoảng cách */
-cursor: pointer;
-transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
-display: flex;
-flex-direction: column;
-gap: calc(var(--spacing-unit)* 0.75); /* Giảm gap */
-}
-.collapsed-section-block.interactive:hover {
-background-color: var(--bg-tertiary);
-border-color: #444;
-}
-
-.collapsed-section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.collapsed-title-group {
-  display: flex;
-  align-items: center;
-  gap: calc(var(--spacing-unit) * 0.75);
-}
-.collapsed-sparkle-icon {
-  color: var(--text-accent);
-  font-size: 1.1rem;
-}
-.collapsed-title-text {
-  font-weight: 600;
-  color: var(--text-primary);
-  font-size: 0.95rem;
-}
-.block-timestamp.collapsed-timestamp {
-   font-size: 0.75rem;
-   margin-left: auto;
-   color: var(--text-muted);
-}
-
-.collapsed-section-body { }
-.collapsed-prompt-summary {
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  line-height: 1.5;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 1; /* Chỉ hiện 1 dòng tóm tắt */
-  -webkit-box-orient: vertical;
-  margin: 0;
-}
-
-.collapsed-section-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: calc(var(--spacing-unit) * 0.5);
-}
-.expand-prompt-text {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-.expand-icon {
-  color: var(--text-muted);
-  font-size: 1.1rem;
-}
-
-/* --- Animation cho khối con (Collapsible Content) --- */
-.collapsible-content {
-overflow: hidden;
-transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-            opacity 0.3s ease-out,
-            padding-top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-            margin-top 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-display: flex;
-flex-direction: column;
-/* Bỏ gap ở đây, dùng margin của interaction-block bên trong */
-/* gap: calc(var(--spacing-unit) * 3); */
-margin-left: calc(32px + var(--spacing-unit)); /* Thụt lề trái */
-padding-top: 0;
-max-height: 0px;
-opacity: 0;
-will-change: max-height, opacity;
-margin-top: 0; /* Bắt đầu không có margin top */
-}
-
-.collapsible-content.expanded {
-padding-top: var(--spacing-unit); /* Padding khi mở */
-margin-top: var(--spacing-unit); /* Margin top khi mở */
-max-height: 3000px; /* Giá trị đủ lớn */
-opacity: 1;
-}
-/* Áp dụng margin-bottom cho các block con bên trong content */
-.collapsible-content > .interaction-block {
-  margin-bottom: calc(var(--spacing-unit) * 2);
-}
-.collapsible-content > .interaction-block:last-child {
-  margin-bottom: 0; /* Block cuối cùng không cần */
-}
-
-
-/* --- Nút Collapse Round (Cập nhật giao diện) --- */
-.collapse-round-wrapper {
-  text-align: left;
-  margin-top: calc(var(--spacing-unit) * 1.5);
-  padding-top: calc(var(--spacing-unit) * 1.5);
-  border-top: 1px solid var(--border-color-secondary);
-  margin-left: 0; /* Vẫn nằm trong .collapsible-content */
-}
-.collapse-round-button {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: calc(var(--spacing-unit)*0.5) 0;
-  font-size: 0.85rem;
-  display: inline-flex;
-  align-items: center;
-  gap: calc(var(--spacing-unit)*0.5);
-  border-radius: var(--border-radius-small);
-  transition: color 0.2s ease-out;
-}
-.collapse-round-button:hover {
-  color: var(--text-primary);
-}
-.collapse-round-button svg {
-  font-size: 1rem;
-}

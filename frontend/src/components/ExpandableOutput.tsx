@@ -1,5 +1,5 @@
 // frontend/src/components/ExpandableOutput.tsx
-import React, { useRef } from 'react'; // Chỉ cần useRef
+import React, { useRef } from 'react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import './CenterArea.css'; // Dùng chung CSS
 
@@ -8,8 +8,8 @@ interface ExpandableOutputProps {
   label: string; // "stdout" hoặc "stderr"
   isExpanded: boolean;
   onToggleExpand: () => void;
-  previewLineCount?: number; // Dùng để tính class hoặc style nếu cần
-  className?: string; // Cho phép thêm class (vd: stderr)
+  previewLineCount?: number; // Số dòng hiển thị khi thu gọn
+  className?: string; // Cho phép thêm class (vd: stderr-section)
 }
 
 const ExpandableOutput: React.FC<ExpandableOutputProps> = ({
@@ -20,14 +20,18 @@ const ExpandableOutput: React.FC<ExpandableOutputProps> = ({
   previewLineCount = 5, // Mặc định 5 dòng
   className = '',
 }) => {
-  const preRef = useRef<HTMLPreElement>(null); // Vẫn giữ ref nếu cần
+  const preRef = useRef<HTMLPreElement>(null);
 
   if (!text?.trim()) {
     return null; // Không hiển thị nếu không có nội dung
   }
 
   const lines = text.split('\n');
+  // Vẫn kiểm tra để biết có cần nút Expand/Collapse không
   const needsExpansion = lines.length > previewLineCount;
+
+  // Ước tính chiều cao preview dựa trên số dòng và line-height (ví dụ: 1.45em)
+  const previewHeightEm = `${previewLineCount * 1.45}em`;
 
   return (
     <div className={`output-section ${className}`}>
@@ -40,12 +44,13 @@ const ExpandableOutput: React.FC<ExpandableOutputProps> = ({
           </button>
         )}
       </div>
-      {/* Class được cập nhật bởi isExpanded */}
+      {/* Đặt CSS variable cho chiều cao preview */}
       <pre
         ref={preRef}
         className={`output-pre ${isExpanded ? 'expanded' : 'collapsed'}`}
+        style={{ '--preview-height': previewHeightEm } as React.CSSProperties}
       >
-        <code>{text}</code>
+        <code>{text}</code> {/* Luôn render full text */}
       </pre>
     </div>
   );

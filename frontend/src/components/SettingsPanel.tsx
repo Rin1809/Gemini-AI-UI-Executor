@@ -57,10 +57,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           </div>
         </div>
 
-        {/* --- Khu vực ghi đè API Key --- */}
+        {/* --- Khu vực API Key --- */}
         <div className="settings-section api-key-section">
             {/* Label và icon */}
-            <label htmlFor="uiApiKey"><FiKey /> Ghi đè API Key</label>
+            <label htmlFor="uiApiKey"><FiKey />API Key</label>
             {/* Input nhập API Key */}
             <input
                 type="password" // Kiểu password để ẩn key

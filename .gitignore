@@ -1,0 +1,24 @@
+.env
+
+# moi truong ao pytohn
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+
+# Node build cho frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.DS_Store
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.eslintcache
+
+# file ngoai le
+.DS_Store
+Thumbs.db
+
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace

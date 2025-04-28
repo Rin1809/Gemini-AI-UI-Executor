@@ -4,7 +4,7 @@ import sys
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import google.generativeai as genai
-from google.generativeai.types import GenerationConfig  # Chỉ cần import cái này từ types
+from google.generativeai.types import GenerationConfig
 from dotenv import load_dotenv
 import codecs
 import re
@@ -64,18 +64,13 @@ def create_prompt(user_input):
     prompt = f"""
 Bạn là một trợ lý AI chuyên tạo mã Python ngắn gọn để thực thi các tác vụ trên máy tính ({os_name}) dựa trên yêu cầu của người dùng.
 **QUAN TRỌNG:** Chỉ trả về khối mã Python cuối cùng được bao trong ```python ... ```. KHÔNG bao gồm bất kỳ giải thích, lời dẫn, hoặc các bước suy nghĩ nào khác bên ngoài khối mã.
-Sử dụng module `subprocess` khi cần thiết để chạy lệnh hệ thống.
 Đảm bảo mã là an toàn và chỉ thực hiện đúng yêu cầu. Đảm bảo mã tương thích với Python 3.
 Sử dụng try-except để xử lý lỗi cơ bản nếu có thể. In thông báo kết quả hoặc lỗi ra stdout.
 
 Ví dụ yêu cầu: Mở Control Panel
 Mã trả về (ví dụ cho Windows):
 ```python
-import subprocess
-import sys
-if sys.platform == "win32":
-    try:
-        subprocess.run(['control'], check=True)
+...
         print("Đã mở Control Panel.")
     except Exception as e:
         print(f"Lỗi khi mở Control Panel: {{e}}")
@@ -86,15 +81,8 @@ else:
 Ví dụ yêu cầu: Tạo thư mục 'temp_folder' trên Desktop
 Mã trả về (ví dụ cho Windows):
 ```python
-import os
-import sys
-try:
-    if sys.platform == "win32":
-        desktop_path = os.path.join(os.environ['USERPROFILE'], 'Desktop')
-    else: # Giả định cho Linux/macOS
-        desktop_path = os.path.join(os.path.expanduser('~'), 'Desktop')
-    temp_dir = os.path.join(desktop_path, 'temp_folder')
-    os.makedirs(temp_dir, exist_ok=True)
+
+....
     print(f"Đã tạo hoặc đã tồn tại thư mục: {{temp_dir}}")
 except Exception as e:
     print(f"Lỗi khi tạo thư mục: {{e}}")
@@ -224,7 +212,7 @@ def generate_response_from_gemini(full_prompt, model_config, is_for_review_or_de
 
              final_text = "\n".join(cleaned_lines).strip()
              # Bỏ ``` ở cuối nếu là review/debug mà không có code block theo sau
-             # Điều này có thể không cần thiết nếu logic tách code ở /api/debug hoạt động tốt
+             # tabun không cần thiết nếu logic tách code ở /api/debug hoạt động tốt
              # if final_text.endswith("```"):
              #    final_text = final_text[:-3].strip()
              return final_text
@@ -261,7 +249,7 @@ def extract_python_code(raw_text):
     if matches_generic:
         # Kiểm tra sơ bộ xem có phải code python không (tùy chọn)
         last_block = matches_generic[-1].group(1).strip()
-        # if "import " in last_block or "def " in last_block or "print(" in last_block:
+
         #    return last_block
         # Trả về khối cuối cùng bất kể ngôn ngữ
         return last_block
@@ -441,7 +429,6 @@ def handle_debug():
                  explanation_part = "(AI chỉ trả về code, không có giải thích)"
                  corrected_code = last_code_block_match.group(1).strip()
         else:
-             # Không tìm thấy khối code Python sửa lỗi cuối cùng
              # Phần explanation_part đã là toàn bộ raw_response
              pass
 
@@ -462,7 +449,5 @@ def handle_debug():
 # --------------------
 
 if __name__ == '__main__':
-    # Chạy trên cổng 5001 để tránh xung đột với frontend (thường chạy trên 5173 hoặc 3000)
-    # debug=True sẽ tự động reload khi có thay đổi code (chỉ dùng khi phát triển)
     print("Backend đang chạy tại http://localhost:5001")
     app.run(debug=True, port=5001)

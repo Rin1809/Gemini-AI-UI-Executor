@@ -101,13 +101,14 @@ Bạn là một chuyên gia đánh giá code Python. Hãy phân tích đoạn m�
 2.  **Tính đúng đắn:** Mã có thực hiện đúng yêu cầu dự kiến không? Lỗi?
 3.  **Tính hiệu quả/Tối ưu:** Có cách viết tốt hơn không?
 4.  **Khả năng tương thích:** Chạy được trên các OS khác không?
+5.  **Không cần đưa ra code cải tiến.**
 
 Đoạn mã cần đánh giá:
 ```python
 {code_to_review}
 ```
 
-**QUAN TRỌNG:** Chỉ trả về phần văn bản nhận xét/đánh giá bằng Markdown. KHÔNG bao gồm các câu dẫn như "Đây là đánh giá của tôi:", "Phân tích code:", hoặc các bước suy nghĩ/trung gian. Bắt đầu trực tiếp bằng nội dung đánh giá. Định dạng các khối mã ví dụ (nếu có) trong Markdown bằng ```python ... ```.
+**QUAN TRỌNG:** Chỉ trả về phần văn bản nhận xét/đánh giá và **Kết luận cuối cùng:** Có/Không/Tương đối về mặt An toàn khi sử dụng. bằng Markdown. KHÔNG bao gồm các câu dẫn như "Đây là đánh giá của tôi:", "Phân tích code:", hoặc các bước suy nghĩ/trung gian. Bắt đầu trực tiếp bằng nội dung đánh giá. Định dạng các khối mã ví dụ (nếu có) trong Markdown bằng ```python ... ```.
 """
     return prompt
 

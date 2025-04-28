@@ -194,51 +194,52 @@
 
 /* --- Collapsible Content & Animation --- */
 .collapsible-content {
-  overflow: hidden; /* Quan trọng */
-  /* Định nghĩa transition CHỈ trên class cơ sở */
-  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.3s ease-in-out, 
-              margin-top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-              border-top-color 0.35s ease-out;
-  /* Trạng thái ban đầu (collapsed) */
-  max-height: 0;
-  opacity: 0;
-  border-top: 1px solid transparent;
-  margin-top: 0;
-  margin-left: calc(32px + var(--spacing-unit)); /* Giữ nguyên thụt lề */
-  display: block; /* Đảm bảo là block */
-  will-change: max-height, opacity;
-  box-sizing: border-box;
-}
-
-
-.collapsible-content.expanded {
-  /* Trạng thái mở rộng - chỉ định nghĩa các giá trị cuối cùng */
-  max-height: 3000px; 
-  opacity: 1;
-  border-top-color: var(--border-color-secondary);
-  margin-top: calc(var(--spacing-unit) * 1.5);
-}
-
-/* --- Collapse Round Button --- */
-.collapse-round-wrapper {
-    text-align: left;
-    margin-top: calc(var(--spacing-unit) * 1.5); 
-    padding-top: calc(var(--spacing-unit) * 1.5); 
-    border-top: 1px solid var(--border-color-secondary);
-    margin-left: 0; 
-    padding-bottom: var(--spacing-unit);
-    padding-left: calc(32px + var(--spacing-unit)); /* Thụt lề cho nút để căn chỉnh */
+    overflow: hidden; /* Quan trọng */
+    /* Định nghĩa transition CHỈ trên class cơ sở */
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s ease-in-out,
+                margin-top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                border-top-color 0.35s ease-out;
+    /* Trạng thái ban đầu (collapsed) */
+    max-height: 0;
+    opacity: 0;
+    border-top: 1px solid transparent;
+    margin-top: 0;
+    margin-left: calc(32px + var(--spacing-unit)); /* Giữ nguyên thụt lề */
+    display: block; /* Đảm bảo là block */
+    will-change: max-height, opacity; /* Gợi ý tối ưu hóa cho trình duyệt */
     box-sizing: border-box;
-}
-.collapse-round-button {
-    background: none; border: none; color: var(--text-muted);
-    cursor: pointer; padding: calc(var(--spacing-unit)*0.5) 0; font-size: 0.8rem;
-    display: inline-flex; align-items: center; gap: calc(var(--spacing-unit)*0.5);
-    border-radius: var(--border-radius-small); transition: color 0.2s ease-out;
-}
-.collapse-round-button:hover { color: var(--text-primary); }
-.collapse-round-button svg { font-size: 0.9rem; }
+  }
+  
+  
+  .collapsible-content.expanded {
+    /* Trạng thái mở rộng - chỉ định nghĩa các giá trị cuối cùng */
+    max-height: 3000px; /* Đủ lớn để chứa nội dung */
+    opacity: 1;
+    border-top-color: var(--border-color-secondary); /* Đường kẻ phân cách khi mở */
+    margin-top: calc(var(--spacing-unit) * 1.5); /* Khoảng cách trên khi mở */
+  }
+  
+  /* --- Collapse Round Button --- */
+  .collapse-round-wrapper {
+      text-align: left;
+      margin-top: calc(var(--spacing-unit) * 1.5);
+      padding-top: calc(var(--spacing-unit) * 1.5);
+      border-top: 1px solid var(--border-color-secondary);
+      margin-left: 0;
+      padding-bottom: var(--spacing-unit);
+      /* Thụt lề cho nút để căn chỉnh với nội dung con bên trên */
+      padding-left: calc(32px + var(--spacing-unit));
+      box-sizing: border-box;
+  }
+  .collapse-round-button {
+      background: none; border: none; color: var(--text-muted);
+      cursor: pointer; padding: calc(var(--spacing-unit)*0.5) 0; font-size: 0.8rem;
+      display: inline-flex; align-items: center; gap: calc(var(--spacing-unit)*0.5);
+      border-radius: var(--border-radius-small); transition: color 0.2s ease-out;
+  }
+  .collapse-round-button:hover { color: var(--text-primary); }
+  .collapse-round-button svg { font-size: 0.9rem; }
 
 
 /* --- AI Code Block, Review, Debug Styles --- */

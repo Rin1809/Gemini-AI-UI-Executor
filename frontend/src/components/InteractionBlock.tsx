@@ -5,13 +5,13 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import ExpandableOutput from './ExpandableOutput'; // Cần component này
-import { ConversationBlock, ExecutionResult, ReviewResult, DebugResult } from '../App'; // Import interfaces
+import ExpandableOutput from './ExpandableOutput';
+import { ConversationBlock, ExecutionResult, ReviewResult, DebugResult } from '../App'; // Đảm bảo import đúng các types
 import { toast } from 'react-toastify';
-import './CenterArea.css'; // Dùng chung CSS
+import './CenterArea.css';
 
 interface InteractionBlockProps {
-    block: ConversationBlock; // Giờ đã có isNew?
+    block: ConversationBlock;
     isBusy: boolean;
     onReview: (codeToReview: string) => void;
     onExecute: (codeToExecute: string) => void;
@@ -19,55 +19,116 @@ interface InteractionBlockProps {
     onApplyCorrectedCode: (code: string) => void;
     expandedOutputs: Record<string, { stdout: boolean; stderr: boolean }>;
     onToggleOutputExpand: (blockId: string, type: 'stdout' | 'stderr') => void;
-    // Bỏ isCollapsible và onToggleCollapse
+    'data-block-id'?: string; // Prop này nhận id từ CenterArea
 }
 
 // Helper format timestamp
-const formatTimestamp = (isoString: string) => {
+const formatTimestamp = (isoString: string | undefined): string => {
+    if (!isoString) return '';
     try {
         const date = new Date(isoString);
-        // Giữ định dạng HH:MM AM/PM
         return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
     } catch (e) {
-        return ''; // Trả về rỗng nếu timestamp không hợp lệ
+        console.error("Invalid timestamp:", isoString, e);
+        return '';
     }
 };
 
-// Markdown Components (nếu chưa có thì thêm vào)
+// Markdown Components
 const MarkdownComponents = {
     code({ node, inline, className, children, ...props }: any) {
       const match = /language-(\w+)/.exec(className || '');
       const codeString = String(children ?? '').replace(/\n$/, '');
       const handleCopyMdCode = () => { navigator.clipboard.writeText(codeString); toast.info("Copied!"); };
+
       return !inline && match ? (
         <div className="markdown-code-block">
             <div className="code-block-header">
                 <span>{match[1]}</span>
                 <button onClick={handleCopyMdCode} className="icon-button subtle small copy-button" title="Copy code"><FiCopy /></button>
              </div>
-            <SyntaxHighlighter style={vscDarkPlus as any} language={match[1]} PreTag="div" {...props} customStyle={{ margin: '0', borderRadius: '0 0 var(--border-radius-small) var(--border-radius-small)', fontSize: '0.8rem', backgroundColor: 'transparent' }} codeTagProps={{ style: { fontFamily: 'var(--code-font-family)' } }}>
+            <SyntaxHighlighter
+               style={vscDarkPlus as any}
+               language={match[1]}
+               PreTag="div"
+               {...props}
+               // Sử dụng customStyle thay vì style trực tiếp để tránh xung đột
+               customStyle={{ margin: '0', borderRadius: '0 0 var(--border-radius-small) var(--border-radius-small)', fontSize: '0.8rem', backgroundColor: 'transparent', padding: 'calc(var(--spacing-unit)*0.75) var(--spacing-unit)'}}
+               codeTagProps={{ style: { fontFamily: 'var(--code-font-family)', lineHeight: '1.4' }}}
+            >
                 {codeString}
             </SyntaxHighlighter>
         </div>
-      ) : ( <code className={`inline-code ${className || ''}`} {...props}>{children}</code> );
+      ) : (
+         <code className={`inline-code ${className || ''}`} {...props}>
+            {children}
+         </code>
+      );
     }
-    // Có thể thêm các component khác cho p, ul, ol, blockquote... nếu muốn tùy chỉnh thêm
 };
 
 
 const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
     block, isBusy, onReview, onExecute, onDebug, onApplyCorrectedCode,
-    expandedOutputs, onToggleOutputExpand
+    expandedOutputs, onToggleOutputExpand,
+    'data-block-id': dataBlockId // Nhận prop data-block-id
  }) => {
-  const { type, data, id, timestamp, isNew } = block; // Lấy isNew
-  const handleCopy = (text: string | null | undefined) => { if (typeof text === 'string') { navigator.clipboard.writeText(text); toast.info("Copied!"); } };
-  const handleDownload = (filename: string, text: string | null | undefined) => { if (typeof text === 'string') { const element = document.createElement("a"); const file = new Blob([text], {type: 'text/plain;charset=utf-8'}); element.href = URL.createObjectURL(file); element.download = filename; document.body.appendChild(element); element.click(); document.body.removeChild(element); } };
+  const { type, data, id, timestamp, isNew } = block;
+
+  const handleCopy = (text: string | null | undefined) => {
+     if (typeof text === 'string') {
+        navigator.clipboard.writeText(text).then(() => {
+           toast.info("Copied!");
+        }).catch(err => {
+           toast.error("Failed to copy!");
+           console.error("Clipboard copy failed:", err);
+        });
+     }
+  };
+
+  const handleDownload = (filename: string, text: string | null | undefined) => {
+     if (typeof text === 'string') {
+        try {
+            const element = document.createElement("a");
+            const file = new Blob([text], {type: 'text/plain;charset=utf-8'});
+            element.href = URL.createObjectURL(file);
+            element.download = filename;
+            document.body.appendChild(element); // Cần thiết cho Firefox
+            element.click();
+            document.body.removeChild(element); // Dọn dẹp
+            URL.revokeObjectURL(element.href); // Giải phóng bộ nhớ
+        } catch (err) {
+            toast.error("Failed to download file.");
+            console.error("File download failed:", err);
+        }
+     }
+  };
+
+    // Helper kiểm tra lỗi cho execution block
+    const hasErrorSignal = (execData: any): boolean => {
+        if (!execData) return false;
+        const hasStdErr = execData?.error?.trim();
+        const nonZeroReturn = execData?.return_code !== 0 && execData?.return_code !== undefined; // return_code có thể là 0
+        // Kiểm tra output có chứa từ khóa lỗi không, ngay cả khi return code = 0 và stderr rỗng
+        const stdoutErrorKeywords = ['lỗi', 'error', 'failed', 'không thể', 'cannot', 'unable', 'traceback', 'exception', 'not found', 'không tìm thấy', 'warning'];
+        const stdoutLooksLikeError = execData?.output?.trim() && stdoutErrorKeywords.some(kw => execData.output.toLowerCase().includes(kw));
+
+        return !!(nonZeroReturn || hasStdErr || stdoutLooksLikeError);
+    };
+
 
   const renderContent = () => {
-    if (!data && type !== 'loading' && type !== 'user') return <div className="error-inline">Error: Invalid block data for type '{type}'</div>;
+    // Thêm kiểm tra data tồn tại chặt chẽ hơn
+    if (data === undefined || data === null) {
+        // Cho phép loading và user không cần data
+        if (type !== 'loading' && type !== 'user') {
+             console.warn(`Invalid block data for type '${type}' (id: ${id}):`, data);
+             return <div className="error-inline">Error: Invalid block data received.</div>;
+        }
+    }
+
     switch (type) {
       case 'user':
-        // Chỉ render prompt text
         return <div className="prompt-text">{String(data ?? '')}</div>;
 
       case 'ai-code':
@@ -81,50 +142,65 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
                         <button onClick={() => handleDownload("script.py", codeStr)} className="icon-button subtle small" title="Download"><FiDownload /></button>
                     </div>
                 </div>
-                <SyntaxHighlighter language="python" style={vscDarkPlus as any} className="main-code-block" codeTagProps={{ style: { fontFamily: 'var(--code-font-family)' } }}>
+                <SyntaxHighlighter
+                    language="python"
+                    style={vscDarkPlus as any}
+                    className="main-code-block"
+                    // Sử dụng customStyle thay vì style để tránh ghi đè
+                    customStyle={{ margin: '0', padding: 'var(--spacing-unit) calc(var(--spacing-unit)*1.5)', borderRadius: '0', fontSize: '0.875rem', backgroundColor: 'transparent', lineHeight: '1.45' }}
+                    codeTagProps={{ style: { fontFamily: 'var(--code-font-family)' } }}
+                    PreTag="pre" // Đảm bảo là thẻ pre
+                 >
                     {codeStr}
                 </SyntaxHighlighter>
              </div>
          ) : <p className="error-inline">Empty code block received.</p>;
 
       case 'review':
+        const reviewData = data as ReviewResult; // Ép kiểu để kiểm tra
         return (
             <div className="markdown-content review-content">
-                {data?.error ? (
-                    <p className="error-inline">{data.error}</p>
+                {reviewData?.error ? (
+                    <p className="error-inline">{reviewData.error}</p>
                  ) : (
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
-                        {data?.review || ''}
+                        {reviewData?.review || ''}
                     </ReactMarkdown>
                  )}
             </div>
         );
 
-      case 'execution':
-        const execData = data as (ExecutionResult & { codeThatFailed?: string });
-        const currentOutputState = expandedOutputs[id] || { stdout: false, stderr: false };
-        const hasError = execData?.return_code !== 0 || execData?.error?.trim();
-        const stdoutLooksError = hasErrorSignal(execData);
-        return (
-          <div className={`execution-content ${hasError || stdoutLooksError ? 'error' : ''}`}>
-            {execData?.message && !execData.message.startsWith("Thực thi") && <p className="exec-message">{execData.message}</p>}
-            <ExpandableOutput
-              text={execData?.output}
-              label="stdout"
-              isExpanded={currentOutputState.stdout}
-              onToggleExpand={() => onToggleOutputExpand(id, 'stdout')}
-              className="stdout-section"
-            />
-            <ExpandableOutput
-              text={execData?.error}
-              label="stderr"
-              isExpanded={currentOutputState.stderr}
-              onToggleExpand={() => onToggleOutputExpand(id, 'stderr')}
-              className="stderr-section"
-            />
-            <p className="return-code">Return Code: {execData?.return_code ?? 'N/A'}</p>
-          </div>
-        );
+        case 'execution':
+            const execData = data as (ExecutionResult & { codeThatFailed?: string });
+            const currentOutputState = expandedOutputs[id] || { stdout: false, stderr: false };
+            const hasErr = hasErrorSignal(execData); // Gọi helper
+
+            return (
+              <div className={`execution-content ${hasErr ? 'error' : ''}`}>
+                 {/* Chỉ hiển thị message nếu nó khác message mặc định */}
+                {execData?.message && !/^(Thực thi thành công|Thực thi hoàn tất với lỗi)\.$/.test(execData.message) && (
+                    <p className="exec-message">{execData.message}</p>
+                )}
+                <ExpandableOutput
+                  text={execData?.output}
+                  label="stdout"
+                  isExpanded={currentOutputState.stdout}
+                  onToggleExpand={() => onToggleOutputExpand(id, 'stdout')}
+                  className="stdout-section"
+                />
+                <ExpandableOutput
+                  text={execData?.error}
+                  label="stderr"
+                  isExpanded={currentOutputState.stderr}
+                  onToggleExpand={() => onToggleOutputExpand(id, 'stderr')}
+                  className="stderr-section"
+                />
+                 {/* Luôn hiển thị return code */}
+                <p className="return-code">
+                    Return Code: {execData?.return_code !== undefined ? execData.return_code : 'N/A'}
+                </p>
+              </div>
+            );
 
       case 'debug':
         const debugData = data as DebugResult;
@@ -148,7 +224,14 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
                                 <span>python (corrected)</span>
                                 <button onClick={() => handleCopy(correctedCode)} className="icon-button subtle small" title="Copy"><FiCopy /></button>
                              </div>
-                            <SyntaxHighlighter language="python" style={vscDarkPlus as any} className="main-code-block corrected-code" codeTagProps={{ style: { fontFamily: 'var(--code-font-family)' } }}>
+                             <SyntaxHighlighter
+                                language="python"
+                                style={vscDarkPlus as any}
+                                className="main-code-block corrected-code"
+                                customStyle={{ margin: '0', padding: 'var(--spacing-unit) calc(var(--spacing-unit)*1.5)', borderRadius: '0', fontSize: '0.875rem', backgroundColor: 'transparent', lineHeight: '1.45' }}
+                                codeTagProps={{ style: { fontFamily: 'var(--code-font-family)' } }}
+                                PreTag="pre"
+                             >
                                 {correctedCode}
                             </SyntaxHighlighter>
                         </div>
@@ -161,20 +244,14 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
          return <div className="loading-content"><FiLoader className="spinner" /> <p>{String(data ?? 'Loading...')}</p></div>;
 
       case 'error':
+          // Sử dụng error-inline style đã có
           return <div className="error-inline">{String(data ?? 'An unknown error occurred.')}</div>;
 
-      default: return <div className="unknown-block error-inline">Unknown block type: {type}</div>;
+      default:
+          console.error("Unknown block type encountered:", type, block);
+          return <div className="unknown-block error-inline">Error: Unknown block type '{type}'</div>;
     }
   };
-
-  // Helper kiểm tra lỗi cho execution block
-  const hasErrorSignal = (execData: any): boolean => {
-    if (!execData) return false;
-    const hasStdErr = execData?.error?.trim();
-    const nonZeroReturn = execData?.return_code !== 0;
-    const stdoutLooksLikeError = execData?.output?.trim() && ['lỗi', 'error', 'failed', 'không thể', 'cannot', 'unable', 'traceback', 'exception', 'not found', 'không tìm thấy'].some(kw => execData.output.toLowerCase().includes(kw));
-    return !!(nonZeroReturn || hasStdErr || stdoutLooksLikeError);
- }
 
 
   const renderIcon = () => {
@@ -182,7 +259,9 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
            case 'user': return <span className="block-icon user-icon"><FiUser/></span>;
            case 'ai-code': return <span className="block-icon ai-icon"><FiCode/></span>;
            case 'review': return <span className="block-icon review-icon"><FiEye/></span>;
-           case 'execution': const hasErr = hasErrorSignal(data); return <span className={`block-icon execution-icon ${hasErr ? 'error' : 'success'}`}>{hasErr ? <FiAlertTriangle/> : <FiCheckCircle/>}</span>;
+           case 'execution':
+                 const hasErr = hasErrorSignal(data); // Gọi lại helper
+                 return <span className={`block-icon execution-icon ${hasErr ? 'error' : 'success'}`}>{hasErr ? <FiAlertTriangle/> : <FiCheckCircle/>}</span>;
            case 'debug': return <span className="block-icon debug-icon"><FiTool/></span>;
            case 'loading': return <span className="block-icon loading-icon"><FiLoader className="spinner"/></span>;
            case 'error': return <span className="block-icon error-icon"><FiAlertTriangle/></span>;
@@ -191,25 +270,39 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
    };
 
    const renderActions = () => {
+        // Chỉ render actions cho các block có thể có action
         if (type === 'ai-code' && data) {
-            return (<> <button onClick={() => onReview(data)} disabled={isBusy} title="Review Code"><FiEye /> Review</button> <button onClick={() => onExecute(data)} disabled={isBusy} className="execute" title="Execute Code"><FiPlay /> Execute</button> </>);
+            return (
+                 <>
+                     <button onClick={() => onReview(data)} disabled={isBusy} title="Review Code"><FiEye /> Review</button>
+                     <button onClick={() => onExecute(data)} disabled={isBusy} className="execute" title="Execute Code"><FiPlay /> Execute</button>
+                 </>
+             );
         }
         if (type === 'execution' && hasErrorSignal(data)) {
-            const codeThatFailed = data?.codeThatFailed;
+            const codeThatFailed = (data as ExecutionResult & { codeThatFailed?: string })?.codeThatFailed;
             if (codeThatFailed) {
                 return <button onClick={() => onDebug(codeThatFailed, data as ExecutionResult)} disabled={isBusy} className="debug" title="Debug Error"><FiTool /> Debug</button>;
             }
         }
-        if (type === 'debug' && data?.corrected_code) {
-            return <button onClick={() => onApplyCorrectedCode(data.corrected_code)} disabled={isBusy} className="apply-code" title="Apply Corrected Code">Use This Code</button>;
+        if (type === 'debug' && (data as DebugResult)?.corrected_code) {
+            // Đảm bảo data.corrected_code không phải là null/undefined trước khi truyền
+             const codeToApply = (data as DebugResult).corrected_code;
+             if (codeToApply) {
+                return <button onClick={() => onApplyCorrectedCode(codeToApply)} disabled={isBusy} className="apply-code" title="Apply Corrected Code">Use This Code</button>;
+             }
         }
+        // Không render gì cho user, loading, error, review
         return null;
    };
 
-  return (
-    <div className={`interaction-block block-type-${type} ${isNew ? 'newly-added' : ''}`}>
+   // Render block chính
+   return (
+    // >>> Thêm data-block-id vào div ngoài cùng <<<
+    <div className={`interaction-block block-type-${type} ${isNew ? 'newly-added' : ''}`} data-block-id={dataBlockId || id}>
       <div className="block-avatar"> {renderIcon()} </div>
       <div className="block-main-content">
+         {/* Header chỉ cho user block */}
          {type === 'user' && (
             <div className="block-header user-header">
                <span className="user-header-title">Prompt</span>
@@ -217,10 +310,8 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
             </div>
          )}
         <div className="block-content-area">{renderContent()}</div>
-        {/* Chỉ render action nếu không phải là block user hoặc loading */}
-        {type !== 'user' && type !== 'loading' && (
-             <div className="block-actions-area">{renderActions()}</div>
-        )}
+        {/* Actions chỉ render cho các loại block phù hợp */}
+        <div className="block-actions-area">{renderActions()}</div>
       </div>
     </div>
    );

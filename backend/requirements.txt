@@ -5,4 +5,3 @@ python-dotenv
 requests 
 google.genai
 genai
-psutil

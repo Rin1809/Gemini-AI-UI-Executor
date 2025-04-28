@@ -1,5 +1,5 @@
 /* frontend/src/components/UserInput.css */
-.user-input-container { padding: var(--spacing-unit) calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2); background-color: var(--bg-primary); border-top: 1px solid var(--border-color); margin-top: auto; width: 100%; flex-shrink: 0; }
+.user-input-container { padding: var(--spacing-unit) calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2); background-color: var(--bg-primary); border-top: 1px solid #131314; margin-top: auto; width: 100%; flex-shrink: 0; }
 .user-input-area { display: flex; align-items: flex-end; background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: var(--spacing-unit); width: 100%; max-width: 850px; margin-left: auto; margin-right: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.2); position: relative; }
 .user-input-area textarea { flex-grow: 1; background-color: transparent; border: none; padding: calc(var(--spacing-unit)*0.5) var(--spacing-unit); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; line-height: 1.6; max-height: 250px; min-height: calc(1.6rem + var(--spacing-unit) + 2px); resize: none; overflow-y: auto; }
 .user-input-area textarea:focus { outline: none; box-shadow: none; }

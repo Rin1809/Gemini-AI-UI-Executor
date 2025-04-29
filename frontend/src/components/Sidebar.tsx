@@ -2,7 +2,7 @@
 import React, { ChangeEvent } from 'react';
 import { FiX } from 'react-icons/fi'; // Icon đóng sidebar
 import SettingsPanel from './SettingsPanel';
-import { ModelConfig } from '../App'; // Import type ModelConfig
+import { ModelConfig } from '../App';
 import './Sidebar.css';
 
 // --- Props Interface ---

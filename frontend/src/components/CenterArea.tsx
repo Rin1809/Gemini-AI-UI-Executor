@@ -4,7 +4,6 @@ import { FiSettings, FiChevronUp } from 'react-icons/fi';
 import UserInput from './UserInput';
 import InteractionBlock from './InteractionBlock';
 import CollapsedInteractionBlock from './CollapsedInteractionBlock';
-// Import các kiểu dữ liệu cần thiết
 import { ConversationBlock, ExecutionResult, ReviewResult, DebugResult, InstallationResult, ExplainResult } from '../App';
 import './CenterArea.css';
 

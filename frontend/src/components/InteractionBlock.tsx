@@ -1,13 +1,11 @@
 // frontend/src/components/InteractionBlock.tsx
 import React from 'react';
-// Import các icon cần thiết
 import { FiUser, FiCode, FiPlay, FiEye, FiAlertTriangle, FiTool, FiCheckCircle, FiLoader, FiCopy, FiDownload, FiTerminal, FiHelpCircle } from 'react-icons/fi';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import ExpandableOutput from './ExpandableOutput';
-// Import các kiểu dữ liệu, bao gồm cả ExplainResult (MỚI)
 import { ConversationBlock, ExecutionResult, ReviewResult, DebugResult, InstallationResult, ExplainResult } from '../App';
 import { toast } from 'react-toastify';
 import './CenterArea.css';

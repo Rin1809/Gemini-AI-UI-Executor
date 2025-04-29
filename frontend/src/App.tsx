@@ -5,8 +5,6 @@ import Sidebar from './components/Sidebar';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
-// Bỏ FiHelpCircle ở đây nếu đã import trong InteractionBlock
-// import { FiHelpCircle } from 'react-icons/fi';
 
 // --- Định nghĩa kiểu dữ liệu (Interfaces) ---
 export interface ExecutionResult {
@@ -563,14 +561,15 @@ function App() {
   // Cập nhật isBusy để bao gồm isExplaining (MỚI)
   const isBusy = isLoading || isExecuting || isReviewing || isDebugging || isInstalling || isExplaining;
 
-  const displayedConversation = conversation.slice(-MAX_DISPLAYED_BLOCKS);
+  // *A const displayedConversation = conversation.slice(-MAX_DISPLAYED_BLOCKS); // ---> cái này là lỗi aka tính năng giới hạn hiển thị, dài quá thì cho outblock, nếu muốn thì xóa cmt là đc
 
   return (
     <div className="main-container">
       <ToastContainer theme="dark" position="bottom-right" autoClose={4000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
 
       <CenterArea
-        conversation={displayedConversation}
+       // conversation={displayedConversation} // --> *A
+        conversation={conversation}
         isLoading={isLoading} // Vẫn truyền isLoading riêng cho UserInput
         isBusy={isBusy}     // Truyền isBusy chung cho các nút trong InteractionBlock
         prompt={prompt}

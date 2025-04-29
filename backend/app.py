@@ -11,10 +11,10 @@ import codecs
 import re
 import shlex
 import ctypes # Dùng cho việc kiểm tra quyền admin trên Windows
-import traceback # Để ghi log lỗi chi tiết
-import json # Thêm import json
+import traceback 
+import json 
 
-# Tải biến môi trường từ file .env ở thư mục gốc
+
 load_dotenv(dotenv_path='../.env')
 
 app = Flask(__name__)
@@ -24,8 +24,8 @@ CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 # --- Cấu hình Gemini ---
 # Lấy API key mặc định từ file .env
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-# Việc cấu hình API key chủ yếu được xử lý trong hàm generate_response_from_gemini
-# để hỗ trợ việc thay đổi key động từ giao diện người dùng.
+# Việc cấu hình API key chủ yếu được xử lý trong hàm generate_response_from_gemini để hỗ trợ việc thay đổi key động từ ui.
+
 
 # --- Ánh xạ cài đặt an toàn (KHÔNG THAY ĐỔI) ---
 SAFETY_SETTINGS_MAP = {
@@ -67,50 +67,7 @@ Sử dụng try-except để xử lý lỗi cơ bản nếu có thể. In thông
 Ví dụ yêu cầu: Mở Control Panel
 Mã trả về (ví dụ cho Windows):
 ```python
-import subprocess
-import platform
-
-try:
-    system = platform.system()
-    if system == "Windows":
-        try:
-            subprocess.run(["control"], check=True, shell=True) # shell=True cần thiết cho lệnh này
-            print("Đã thử mở Control Panel.")
-        except FileNotFoundError:
-            print("Lệnh 'control' không tìm thấy. Có thể hệ thống Windows bị lỗi.")
-        except Exception as e_win:
-            print(f"Lỗi khi mở Control Panel trên Windows: {{e_win}}")
-    elif system == "Darwin": # macOS
-        try:
-            subprocess.run(["open", "-a", "System Settings"], check=True) # System Settings trên Ventura+
-            print("Đã thử mở System Settings.")
-        except FileNotFoundError:
-             try:
-                 subprocess.run(["open", "-a", "System Preferences"], check=True) # System Preferences cũ hơn
-                 print("Đã thử mở System Preferences.")
-             except FileNotFoundError:
-                 print("Lệnh 'open' hoặc System Settings/Preferences không tìm thấy.")
-             except Exception as e_mac_pref:
-                 print(f"Lỗi khi mở System Preferences trên macOS: {{e_mac_pref}}")
-        except Exception as e_mac:
-            print(f"Lỗi khi mở System Settings trên macOS: {{e_mac}}")
-    elif system == "Linux":
-        # Thử các lệnh phổ biến
-        commands_to_try = ["gnome-control-center", "mate-control-center", "cinnamon-settings", "systemsettings5", "xfce4-settings-manager"]
-        opened = False
-        last_error = None
-        for cmd in commands_to_try:
-             try:
-                 subprocess.run([cmd], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                 print(f"Đã thử mở control center bằng lệnh '{{cmd}}'.")
-                 opened = True
-                 break
-             except FileNotFoundError:
-                 last_error = f"Lệnh '{{cmd}}' không tìm thấy."
-                 continue # Thử lệnh tiếp theo
-             except Exception as e_linux:
-                 last_error = f"Lỗi khi chạy '{{cmd}}': {{e_linux}}"
-                 continue # Thử lệnh tiếp theo
+#.... logic
         if not opened:
             print(f"Không thể mở control center bằng các lệnh phổ biến. Lỗi cuối cùng: {{last_error if last_error else 'Không rõ'}}")
     else:
@@ -124,29 +81,8 @@ except Exception as e:
 Ví dụ yêu cầu: Tạo thư mục 'temp_folder' trên Desktop
 Mã trả về (ví dụ cho Windows):
 ```python
-import os
-import platform
 
-try:
-    system = platform.system()
-    if system == "Windows":
-        desktop_path = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
-    elif system == "Darwin": # macOS
-        desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
-    elif system == "Linux":
-        desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
-        # Kiểm tra xem thư mục Desktop có tồn tại không, nếu không thì dùng thư mục home
-        if not os.path.isdir(desktop_path):
-             print(f"Không tìm thấy thư mục Desktop, sẽ tạo trong thư mục Home.")
-             desktop_path = os.path.expanduser("~")
-    else:
-         print(f"Hệ điều hành {{system}} không được hỗ trợ tự động. Tạo trong thư mục hiện tại.")
-         desktop_path = "." # Thư mục hiện tại
-
-    temp_dir = os.path.join(desktop_path, 'temp_folder')
-
-    # Tạo thư mục nếu chưa tồn tại
-    os.makedirs(temp_dir, exist_ok=True)
+#....logic code
     print(f"Đã tạo hoặc đã tồn tại thư mục: {{temp_dir}}")
 except Exception as e:
     print(f"Lỗi khi tạo thư mục: {{e}}")

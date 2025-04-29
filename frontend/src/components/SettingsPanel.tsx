@@ -1,6 +1,6 @@
 // frontend/src/components/SettingsPanel.tsx
 import React, { ChangeEvent } from 'react';
-import { FiSave, FiSettings, FiKey, FiAlertTriangle } from 'react-icons/fi'; // Import icons cần thiết
+import { FiSave, FiSettings, FiKey, FiAlertTriangle } from 'react-icons/fi'; 
 import './SettingsPanel.css';
 
 // --- Props Interface ---

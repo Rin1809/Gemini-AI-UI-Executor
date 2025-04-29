@@ -1,7 +1,7 @@
 // frontend/src/components/CollapsedInteractionBlock.tsx
 import React from 'react';
 import { FiChevronDown } from 'react-icons/fi';
-import { PiSparkleFill } from "react-icons/pi"; // Icon user prompt
+import { PiSparkleFill } from "react-icons/pi"; 
 import './CenterArea.css';
 
 // --- Props Interface ---

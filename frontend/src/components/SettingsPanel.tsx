@@ -215,7 +215,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
               </label>
            </div>
            <p className="admin-warning-note">
-               Cẩn trọng! Chỉ bật nếu bạn hiểu rõ mã nguồn sẽ được thực thi. Backend cũng cần được chạy với quyền tương ứng.
+               Cẩn trọng! Chỉ bật nếu hiểu rõ mã nguồn sẽ được thực thi. Backend cũng cần được chạy với quyền tương ứng.
            </p>
         </div>
       </div>

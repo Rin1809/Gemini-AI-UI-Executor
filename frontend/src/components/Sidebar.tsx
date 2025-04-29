@@ -47,10 +47,10 @@ const Sidebar: React.FC<SidebarProps> = ({
          aria-hidden={!isOpen} // Hỗ trợ accessibility
        ></div>
        {/* Container chính của sidebar */}
-      <aside className={`sidebar-container ${isOpen ? 'open' : ''}`} aria-label="Sidebar cài đặt thực thi">
+      <aside className={`sidebar-container ${isOpen ? 'open' : ''}`} aria-label="Sidebar Settingss%">
         {/* Header của sidebar */}
         <div className="sidebar-header">
-          <h3>Cài đặt Thực thi</h3>
+          <h3>ᓚᘏᗢ | Run Setting</h3>
           {/* Nút đóng sidebar */}
           <button onClick={onClose} className="icon-button subtle close-sidebar-button" title="Đóng Cài đặt" aria-label="Đóng cài đặt">
             <FiX />
@@ -63,7 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             modelConfig={modelConfig}
             onConfigChange={onConfigChange}
             onSaveSettings={onSaveSettings}
-            isDisabled={isBusy}
+            isDisabled={isBusy} // Sử dụng isBusy đã cập nhật
             // Truyền các props mới liên quan đến admin và API key
             runAsAdmin={runAsAdmin}
             uiApiKey={uiApiKey}

@@ -12,6 +12,7 @@ import re
 import shlex
 import ctypes # Dùng cho việc kiểm tra quyền admin trên Windows
 import traceback # Để ghi log lỗi chi tiết
+import json # Thêm import json
 
 # Tải biến môi trường từ file .env ở thư mục gốc
 load_dotenv(dotenv_path='../.env')
@@ -66,26 +67,86 @@ Sử dụng try-except để xử lý lỗi cơ bản nếu có thể. In thông
 Ví dụ yêu cầu: Mở Control Panel
 Mã trả về (ví dụ cho Windows):
 ```python
+import subprocess
+import platform
 
-# Code xử lý logic...
-            print("Đã thử mở control center.")
+try:
+    system = platform.system()
+    if system == "Windows":
+        try:
+            subprocess.run(["control"], check=True, shell=True) # shell=True cần thiết cho lệnh này
+            print("Đã thử mở Control Panel.")
         except FileNotFoundError:
-             print("Lệnh 'gnome-control-center' không tìm thấy. Hãy mở cài đặt hệ thống thủ công.")
-        except Exception as e_linux:
-             print(f"Lỗi khi mở control center trên Linux: {{e_linux}}")
+            print("Lệnh 'control' không tìm thấy. Có thể hệ thống Windows bị lỗi.")
+        except Exception as e_win:
+            print(f"Lỗi khi mở Control Panel trên Windows: {{e_win}}")
+    elif system == "Darwin": # macOS
+        try:
+            subprocess.run(["open", "-a", "System Settings"], check=True) # System Settings trên Ventura+
+            print("Đã thử mở System Settings.")
+        except FileNotFoundError:
+             try:
+                 subprocess.run(["open", "-a", "System Preferences"], check=True) # System Preferences cũ hơn
+                 print("Đã thử mở System Preferences.")
+             except FileNotFoundError:
+                 print("Lệnh 'open' hoặc System Settings/Preferences không tìm thấy.")
+             except Exception as e_mac_pref:
+                 print(f"Lỗi khi mở System Preferences trên macOS: {{e_mac_pref}}")
+        except Exception as e_mac:
+            print(f"Lỗi khi mở System Settings trên macOS: {{e_mac}}")
+    elif system == "Linux":
+        # Thử các lệnh phổ biến
+        commands_to_try = ["gnome-control-center", "mate-control-center", "cinnamon-settings", "systemsettings5", "xfce4-settings-manager"]
+        opened = False
+        last_error = None
+        for cmd in commands_to_try:
+             try:
+                 subprocess.run([cmd], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                 print(f"Đã thử mở control center bằng lệnh '{{cmd}}'.")
+                 opened = True
+                 break
+             except FileNotFoundError:
+                 last_error = f"Lệnh '{{cmd}}' không tìm thấy."
+                 continue # Thử lệnh tiếp theo
+             except Exception as e_linux:
+                 last_error = f"Lỗi khi chạy '{{cmd}}': {{e_linux}}"
+                 continue # Thử lệnh tiếp theo
+        if not opened:
+            print(f"Không thể mở control center bằng các lệnh phổ biến. Lỗi cuối cùng: {{last_error if last_error else 'Không rõ'}}")
+    else:
+        print(f"Hệ điều hành {{system}} không được hỗ trợ tự động mở cài đặt.")
 
-except FileNotFoundError:
-     print(f"Lỗi: Lệnh không tìm thấy trên hệ thống này.")
 except Exception as e:
-     print(f"Lỗi khi mở Control Panel/System Settings: {{e}}")
+     print(f"Lỗi không xác định khi thực thi: {{e}}")
 
 ```
 
 Ví dụ yêu cầu: Tạo thư mục 'temp_folder' trên Desktop
 Mã trả về (ví dụ cho Windows):
 ```python
+import os
+import platform
 
-# Code xử lý logic...
+try:
+    system = platform.system()
+    if system == "Windows":
+        desktop_path = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+    elif system == "Darwin": # macOS
+        desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+    elif system == "Linux":
+        desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+        # Kiểm tra xem thư mục Desktop có tồn tại không, nếu không thì dùng thư mục home
+        if not os.path.isdir(desktop_path):
+             print(f"Không tìm thấy thư mục Desktop, sẽ tạo trong thư mục Home.")
+             desktop_path = os.path.expanduser("~")
+    else:
+         print(f"Hệ điều hành {{system}} không được hỗ trợ tự động. Tạo trong thư mục hiện tại.")
+         desktop_path = "." # Thư mục hiện tại
+
+    temp_dir = os.path.join(desktop_path, 'temp_folder')
+
+    # Tạo thư mục nếu chưa tồn tại
+    os.makedirs(temp_dir, exist_ok=True)
     print(f"Đã tạo hoặc đã tồn tại thư mục: {{temp_dir}}")
 except Exception as e:
     print(f"Lỗi khi tạo thư mục: {{e}}")
@@ -160,6 +221,49 @@ d.  **Sửa lỗi Code:** Nếu lỗi có thể sửa trực tiếp trong mã Py
 """
     return prompt
 
+# Hàm tạo prompt để yêu cầu Gemini giải thích (MỚI)
+def create_explain_prompt(content_to_explain, context):
+    prompt_header = "Bạn là một trợ lý AI giỏi giải thích các khái niệm kỹ thuật một cách đơn giản, dễ hiểu cho người dùng không chuyên."
+    prompt_instruction = "\n\n**Yêu cầu:** Giải thích nội dung sau đây bằng tiếng Việt, sử dụng Markdown, tập trung vào ý nghĩa chính và những điều người dùng cần biết. Giữ cho giải thích ngắn gọn và rõ ràng. Bắt đầu trực tiếp bằng nội dung giải thích, không thêm lời dẫn."
+    context_description = ""
+
+    # Làm sạch content nếu là JSON string (loại bỏ các ký tự điều khiển không cần thiết)
+    try:
+        if isinstance(content_to_explain, str) and content_to_explain.strip().startswith('{') and content_to_explain.strip().endswith('}'):
+             parsed_json = json.loads(content_to_explain)
+             content_to_explain_formatted = json.dumps(parsed_json, ensure_ascii=False, indent=2) # Định dạng lại cho dễ đọc
+        else:
+             content_to_explain_formatted = str(content_to_explain) # Đảm bảo là string
+    except json.JSONDecodeError:
+         content_to_explain_formatted = str(content_to_explain) # Giữ nguyên nếu không phải JSON hợp lệ
+
+    if context == 'python_code':
+        context_description = f"Đây là một đoạn mã Python:\n```python\n{content_to_explain_formatted}\n```"
+        prompt_instruction = "\n\n**Yêu cầu:** Giải thích đoạn mã Python này làm gì, mục đích chính của nó là gì, và tóm tắt các bước thực hiện chính (nếu có). Trả lời bằng tiếng Việt, sử dụng Markdown. Bắt đầu trực tiếp bằng nội dung giải thích."
+    elif context == 'execution_result':
+        context_description = f"Đây là kết quả sau khi thực thi một đoạn mã:\n```json\n{content_to_explain_formatted}\n```"
+        prompt_instruction = "\n\n**Yêu cầu:** Phân tích kết quả thực thi này (stdout, stderr, mã trả về). Cho biết lệnh có vẻ đã thành công hay thất bại và giải thích ngắn gọn tại sao dựa trên kết quả. Lưu ý cả các cảnh báo (warning) nếu có. Trả lời bằng tiếng Việt, sử dụng Markdown. Bắt đầu trực tiếp bằng nội dung giải thích."
+    elif context == 'review_text':
+        context_description = f"Đây là một bài đánh giá code:\n```markdown\n{content_to_explain_formatted}\n```"
+        prompt_instruction = "\n\n**Yêu cầu:** Tóm tắt và giải thích những điểm chính của bài đánh giá code này bằng ngôn ngữ đơn giản hơn. Trả lời bằng tiếng Việt, sử dụng Markdown. Bắt đầu trực tiếp bằng nội dung giải thích."
+    elif context == 'debug_result':
+        context_description = f"Đây là kết quả từ việc gỡ lỗi một đoạn mã:\n```json\n{content_to_explain_formatted}\n```"
+        prompt_instruction = "\n\n**Yêu cầu:** Giải thích kết quả gỡ lỗi này, bao gồm nguyên nhân lỗi được xác định, ý nghĩa của đề xuất cài đặt package (nếu có), và mục đích của đoạn code đã sửa (nếu có). Trả lời bằng tiếng Việt, sử dụng Markdown. Bắt đầu trực tiếp bằng nội dung giải thích."
+    elif context == 'error_message':
+        context_description = f"Đây là một thông báo lỗi:\n```\n{content_to_explain_formatted}\n```"
+        prompt_instruction = "\n\n**Yêu cầu:** Giải thích thông báo lỗi này có nghĩa là gì, nguyên nhân phổ biến có thể gây ra nó, và gợi ý hướng khắc phục (nếu có thể). Trả lời bằng tiếng Việt, sử dụng Markdown. Bắt đầu trực tiếp bằng nội dung giải thích."
+    elif context == 'installation_result':
+        context_description = f"Đây là kết quả sau khi cài đặt một package Python:\n```json\n{content_to_explain_formatted}\n```"
+        prompt_instruction = "\n\n**Yêu cầu:** Phân tích kết quả cài đặt package này. Cho biết việc cài đặt thành công hay thất bại, và giải thích ngắn gọn output/error từ pip. Trả lời bằng tiếng Việt, sử dụng Markdown. Bắt đầu trực tiếp bằng nội dung giải thích."
+    else: # Ngữ cảnh mặc định hoặc không xác định
+         context_description = f"Nội dung cần giải thích:\n```\n{content_to_explain_formatted}\n```"
+         # Giữ nguyên prompt_instruction mặc định
+
+    full_prompt = f"{prompt_header}{context_description}{prompt_instruction}"
+    # print(f"--- Explain Prompt ---\n{full_prompt}\n----------------------") # Bỏ comment để debug prompt
+    return full_prompt
+
+
 # Hàm gọi Gemini API, xử lý việc chọn API Key và các tham số
 def generate_response_from_gemini(full_prompt, model_config, is_for_review_or_debug=False):
     global GOOGLE_API_KEY # Dùng key mặc định từ .env
@@ -200,7 +304,7 @@ def generate_response_from_gemini(full_prompt, model_config, is_for_review_or_de
         if not model_name: model_name = 'gemini-1.5-flash' # Đảm bảo có model name mặc định
 
         temperature = model_config.get('temperature', 0.7)
-        top_p = model_config.get('top_p', 1.0) # Sửa lại giá trị mặc định của top_p
+        top_p = model_config.get('top_p', 0.95) # Sửa lại giá trị mặc định của top_p
         top_k = model_config.get('top_k', 40)
         safety_setting_key = model_config.get('safety_setting', 'BLOCK_MEDIUM_AND_ABOVE')
         safety_settings = SAFETY_SETTINGS_MAP.get(safety_setting_key, SAFETY_SETTINGS_MAP['BLOCK_MEDIUM_AND_ABOVE'])
@@ -230,7 +334,8 @@ def generate_response_from_gemini(full_prompt, model_config, is_for_review_or_de
 
         raw_text = response.text.strip()
 
-        # Dọn dẹp phần dẫn nhập không cần thiết trong output review/debug
+        # Dọn dẹp phần dẫn nhập không cần thiết trong output review/debug/explain
+        # Áp dụng cả cho giải thích
         if is_for_review_or_debug and raw_text:
              lines = raw_text.splitlines()
              cleaned_lines = []
@@ -239,6 +344,7 @@ def generate_response_from_gemini(full_prompt, model_config, is_for_review_or_de
                  "đây là đánh giá", "here is the review", "phân tích code",
                  "review:", "analysis:", "đây là phân tích", "here is the analysis",
                  "giải thích và đề xuất:", "phân tích và đề xuất:",
+                 "đây là giải thích", "here is the explanation", "giải thích:", "explanation:",
                  "[thinking", "[processing", "```text" # Loại bỏ cả các tag thinking/processing nếu có
              )
              first_meaningful_line = False
@@ -271,7 +377,10 @@ def generate_response_from_gemini(full_prompt, model_config, is_for_review_or_de
         elif "Deadline Exceeded" in error_message or "timeout" in error_message.lower():
              return f"Lỗi mạng: Yêu cầu tới Gemini API bị quá thời gian (timeout). Vui lòng thử lại."
         elif "SAFETY" in error_message.upper(): # Lỗi liên quan đến chính sách an toàn
-             return f"Lỗi: Yêu cầu hoặc phản hồi có thể vi phạm chính sách an toàn của Gemini. ({error_message})"
+             # Cố gắng lấy thông tin chi tiết hơn nếu có
+             details = re.search(r"Finish Reason: (\w+).+Safety Ratings: \[(.+?)]", error_message, re.DOTALL)
+             reason_detail = f" (Reason: {details.group(1)}, Ratings: {details.group(2)})" if details else ""
+             return f"Lỗi: Yêu cầu hoặc phản hồi có thể vi phạm chính sách an toàn của Gemini.{reason_detail} ({error_message[:100]}...)" # Giới hạn độ dài lỗi gốc
         return f"Lỗi máy chủ khi gọi Gemini: {error_message}"
 
     finally:
@@ -320,28 +429,24 @@ def handle_generate():
         return jsonify({"error": "Vui lòng nhập yêu cầu."}), 400
 
     full_prompt = create_prompt(user_input)
-    # Truyền model_config (có thể chứa api_key) vào hàm gọi Gemini
+    # is_for_review_or_debug=False vì đây là sinh code
     raw_response = generate_response_from_gemini(full_prompt, model_config.copy(), is_for_review_or_debug=False)
 
     # Kiểm tra kết quả trả về từ Gemini
     if raw_response and not raw_response.startswith("Lỗi"):
         generated_code = extract_python_code(raw_response)
-        # Kiểm tra xem code có vẻ hợp lệ không
         if not generated_code.strip() or ("```" in generated_code and not generated_code.startswith("import ") and not generated_code.startswith("#")):
              print(f"Cảnh báo: Trích xuất code có thể không thành công. Kết quả: {generated_code}")
-
-        # Phát hiện các từ khóa tiềm ẩn nguy hiểm (đơn giản)
         potentially_dangerous = ["rm ", "del ", "format ", "shutdown ", "reboot ", "sys.exit(", "rmdir"]
         code_lower = generated_code.lower()
         detected_dangerous = [kw for kw in potentially_dangerous if kw in code_lower]
         if detected_dangerous:
             print(f"Cảnh báo: Mã tạo ra chứa từ khóa có thể nguy hiểm: {detected_dangerous}")
-
         return jsonify({"code": generated_code})
-    elif raw_response: # Có lỗi trả về từ Gemini (bắt đầu bằng "Lỗi:")
+    elif raw_response:
         status_code = 400 if ("Lỗi cấu hình" in raw_response or "Lỗi: Phản hồi bị chặn" in raw_response) else 500
         return jsonify({"error": raw_response}), status_code
-    else: # Trường hợp lỗi không xác định khác
+    else:
         return jsonify({"error": "Không thể tạo mã hoặc có lỗi không xác định xảy ra."}), 500
 
 # Endpoint để đánh giá code
@@ -349,18 +454,17 @@ def handle_generate():
 def handle_review():
     data = request.get_json()
     code_to_review = data.get('code')
-    model_config = data.get('model_config', {}) # Đã bao gồm cả api_key (nếu có)
-
+    model_config = data.get('model_config', {})
     if not code_to_review:
         return jsonify({"error": "Không có mã nào để đánh giá."}), 400
 
     full_prompt = create_review_prompt(code_to_review)
-    # Truyền model_config (có thể chứa api_key) vào hàm gọi Gemini
+    # is_for_review_or_debug=True để dọn dẹp output
     review_text = generate_response_from_gemini(full_prompt, model_config.copy(), is_for_review_or_debug=True)
 
-    if review_text and not review_text.startswith("Lỗi:"):
-        return jsonify({"review": review_text})
-    elif review_text: # Có lỗi trả về từ Gemini
+    if review_text and not review_text.startswith("Lỗi"):
+        return jsonify({"review": review_text}) # Key trả về là "review"
+    elif review_text:
         status_code = 400 if ("Lỗi cấu hình" in review_text or "Lỗi: Phản hồi bị chặn" in review_text) else 500
         return jsonify({"error": review_text}), status_code
     else:
@@ -371,7 +475,7 @@ def handle_review():
 def handle_execute():
     data = request.get_json()
     code_to_execute = data.get('code')
-    run_as_admin = data.get('run_as_admin', False) # Lấy cờ yêu cầu chạy với quyền admin
+    run_as_admin = data.get('run_as_admin', False)
 
     if not code_to_execute:
         return jsonify({"error": "Không có mã nào để thực thi."}), 400
@@ -381,55 +485,41 @@ def handle_execute():
     print(f"----------------------------------------------------------")
 
     command = [sys.executable, '-c', code_to_execute]
-    admin_warning = None # Thông báo cảnh báo về quyền admin sẽ trả về frontend
+    admin_warning = None
 
-    # Xử lý yêu cầu chạy với quyền admin/root
     if run_as_admin:
-        if sys.platform == "win32": # Windows
+        if sys.platform == "win32":
             try:
-                # Kiểm tra xem backend có đang chạy với quyền admin không
                 is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
                 if not is_admin:
                     admin_warning = "Đã yêu cầu chạy với quyền Admin, nhưng backend không có quyền này. Đang thực thi với quyền người dùng thông thường."
                     print(f"[CẢNH BÁO] {admin_warning}")
-                    # Trên Windows, khó nâng quyền đáng tin cậy cho tiến trình con từ tiến trình không có quyền.
-                    # Chỉ cảnh báo người dùng.
             except Exception as admin_check_e:
                 admin_warning = f"Không thể kiểm tra quyền admin ({admin_check_e}). Đang thực thi với quyền người dùng thông thường."
                 print(f"[LỖI] {admin_warning}")
-        elif sys.platform in ["linux", "darwin"]: # Linux hoặc macOS
+        elif sys.platform in ["linux", "darwin"]:
             try:
-                # Kiểm tra xem có lệnh sudo không và có hoạt động không
                 subprocess.run(['which', 'sudo'], check=True, capture_output=True, text=True)
                 print("[INFO] Thêm 'sudo' vào đầu lệnh theo yêu cầu. Có thể cần nhập mật khẩu trong console backend.")
-                command.insert(0, 'sudo') # Thêm sudo vào đầu lệnh
+                command.insert(0, 'sudo')
             except (FileNotFoundError, subprocess.CalledProcessError):
                  admin_warning = "Đã yêu cầu chạy với quyền Root, nhưng không tìm thấy lệnh 'sudo' hoặc kiểm tra thất bại. Đang thực thi với quyền người dùng thông thường."
                  print(f"[LỖI] {admin_warning}")
-                 # Không sửa command nếu không tìm thấy sudo
             except Exception as sudo_check_e:
                  admin_warning = f"Lỗi khi kiểm tra sudo ({sudo_check_e}). Đang thực thi với quyền người dùng thông thường."
                  print(f"[LỖI] {admin_warning}")
-        else: # Hệ điều hành khác không hỗ trợ rõ ràng
+        else:
              admin_warning = f"Yêu cầu 'Run as Admin/Root' không được hỗ trợ rõ ràng trên hệ điều hành này ({sys.platform}). Đang thực thi với quyền người dùng thông thường."
              print(f"[CẢNH BÁO] {admin_warning}")
 
-    # Thực thi mã
     try:
         process_env = os.environ.copy()
-        process_env["PYTHONIOENCODING"] = "utf-8" # Đảm bảo output là UTF-8
+        process_env["PYTHONIOENCODING"] = "utf-8"
 
         result = subprocess.run(
-            command, # Lệnh có thể đã được thêm 'sudo'
-            capture_output=True,
-            encoding='utf-8',
-            errors='replace', # Thay thế ký tự không hợp lệ thay vì báo lỗi
-            timeout=30, # Giới hạn thời gian thực thi 30 giây
-            check=False, # Không tự động raise lỗi nếu return code != 0
-            env=process_env,
-            text=True
+            command, capture_output=True, encoding='utf-8', errors='replace',
+            timeout=30, check=False, env=process_env, text=True
         )
-
         output = result.stdout
         error_output = result.stderr
         return_code = result.returncode
@@ -440,26 +530,18 @@ def handle_execute():
         print(f"----------------------------------------------")
 
         message = "Thực thi thành công." if return_code == 0 else "Thực thi hoàn tất (có thể có lỗi)."
-
         response_data = {
-            "message": message,
-            "output": output,
-            "error": error_output,
-            "return_code": return_code
+            "message": message, "output": output, "error": error_output, "return_code": return_code
         }
-        # Thêm cảnh báo về quyền admin vào phản hồi nếu có
         if admin_warning:
             response_data["warning"] = admin_warning
-
         return jsonify(response_data)
 
     except subprocess.TimeoutExpired:
         print("Lỗi: Thực thi mã vượt quá thời gian cho phép (30 giây).")
-        # Vẫn trả về cảnh báo admin nếu có
         return jsonify({"error": "Thực thi mã vượt quá thời gian cho phép.", "output": "", "error": "Timeout", "return_code": -1, "warning": admin_warning}), 408
     except FileNotFoundError as fnf_error:
          missing_cmd = str(fnf_error)
-         # Phân biệt lỗi do không tìm thấy python/sudo hay lỗi từ code bên trong
          if 'sudo' in missing_cmd and run_as_admin and sys.platform != "win32":
               err_msg = "Lỗi hệ thống: Lệnh 'sudo' không được tìm thấy. Không thể chạy với quyền root."
               print(f"[LỖI] {err_msg}")
@@ -469,15 +551,11 @@ def handle_execute():
               print(f"[LỖI] {err_msg}")
               return jsonify({"error": err_msg, "output": "", "error": f"FileNotFoundError: {missing_cmd}", "return_code": -1, "warning": admin_warning}), 500
          else:
-              # Lỗi FileNotFoundError từ bên trong code người dùng
               print(f"Lỗi FileNotFoundError trong quá trình thực thi code: {fnf_error}")
-              # Trả về như lỗi thực thi bình thường, bao gồm cảnh báo admin
-              return jsonify({"message": "Thực thi thất bại (FileNotFoundError).", "output": "", "error": str(fnf_error), "return_code": -1, "warning": admin_warning}), 200 # Trả 200 vì server xử lý được, chỉ là code chạy bị lỗi
-
+              return jsonify({"message": "Thực thi thất bại (FileNotFoundError).", "output": "", "error": str(fnf_error), "return_code": -1, "warning": admin_warning}), 200
     except Exception as e:
         print(f"Lỗi nghiêm trọng khi thực thi mã: {e}", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
-        # Vẫn trả về cảnh báo admin nếu có
         return jsonify({"error": f"Lỗi hệ thống khi thực thi mã: {e}", "output": "", "error": str(e), "return_code": -1, "warning": admin_warning}), 500
 
 # Endpoint để gỡ lỗi code
@@ -488,48 +566,41 @@ def handle_debug():
     failed_code = data.get('code')
     stdout = data.get('stdout', '')
     stderr = data.get('stderr', '')
-    model_config = data.get('model_config', {}) # Đã bao gồm cả api_key (nếu có)
+    model_config = data.get('model_config', {})
 
     if not failed_code:
         return jsonify({"error": "Thiếu mã lỗi để gỡ rối."}), 400
 
     full_prompt = create_debug_prompt(original_prompt, failed_code, stdout, stderr)
-    # Truyền model_config (có thể chứa api_key) vào hàm gọi Gemini
+    # is_for_review_or_debug=True để dọn dẹp output
     raw_response = generate_response_from_gemini(full_prompt, model_config.copy(), is_for_review_or_debug=True)
 
-    if raw_response and not raw_response.startswith("Lỗi:"):
+    if raw_response and not raw_response.startswith("Lỗi"):
         explanation_part = raw_response
         corrected_code = None
         suggested_package = None
 
-        # Tìm đề xuất cài đặt package (khối ```bash ... pip install ...```)
         install_match = re.search(r"```bash\s*pip install\s+([\w\-]+)\s*```", explanation_part, re.IGNORECASE)
         if install_match:
             suggested_package = install_match.group(1).strip()
             print(f"Debug: Phát hiện đề xuất cài đặt package: {suggested_package}")
-            # Loại bỏ khối bash khỏi phần giải thích
             explanation_part = explanation_part[:install_match.start()].strip() + explanation_part[install_match.end():].strip()
 
-        # Tìm khối code Python cuối cùng (được cho là code đã sửa)
         last_code_block_match = None
         python_matches = list(re.finditer(r"```python\s*([\s\S]*?)\s*```", explanation_part))
         if python_matches:
             last_code_block_match = python_matches[-1]
 
-        # Tách code sửa lỗi và phần giải thích còn lại
         if last_code_block_match:
             start_index = last_code_block_match.start()
             potential_explanation_before_code = explanation_part[:start_index].strip()
-            # Chỉ lấy phần trước khối code làm giải thích nếu nó có nội dung
             if potential_explanation_before_code:
                  explanation_part = potential_explanation_before_code
                  corrected_code = last_code_block_match.group(1).strip()
             else:
-                 # Nếu không có gì trước khối code, có thể AI chỉ trả về code
                  explanation_part = "(AI chỉ trả về code sửa lỗi, không có giải thích)"
                  corrected_code = last_code_block_match.group(1).strip()
 
-        # Dọn dẹp thêm phần dẫn nhập còn sót lại trong giải thích
         explanation_part = re.sub(r"^(Phân tích và đề xuất:|Giải thích và đề xuất:)\s*", "", explanation_part, flags=re.IGNORECASE | re.MULTILINE).strip()
 
         return jsonify({
@@ -537,7 +608,7 @@ def handle_debug():
             "corrected_code": corrected_code,
             "suggested_package": suggested_package
         })
-    elif raw_response: # Có lỗi trả về từ Gemini
+    elif raw_response:
         status_code = 400 if ("Lỗi cấu hình" in raw_response or "Lỗi: Phản hồi bị chặn" in raw_response) else 500
         return jsonify({"error": raw_response}), status_code
     else:
@@ -552,30 +623,20 @@ def handle_install_package():
     if not package_name:
         return jsonify({"error": "Thiếu tên package để cài đặt."}), 400
 
-    # Kiểm tra tên package đơn giản để tránh inject lệnh
     if not re.fullmatch(r"^[a-zA-Z0-9\-_]+$", package_name):
         print(f"[CẢNH BÁO] Tên package không hợp lệ bị từ chối: {package_name}")
         return jsonify({"success": False, "error": f"Tên package không hợp lệ: {package_name}"}), 400
 
     print(f"--- Chuẩn bị cài đặt package: {package_name} ---")
-    # Sử dụng sys.executable để đảm bảo dùng đúng pip của môi trường ảo hiện tại
     command = [sys.executable, '-m', 'pip', 'install', package_name]
 
     try:
         process_env = os.environ.copy()
         process_env["PYTHONIOENCODING"] = "utf-8"
-
         result = subprocess.run(
-            command,
-            capture_output=True,
-            encoding='utf-8',
-            errors='replace',
-            timeout=120, # Timeout 2 phút cho cài đặt
-            check=False,
-            env=process_env,
-            text=True
+            command, capture_output=True, encoding='utf-8', errors='replace',
+            timeout=120, check=False, env=process_env, text=True
         )
-
         output = result.stdout
         error_output = result.stderr
         return_code = result.returncode
@@ -590,7 +651,6 @@ def handle_install_package():
             return jsonify({ "success": True, "message": message, "output": output, "error": error_output })
         else:
             message = f"Cài đặt '{package_name}' thất bại."
-            # Cố gắng lấy lỗi chi tiết từ stderr
             detailed_error = error_output.strip() if error_output else f"Lệnh Pip thất bại với mã trả về {return_code}."
             return jsonify({ "success": False, "message": message, "output": output, "error": detailed_error }), 500
 
@@ -598,13 +658,44 @@ def handle_install_package():
         print(f"Lỗi: Cài đặt package '{package_name}' vượt quá thời gian cho phép (120 giây).")
         return jsonify({"success": False, "error": f"Timeout khi cài đặt '{package_name}'.", "output": "", "error": "Timeout"}), 408
     except FileNotFoundError:
-         # Lỗi này thường xảy ra nếu python hoặc pip không đúng đường dẫn
          print(f"Lỗi: Không tìm thấy '{sys.executable}' hoặc pip.")
          return jsonify({"success": False, "error": "Lỗi hệ thống: Không tìm thấy Python hoặc Pip.", "output": "", "error": "FileNotFoundError"}), 500
     except Exception as e:
         print(f"Lỗi nghiêm trọng khi cài đặt package '{package_name}': {e}", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
         return jsonify({"success": False, "error": f"Lỗi hệ thống khi cài đặt: {e}", "output": "", "error": str(e)}), 500
+
+# Endpoint để giải thích nội dung (MỚI)
+@app.route('/api/explain', methods=['POST'])
+def handle_explain():
+    data = request.get_json()
+    content_to_explain = data.get('content')
+    context = data.get('context', 'unknown') # Lấy ngữ cảnh, mặc định là 'unknown'
+    model_config = data.get('model_config', {})
+
+    if not content_to_explain:
+        return jsonify({"error": "Không có nội dung để giải thích."}), 400
+
+    # Nếu content là object (đã được parse ở frontend), chuyển lại thành string để đưa vào prompt
+    if isinstance(content_to_explain, dict) or isinstance(content_to_explain, list):
+         try:
+              content_to_explain = json.dumps(content_to_explain, ensure_ascii=False, indent=2)
+         except Exception as e:
+              print(f"Lỗi khi chuyển đổi content object thành JSON string trong /explain: {e}")
+              content_to_explain = str(content_to_explain) # Fallback về string
+
+    full_prompt = create_explain_prompt(content_to_explain, context)
+    # is_for_review_or_debug=True để áp dụng dọn dẹp output tương tự review/debug
+    explanation_text = generate_response_from_gemini(full_prompt, model_config.copy(), is_for_review_or_debug=True)
+
+    if explanation_text and not explanation_text.startswith("Lỗi"):
+        # Đảm bảo key trả về là "explanation"
+        return jsonify({"explanation": explanation_text})
+    elif explanation_text: # Có lỗi trả về từ Gemini
+        status_code = 400 if ("Lỗi cấu hình" in explanation_text or "Lỗi: Phản hồi bị chặn" in explanation_text) else 500
+        return jsonify({"error": explanation_text}), status_code
+    else:
+        return jsonify({"error": "Không thể tạo giải thích hoặc có lỗi không xác định xảy ra."}), 500
 
 
 if __name__ == '__main__':

@@ -1,405 +1,415 @@
 /* frontend/src/components/CenterArea.css */
 
-/* --- từ App.css hoặc không --- */
+/* --- Kế thừa từ App.css hoặc định nghĩa tại đây --- */
 :root {
-  /*(các biến màu, font, spacing)*/
-  --border-radius: 8px;
-  --border-radius-small: 4px;
-  --spacing-unit: 8px;
-  --border-color: #303030;
-  --border-color-secondary: #202123;
-  --bg-primary: #131314;
-  --bg-secondary: #1e1f20;
-  --bg-tertiary: #2a2b2c;
-  --text-primary: #e3e3e3;
-  --text-secondary: #bdc1c6;
-  --text-muted: #85888c;
-  --text-accent: #8ab4f8;
-  --code-bg: #161617;
-  --code-font-family: 'Roboto Mono', monospace;
-  --success-color: #81c995;
-  --danger-color: #f28b82;
-  --warning-color: #fdd663;
-  --info-color: #78c9f5; /* Màu cho info */
-}
-
-/* --- Main Layout --- */
-.center-area-wrapper {
-    display: flex; flex-direction: column;
-    height: 100%;
+    /*(các biến màu, font, spacing)*/
+    --border-radius: 8px;
+    --border-radius-small: 4px;
+    --spacing-unit: 8px;
+    --border-color: #303030;
+    --border-color-secondary: #202123;
+    --bg-primary: #131314;
+    --bg-secondary: #1e1f20;
+    --bg-tertiary: #2a2b2c;
+    --text-primary: #e3e3e3;
+    --text-secondary: #bdc1c6;
+    --text-muted: #85888c;
+    --text-accent: #8ab4f8;
+    --code-bg: #161617;
+    --code-font-family: 'Roboto Mono', monospace;
+    --success-color: #81c995;
+    --danger-color: #f28b82;
+    --warning-color: #fdd663;
+    --info-color: #78c9f5; /* Màu cho info */
+  }
+  
+  /* --- Main Layout --- */
+  .center-area-wrapper {
+      display: flex; flex-direction: column;
+      height: 100%;
+      background-color: var(--bg-primary);
+      overflow: hidden;
+      width: 100%; max-width: 100%;
+  }
+  
+  .top-bar {
+    padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit) * 3);
+    border-bottom: 1px solid #131314;
     background-color: var(--bg-primary);
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .top-bar h2 { color: var(--text-primary); font-size: 1.1rem; font-weight: 600; margin: 0; }
+  .settings-trigger-button { color: var(--text-muted); }
+  .settings-trigger-button:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
+  
+  .interaction-container {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 0 calc(var(--spacing-unit) * 3);
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+  }
+  
+  /* --- Interaction Round & Placeholder --- */
+  .interaction-round { border-bottom: 1px solid var(--border-color-secondary); margin: 0; padding: 0; }
+  .interaction-round:last-child { border-bottom: none; }
+  .placeholder-round { border-bottom: 1px solid var(--border-color-secondary); }
+  .placeholder-round:last-child { border-bottom: none; }
+  
+  /* --- General Interaction Block --- */
+  .interaction-block {
+      display: flex; gap: var(--spacing-unit); align-items: flex-start;
+      max-width: 850px; margin-left: auto; margin-right: auto; width: 100%;
+      padding: calc(var(--spacing-unit) * 1.5) 0; position: relative;
+  }
+  
+  /* Animation cho block mới xuất hiện */
+  @keyframes slideInUpFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .interaction-block.newly-added { animation: slideInUpFade 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+  
+  .block-avatar { margin-top: calc(var(--spacing-unit)*0.25); flex-shrink: 0; }
+  .block-icon {
+      font-size: 1.1rem; color: var(--text-muted); width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; background-color: var(--bg-secondary); border: 1px solid var(--border-color);
+  }
+  /* Icon styles per type */
+  .block-icon.user-icon { background-color: var(--accent-primary); color: var(--bg-primary); }
+  .block-icon.ai-icon { background-color: #9333ea; color: white; }
+  .block-icon.review-icon { background-color: #34a853; color: white;}
+  .block-icon.execution-icon.success { background-color: var(--bg-tertiary); }
+  .block-icon.execution-icon.success svg { color: var(--success-color); }
+  .block-icon.execution-icon.error { background-color: var(--bg-tertiary); }
+  .block-icon.execution-icon.error svg { color: var(--danger-color); }
+  .block-icon.debug-icon { background-color: #fbbc04; color: var(--bg-primary);}
+  .block-icon.loading-icon { background-color: var(--bg-tertiary); }
+  .block-icon.error-icon { background-color: var(--bg-tertiary); }
+  .block-icon.error-icon svg { color: var(--danger-color); }
+  .block-icon.info-icon { background-color: var(--bg-tertiary); } /* Style icon info */
+  .block-icon.info-icon svg { color: var(--info-color); } /* Style icon info */
+  .block-icon.installation-icon { background-color: var(--bg-tertiary); } /* Style icon install */
+  .block-icon.installation-icon.success svg { color: var(--success-color); } /* Style icon install success */
+  .block-icon.installation-icon.error svg { color: var(--danger-color); } /* Style icon install error */
+  
+  
+  .block-main-content { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: calc(var(--spacing-unit) * 1); }
+  .block-content-area { padding: 0; border-radius: var(--border-radius); }
+  
+  /* --- User Block Specific Styles --- */
+  .block-type-user .block-header.user-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: calc(var(--spacing-unit) * 0.5); }
+  .user-header-title { font-weight: 500; color: var(--text-primary); font-size: 0.9rem; text-transform: none; letter-spacing: normal; }
+  .block-timestamp { font-size: 0.75rem; color: var(--text-muted); }
+  .block-type-user .block-content-area { background-color: transparent; border: none; }
+  .block-type-user .prompt-text { color: var(--text-primary); font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; font-weight: 400; padding: 0; }
+  
+  /* --- Collapsed Section Block (FIXED) --- */
+  .collapsed-section-block {
+    background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius);
+    padding: calc(var(--spacing-unit)*1.25) calc(var(--spacing-unit) * 1.5);
+    margin-bottom: var(--spacing-unit); cursor: pointer;
+    transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
+    display: flex; flex-direction: column; gap: calc(var(--spacing-unit) * 0.5);
+    /* --- FIX: Add max-width and margin auto --- */
+    max-width: 850px; /* Giống .interaction-block */
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%; /* Đảm bảo chiếm đủ không gian tới max-width */
+    /* --- End FIX --- */
+  }
+  .collapsed-section-block.interactive:hover { background-color: var(--bg-tertiary); border-color: #444; } /* Add .interactive for clarity */
+  .collapsed-section-header { display: flex; justify-content: space-between; align-items: center; }
+  .collapsed-title-group { display: flex; align-items: center; gap: calc(var(--spacing-unit) * 0.75); }
+  .collapsed-sparkle-icon { color: var(--text-accent); font-size: 1rem; }
+  .collapsed-title-text { font-weight: 500; color: var(--text-primary); font-size: 0.9rem; }
+  .block-timestamp.collapsed-timestamp { font-size: 0.75rem; margin-left: auto; }
+  .collapsed-section-body { margin-top: 2px; }
+  .collapsed-prompt-summary { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin: 0; padding-left: calc(1rem + var(--spacing-unit) * 0.75); }
+  .collapsed-section-footer { display: flex; justify-content: space-between; align-items: center; margin-top: calc(var(--spacing-unit) * 0.75); padding-left: calc(1rem + var(--spacing-unit) * 0.75); }
+  .expand-prompt-text { font-size: 0.8rem; color: var(--text-muted); }
+  .expand-icon { color: var(--text-muted); font-size: 1rem; }
+  
+  /* --- Collapsible Content & Animation (FIXED) --- */
+  .collapsible-content {
     overflow: hidden;
-    width: 100%; max-width: 100%;
-}
-
-.top-bar {
-  padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit) * 3);
-  border-bottom: 1px solid #131314;
-  background-color: var(--bg-primary);
-  flex-shrink: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.top-bar h2 { color: var(--text-primary); font-size: 1.1rem; font-weight: 600; margin: 0; }
-.settings-trigger-button { color: var(--text-muted); }
-.settings-trigger-button:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
-
-.interaction-container {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 0 calc(var(--spacing-unit) * 3);
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-}
-
-/* --- Interaction Round & Placeholder --- */
-.interaction-round { border-bottom: 1px solid var(--border-color-secondary); margin: 0; padding: 0; }
-.interaction-round:last-child { border-bottom: none; }
-.placeholder-round { border-bottom: 1px solid var(--border-color-secondary); }
-.placeholder-round:last-child { border-bottom: none; }
-
-/* --- General Interaction Block --- */
-.interaction-block {
-    display: flex; gap: var(--spacing-unit); align-items: flex-start;
-    max-width: 850px; margin-left: auto; margin-right: auto; width: 100%;
-    padding: calc(var(--spacing-unit) * 1.5) 0; position: relative;
-}
-
-/* Animation cho block mới xuất hiện */
-@keyframes slideInUpFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.interaction-block.newly-added { animation: slideInUpFade 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
-
-.block-avatar { margin-top: calc(var(--spacing-unit)*0.25); flex-shrink: 0; }
-.block-icon {
-    font-size: 1.1rem; color: var(--text-muted); width: 32px; height: 32px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 50%; background-color: var(--bg-secondary); border: 1px solid var(--border-color);
-}
-/* Icon styles per type */
-.block-icon.user-icon { background-color: var(--accent-primary); color: var(--bg-primary); }
-.block-icon.ai-icon { background-color: #9333ea; color: white; }
-.block-icon.review-icon { background-color: #34a853; color: white;}
-.block-icon.execution-icon.success { background-color: var(--bg-tertiary); }
-.block-icon.execution-icon.success svg { color: var(--success-color); }
-.block-icon.execution-icon.error { background-color: var(--bg-tertiary); }
-.block-icon.execution-icon.error svg { color: var(--danger-color); }
-.block-icon.debug-icon { background-color: #fbbc04; color: var(--bg-primary);}
-.block-icon.loading-icon { background-color: var(--bg-tertiary); }
-.block-icon.error-icon { background-color: var(--bg-tertiary); }
-.block-icon.error-icon svg { color: var(--danger-color); }
-.block-icon.info-icon { background-color: var(--bg-tertiary); } /* Style icon info */
-.block-icon.info-icon svg { color: var(--info-color); } /* Style icon info */
-
-.block-main-content { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: calc(var(--spacing-unit) * 1); }
-.block-content-area { padding: 0; border-radius: var(--border-radius); }
-
-/* --- User Block Specific Styles --- */
-.block-type-user .block-header.user-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: calc(var(--spacing-unit) * 0.5); }
-.user-header-title { font-weight: 500; color: var(--text-primary); font-size: 0.9rem; text-transform: none; letter-spacing: normal; }
-.block-timestamp { font-size: 0.75rem; color: var(--text-muted); }
-.block-type-user .block-content-area { background-color: transparent; border: none; }
-.block-type-user .prompt-text { color: var(--text-primary); font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; font-weight: 400; padding: 0; }
-
-/* --- Collapsed Section Block --- */
-.collapsed-section-block {
-  background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius);
-  padding: calc(var(--spacing-unit)*1.25) calc(var(--spacing-unit) * 1.5);
-  margin-bottom: var(--spacing-unit); cursor: pointer;
-  transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
-  display: flex; flex-direction: column; gap: calc(var(--spacing-unit) * 0.5);
-}
-.collapsed-section-block:hover { background-color: var(--bg-tertiary); border-color: #444; }
-.collapsed-section-header { display: flex; justify-content: space-between; align-items: center; }
-.collapsed-title-group { display: flex; align-items: center; gap: calc(var(--spacing-unit) * 0.75); }
-.collapsed-sparkle-icon { color: var(--text-accent); font-size: 1rem; }
-.collapsed-title-text { font-weight: 500; color: var(--text-primary); font-size: 0.9rem; }
-.block-timestamp.collapsed-timestamp { font-size: 0.75rem; margin-left: auto; }
-.collapsed-section-body { margin-top: 2px; }
-.collapsed-prompt-summary { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin: 0; padding-left: calc(1rem + var(--spacing-unit) * 0.75); }
-.collapsed-section-footer { display: flex; justify-content: space-between; align-items: center; margin-top: calc(var(--spacing-unit) * 0.75); padding-left: calc(1rem + var(--spacing-unit) * 0.75); }
-.expand-prompt-text { font-size: 0.8rem; color: var(--text-muted); }
-.expand-icon { color: var(--text-muted); font-size: 1rem; }
-
-/* --- Collapsible Content & Animation --- */
-.collapsible-content {
-  overflow: hidden;
-  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-in-out, margin-top 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-top-color 0.35s ease-out;
-  max-height: 0; opacity: 0; border-top: 1px solid transparent; margin-top: 0;
-  margin-left: calc(32px + var(--spacing-unit)); /* Thụt lề */
-  display: block; will-change: max-height, opacity; box-sizing: border-box;
-}
-.collapsible-content.expanded {
-  max-height: 5000px; /* Tăng max-height để chứa nhiều block hơn */
-  opacity: 1; border-top-color: var(--border-color-secondary); margin-top: calc(var(--spacing-unit) * 1.5);
-}
-
-/* --- Collapse Round Button --- */
-.collapse-round-wrapper {
-    text-align: left; margin-top: calc(var(--spacing-unit) * 1.5); padding-top: calc(var(--spacing-unit) * 1.5);
-    border-top: 1px solid var(--border-color-secondary); margin-left: 0; padding-bottom: var(--spacing-unit);
-    padding-left: calc(32px + var(--spacing-unit)); box-sizing: border-box;
-}
-.collapse-round-button {
-    background: none; border: none; color: var(--text-muted); cursor: pointer;
-    padding: calc(var(--spacing-unit)*0.5) 0; font-size: 0.8rem; display: inline-flex;
-    align-items: center; gap: calc(var(--spacing-unit)*0.5);
-    border-radius: var(--border-radius-small); transition: color 0.2s ease-out;
-}
-.collapse-round-button:hover { color: var(--text-primary); }
-.collapse-round-button svg { font-size: 0.9rem; }
-
-/* --- AI Code Block --- */
-.block-type-ai-code .block-content-area {
-    background-color: var(--bg-secondary); border: 1px solid var(--border-color);
-    border-radius: var(--border-radius); overflow: hidden;
-}
-.code-block-container { border-radius: inherit; overflow: hidden; }
-.code-block-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit) calc(var(--spacing-unit)*0.75) calc(var(--spacing-unit)*1.5);
-    background-color: var(--bg-tertiary); color: var(--text-muted);
-    font-size: 0.8rem; font-family: var(--code-font-family); border-bottom: 1px solid var(--border-color);
-}
-.code-block-header > div { display: flex; gap: calc(var(--spacing-unit)*0.5); }
-.code-block-header .icon-button.subtle.small { color: var(--text-muted); font-size: 0.9rem; padding: calc(var(--spacing-unit)*0.5); }
-.code-block-header .icon-button.subtle.small:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
-.main-code-block pre {
-    margin: 0 !important; padding: var(--spacing-unit) calc(var(--spacing-unit)*1.5) !important;
-    border-radius: 0 !important; font-size: 0.875rem !important; background-color: transparent !important; line-height: 1.45 !important;
-}
-.main-code-block code { font-family: var(--code-font-family) !important; }
-
-/* --- Review Block --- */
-.block-type-review .block-content-area {
-    background-color: var(--bg-secondary); border: 1px solid var(--border-color);
-    padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); border-radius: var(--border-radius);
-}
-.markdown-content { font-size: 0.9rem; line-height: 1.7; color: var(--text-secondary); }
-.markdown-content p { margin-bottom: var(--spacing-unit); }
-.markdown-content ul, .markdown-content ol { margin-left: calc(var(--spacing-unit) * 2); margin-bottom: var(--spacing-unit); }
-.markdown-content li { margin-bottom: calc(var(--spacing-unit) * 0.5); }
-.markdown-content strong { font-weight: 600; color: var(--text-primary); }
-.markdown-content a { color: var(--text-accent); text-decoration: none; }
-.markdown-content a:hover { text-decoration: underline; }
-.markdown-content blockquote { border-left: 3px solid var(--border-color); padding-left: var(--spacing-unit); margin: var(--spacing-unit) 0; color: var(--text-muted); font-style: italic; }
-/* Markdown Code Block (inside review/debug) */
-.markdown-code-block { margin: var(--spacing-unit) 0; background-color: var(--code-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius-small); overflow: hidden; }
-.markdown-code-block .code-block-header { padding: calc(var(--spacing-unit)*0.5) var(--spacing-unit) calc(var(--spacing-unit)*0.5) calc(var(--spacing-unit)*1); font-size: 0.75rem; }
-.markdown-code-block .code-block-header .copy-button { color: var(--text-muted); font-size: 0.9rem; padding: calc(var(--spacing-unit)*0.5); background: none; border: none; cursor: pointer; }
-.markdown-code-block .code-block-header .copy-button:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
-.markdown-code-block .syntax-highlighter pre { margin: 0 !important; padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit) !important; border-radius: 0 !important; font-size: 0.8rem !important; background-color: transparent !important; line-height: 1.4 !important; }
-.markdown-code-block .syntax-highlighter code { font-family: var(--code-font-family) !important; }
-.inline-code { background-color: var(--bg-tertiary); color: var(--text-accent); padding: 0.1em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; font-family: var(--code-font-family); border: 1px solid var(--border-color); white-space: nowrap; }
-
-/* --- Execution Block --- */
-.block-type-execution .block-content-area {
-    background-color: var(--bg-secondary); border: 1px solid var(--border-color);
-    padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); border-radius: var(--border-radius);
-}
-.execution-content { font-size: 0.85rem; }
-.exec-message { font-style: italic; color: var(--text-muted); font-size: 0.85rem; margin-bottom: var(--spacing-unit);}
-.output-section { margin-top: var(--spacing-unit); }
-.output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-.output-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; display: block; }
-.expand-output-button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 4px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; border-radius: var(--border-radius-small); }
-.expand-output-button:hover { background-color: var(--bg-tertiary); color: var(--text-primary); }
-.expand-output-button svg { font-size: 0.8rem; }
-.output-section pre.output-pre { background-color: var(--bg-tertiary); border: 1px solid var(--border-color-secondary); color: var(--text-secondary); padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit); margin-top: 0; border-radius: var(--border-radius-small); overflow: hidden; white-space: pre-wrap; word-break: break-all; font-family: var(--code-font-family); font-size: 0.8rem; transition: max-height 0.3s ease-in-out; max-height: var(--preview-height, 7.5em); }
-.output-section pre.output-pre.expanded { max-height: 500px; overflow-y: auto; }
-.output-section.stderr-section pre.output-pre { color: var(--danger-color); background-color: rgba(242, 139, 130, 0.05); border-color: rgba(242, 139, 130, 0.2); }
-.return-code { margin-top: var(--spacing-unit); font-weight: 500; color: var(--text-muted); font-size: 0.8rem; }
-
-/* --- Debug Block --- */
-.block-type-debug .block-content-area {
-    background-color: var(--bg-secondary); border: 1px solid var(--border-color);
-    padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); border-radius: var(--border-radius);
-}
-/* Style cho tiêu đề và khu vực cài đặt */
-.debug-content h4 {
-    font-size: 0.9rem; color: var(--text-primary); /* Đổi màu */
-    margin: calc(var(--spacing-unit)*1.5) 0 var(--spacing-unit) 0;
-    font-weight: 600;
-    border-top: 1px solid var(--border-color-secondary);
-    padding-top: calc(var(--spacing-unit)*1.5);
-    letter-spacing: 0.3px;
-}
-.debug-content h4:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
-.explanation-content { margin-bottom: calc(var(--spacing-unit) * 1.5); }
-.install-suggestion-area { margin-top: calc(var(--spacing-unit) * 1.5); }
-.install-suggestion-area p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--spacing-unit); }
-.install-suggestion-area p code { background-color: var(--bg-tertiary); color: var(--text-accent); padding: 0.1em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; font-family: var(--code-font-family); border: 1px solid var(--border-color); white-space: nowrap; }
-/* Style nút Install */
-.install-library-button {
-    background-color: var(--bg-tertiary); border: 1px solid var(--border-color);
-    padding: calc(var(--spacing-unit)*0.7) calc(var(--spacing-unit)*1.2);
-    font-size: 0.85rem; font-weight: 500; color: var(--info-color); /* Màu xanh info */
-    border-color: rgba(var(--info-color), 0.3); /* Border màu info nhạt */
-    transition: all 0.15s ease-out; cursor: pointer; display: inline-flex;
-    align-items: center; gap: calc(var(--spacing-unit) * 0.75);
-    border-radius: var(--border-radius-small);
-}
-.install-library-button:hover:not(:disabled) { background-color: rgba(var(--info-color), 0.15); border-color: rgba(var(--info-color), 0.5); color: #99d9f7; }
-.install-library-button svg { font-size: 1rem; }
-.install-library-button span { font-family: var(--code-font-family); font-size: inherit; color: inherit; }
-/* Code block trong debug (cho corrected code) */
-.block-type-debug .code-block-container { margin-top: var(--spacing-unit); }
-
-
-/* --- Loading & Error Block --- */
-.block-type-loading .block-content-area { background-color: transparent; border: none; padding: 0; }
-.loading-content { display: flex; align-items: center; gap: var(--spacing-unit); color: var(--text-muted); font-style: italic; font-size: 0.9rem; padding: calc(var(--spacing-unit)*0.5) 0; }
-.loading-content svg { font-size: 1rem; }
-.block-type-error .block-content-area { background-color: transparent; border: none; padding: 0; }
-.error-inline { color: var(--danger-color); background-color: rgba(242, 139, 130, 0.1); border: 1px solid rgba(242, 139, 130, 0.2); padding: var(--spacing-unit); border-radius: var(--border-radius-small); font-size: 0.875rem; }
-
-/* --- Info Block --- */
-.block-type-info .block-content-area { /* Khu vực chứa nội dung info */
-    padding: 0; /* Bỏ padding mặc định nếu có */
-}
-.info-message { /* Style cho chính text message */
-   color: var(--info-color); background-color: rgba(120, 201, 245, 0.1);
-   border: 1px solid rgba(120, 201, 245, 0.2); padding: var(--spacing-unit);
-   border-radius: var(--border-radius-small); font-size: 0.875rem;
-}
-
-
-/* --- Block Action Area --- */
-.block-actions-area {
-    padding: 0; display: flex; gap: var(--spacing-unit); flex-wrap: wrap;
-    justify-content: flex-start; margin-top: calc(var(--spacing-unit) * 1.5); /* Tăng margin top */
-}
-.block-actions-area button {
-    background-color: var(--bg-tertiary); border: 1px solid var(--border-color);
-    padding: calc(var(--spacing-unit)*0.6) var(--spacing-unit); font-size: 0.8rem;
-    font-weight: 500; color: var(--text-secondary); transition: all 0.15s ease-out;
-}
-.block-actions-area button:hover:not(:disabled) { background-color: #40444b; border-color: #50555b; color: var(--text-primary); }
-.block-actions-area button svg { font-size: 0.9rem; margin-right: calc(var(--spacing-unit)*0.5);}
-.block-actions-area button.execute { color: var(--success-color); border-color: rgba(var(--success-color), 0.3); }
-.block-actions-area button.execute:hover:not(:disabled) { background-color: rgba(var(--success-color), 0.15); border-color: rgba(var(--success-color), 0.5); }
-.block-actions-area button.debug { color: var(--warning-color); border-color: rgba(var(--warning-color), 0.3); }
-.block-actions-area button.debug:hover:not(:disabled) { background-color: rgba(var(--warning-color), 0.15); border-color: rgba(var(--warning-color), 0.5); }
-.block-actions-area button.apply-code { color: var(--info-color); border-color: rgba(var(--info-color), 0.3); }
-.block-actions-area button.apply-code:hover:not(:disabled) { background-color: rgba(var(--info-color), 0.15); border-color: rgba(var(--info-color), 0.5); }
-
-/* --- Style cho phần Suggestion & Nút Install Package trong Block Debug --- */
-.install-suggestion-area {
-    margin-top: calc(var(--spacing-unit) * 1.5); /* Khoảng cách với phần trên */
-    margin-bottom: calc(var(--spacing-unit) * 0.5); /* Khoảng cách với code sửa lỗi (nếu có) */
-    padding: 0; /* Kế thừa padding nếu cần hoặc bỏ */
-    /* display: flex; align-items: center; gap: var(--spacing-unit); */ /* Nếu muốn nút nằm cùng dòng text */
-    /* Không cần tái sử dụng block-actions-area hoàn toàn nếu chỉ có 1 nút */
-}
-
-.install-package-button {
-    /* Kế thừa style button chung hoặc định nghĩa lại */
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    color: var(--info-color); /* Màu xanh dương cho hành động install */
-    padding: calc(var(--spacing-unit)*0.6) var(--spacing-unit);
-    font-size: 0.8rem;
-    font-weight: 500;
-    display: inline-flex; /* Để icon và text thẳng hàng */
-    align-items: center;
-    gap: calc(var(--spacing-unit) * 0.75); /* Khoảng cách icon và text */
-    border-radius: var(--border-radius-small);
-    cursor: pointer;
-    transition: all 0.15s ease-out;
-}
-.install-package-button:hover:not(:disabled) {
-    background-color: rgba(120, 201, 245, 0.15); /* Màu xanh dương nhạt hơn khi hover */
-    border-color: rgba(120, 201, 245, 0.4);
-    color: var(--accent-primary);
-}
-.install-package-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background-color: var(--bg-tertiary) !important; /* Ghi đè hover/focus khi disabled */
-    color: var(--text-muted) !important;
-    border-color: var(--border-color) !important;
-}
-.install-package-button svg {
-    font-size: 1rem; /* Kích thước icon */
-}
-.install-package-button code { /* Style cho tên package trong nút */
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 2px 5px;
-    border-radius: 3px;
-    margin-left: 4px;
-    font-family: var(--code-font-family);
-    font-size: 0.95em;
-    color: var(--text-accent); /* Màu khác cho code */
-}
-
-/* --- Style cho Block Kết quả Installation --- */
-.block-type-installation .block-content-area {
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2);
-    border-radius: var(--border-radius);
-}
-.installation-content { font-size: 0.9rem; } /* Tăng font size một chút */
-
-.installation-content .install-message {
-    display: flex;
-    align-items: center; /* Căn giữa icon và text */
-    font-weight: 500;
-    margin-bottom: calc(var(--spacing-unit) * 1.5); /* Tăng khoảng cách dưới */
-    color: var(--text-primary);
-    line-height: 1.4;
-}
-.installation-content .install-message strong { /* Tên package */
-    color: var(--text-accent);
-    margin: 0 4px;
-}
-.installation-content.error .install-message {
-    color: var(--danger-color); /* Màu đỏ cho message lỗi */
-}
-.installation-content.error .install-message strong {
-     color: var(--danger-color); /* Tên package cũng màu đỏ */
-}
-
-/* Style cho output/error của pip */
-.installation-content .output-section {
-    margin-top: var(--spacing-unit);
-}
-.installation-content .output-section pre.output-pre {
-     font-size: 0.8rem; /* Font nhỏ hơn cho log */
-     max-height: var(--preview-height, 10em); /* Cho phép xem nhiều dòng hơn mặc định */
-     line-height: 1.4;
-     background-color: var(--bg-primary); /* Nền tối hơn */
-     border-color: var(--border-color);
-}
-.installation-content .output-section.stderr-section pre.output-pre {
-    color: var(--warning-color); /* Màu vàng cho lỗi/warning của pip */
-    background-color: rgba(253, 214, 99, 0.05);
-    border-color: rgba(253, 214, 99, 0.2);
-}
-
-/* Icon cho Installation Block */
-.block-icon.installation-icon { background-color: var(--bg-tertiary); }
-.block-icon.installation-icon.success svg { color: var(--success-color); }
-.block-icon.installation-icon.error svg { color: var(--danger-color); } /* Icon đỏ nếu lỗi */
-
-/* Nút Apply code trong Debug block */
-.apply-action-area {
-    margin-top: var(--spacing-unit); /* Khoảng cách với code block */
-    padding-top: var(--spacing-unit);
-    border-top: 1px solid var(--border-color-secondary);
-}
-
-/* --- Thêm style cho execution warning --- */
-.exec-warning {
-    color: var(--warning-color); /* Màu vàng */
-    background-color: rgba(253, 214, 99, 0.1); /* Nền vàng nhạt */
-    border: 1px solid rgba(253, 214, 99, 0.2); /* Viền vàng nhạt */
-    /* Kế thừa các style khác từ error-inline nếu muốn */
-    padding: var(--spacing-unit);
-    border-radius: var(--border-radius-small);
-    font-size: 0.875rem;
-    margin-bottom: var(--spacing-unit); /* Thêm margin dưới nếu cần */
-    display: flex; /* Để căn icon với text */
-    align-items: center;
- }
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-in-out, margin-top 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-top-color 0.35s ease-out;
+    max-height: 0; opacity: 0; border-top: 1px solid transparent; margin-top: 0;
+    /* --- FIX: Remove margin-left, add max-width and margin auto --- */
+    /* Xóa: margin-left: calc(32px + var(--spacing-unit)); */
+    max-width: 850px; /* Giống .interaction-block */
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    /* --- End FIX --- */
+    display: block; will-change: max-height, opacity; box-sizing: border-box;
+  }
+  .collapsible-content.expanded {
+    max-height: 5000px; /* Increase max-height */
+    opacity: 1; border-top-color: var(--border-color-secondary); margin-top: calc(var(--spacing-unit) * 1.5);
+  }
+  
+  /* --- Collapse Round Button (FIXED) --- */
+  .collapse-round-wrapper {
+      text-align: left;
+      margin-top: calc(var(--spacing-unit) * 1.5);
+      padding-top: calc(var(--spacing-unit) * 1.5);
+      border-top: 1px solid var(--border-color-secondary);
+      padding-bottom: var(--spacing-unit);
+      box-sizing: border-box;
+      /* --- FIX: Add max-width and margin auto, adjust padding-left --- */
+      max-width: 850px; /* Giống .interaction-block */
+      margin-left: auto;
+      margin-right: auto;
+      width: 100%;
+      padding-left: calc(var(--spacing-unit) * 1); /* Điều chỉnh nếu cần để nút thụt vào */
+      /* --- End FIX --- */
+  }
+  .collapse-round-button {
+      background: none; border: none; color: var(--text-muted); cursor: pointer;
+      padding: calc(var(--spacing-unit)*0.5) 0; font-size: 0.8rem; display: inline-flex;
+      align-items: center; gap: calc(var(--spacing-unit)*0.5);
+      border-radius: var(--border-radius-small); transition: color 0.2s ease-out;
+  }
+  .collapse-round-button:hover { color: var(--text-primary); }
+  .collapse-round-button svg { font-size: 0.9rem; }
+  
+  /* --- AI Code Block --- */
+  .block-type-ai-code .block-content-area {
+      background-color: var(--bg-secondary); border: 1px solid var(--border-color);
+      border-radius: var(--border-radius); overflow: hidden;
+  }
+  .code-block-container { border-radius: inherit; overflow: hidden; }
+  .code-block-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit) calc(var(--spacing-unit)*0.75) calc(var(--spacing-unit)*1.5);
+      background-color: var(--bg-tertiary); color: var(--text-muted);
+      font-size: 0.8rem; font-family: var(--code-font-family); border-bottom: 1px solid var(--border-color);
+  }
+  .code-block-header > div { display: flex; gap: calc(var(--spacing-unit)*0.5); }
+  .code-block-header .icon-button.subtle.small { color: var(--text-muted); font-size: 0.9rem; padding: calc(var(--spacing-unit)*0.5); }
+  .code-block-header .icon-button.subtle.small:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
+  .main-code-block pre {
+      margin: 0 !important; padding: var(--spacing-unit) calc(var(--spacing-unit)*1.5) !important;
+      border-radius: 0 !important; font-size: 0.875rem !important; background-color: transparent !important; line-height: 1.45 !important;
+  }
+  .main-code-block code { font-family: var(--code-font-family) !important; }
+  
+  /* --- Review Block --- */
+  .block-type-review .block-content-area {
+      background-color: var(--bg-secondary); border: 1px solid var(--border-color);
+      padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); border-radius: var(--border-radius);
+  }
+  .markdown-content { font-size: 0.9rem; line-height: 1.7; color: var(--text-secondary); }
+  .markdown-content p { margin-bottom: var(--spacing-unit); }
+  .markdown-content ul, .markdown-content ol { margin-left: calc(var(--spacing-unit) * 2); margin-bottom: var(--spacing-unit); }
+  .markdown-content li { margin-bottom: calc(var(--spacing-unit) * 0.5); }
+  .markdown-content strong { font-weight: 600; color: var(--text-primary); }
+  .markdown-content a { color: var(--text-accent); text-decoration: none; }
+  .markdown-content a:hover { text-decoration: underline; }
+  .markdown-content blockquote { border-left: 3px solid var(--border-color); padding-left: var(--spacing-unit); margin: var(--spacing-unit) 0; color: var(--text-muted); font-style: italic; }
+  /* Markdown Code Block (inside review/debug) */
+  .markdown-code-block { margin: var(--spacing-unit) 0; background-color: var(--code-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius-small); overflow: hidden; }
+  .markdown-code-block .code-block-header { padding: calc(var(--spacing-unit)*0.5) var(--spacing-unit) calc(var(--spacing-unit)*0.5) calc(var(--spacing-unit)*1); font-size: 0.75rem; }
+  .markdown-code-block .code-block-header .copy-button { color: var(--text-muted); font-size: 0.9rem; padding: calc(var(--spacing-unit)*0.5); background: none; border: none; cursor: pointer; }
+  .markdown-code-block .code-block-header .copy-button:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
+  .markdown-code-block .syntax-highlighter pre { margin: 0 !important; padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit) !important; border-radius: 0 !important; font-size: 0.8rem !important; background-color: transparent !important; line-height: 1.4 !important; }
+  .markdown-code-block .syntax-highlighter code { font-family: var(--code-font-family) !important; }
+  .inline-code { background-color: var(--bg-tertiary); color: var(--text-accent); padding: 0.1em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; font-family: var(--code-font-family); border: 1px solid var(--border-color); white-space: nowrap; }
+  
+  /* --- Execution Block --- */
+  .block-type-execution .block-content-area {
+      background-color: var(--bg-secondary); border: 1px solid var(--border-color);
+      padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); border-radius: var(--border-radius);
+  }
+  .execution-content { font-size: 0.85rem; }
+  .exec-message { font-style: italic; color: var(--text-muted); font-size: 0.85rem; margin-bottom: var(--spacing-unit);}
+  .output-section { margin-top: var(--spacing-unit); }
+  .output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .output-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; display: block; }
+  .expand-output-button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 4px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; border-radius: var(--border-radius-small); }
+  .expand-output-button:hover { background-color: var(--bg-tertiary); color: var(--text-primary); }
+  .expand-output-button svg { font-size: 0.8rem; }
+  .output-section pre.output-pre { background-color: var(--bg-tertiary); border: 1px solid var(--border-color-secondary); color: var(--text-secondary); padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit); margin-top: 0; border-radius: var(--border-radius-small); overflow: hidden; white-space: pre-wrap; word-break: break-all; font-family: var(--code-font-family); font-size: 0.8rem; transition: max-height 0.3s ease-in-out; max-height: var(--preview-height, 7.5em); }
+  .output-section pre.output-pre.expanded { max-height: 500px; overflow-y: auto; }
+  .output-section.stderr-section pre.output-pre { color: var(--danger-color); background-color: rgba(242, 139, 130, 0.05); border-color: rgba(242, 139, 130, 0.2); }
+  .return-code { margin-top: var(--spacing-unit); font-weight: 500; color: var(--text-muted); font-size: 0.8rem; }
+  
+  /* Style cho cảnh báo của execution */
+  .exec-warning {
+      color: var(--warning-color); /* Màu vàng */
+      background-color: rgba(253, 214, 99, 0.1); /* Nền vàng nhạt */
+      border: 1px solid rgba(253, 214, 99, 0.2); /* Viền vàng nhạt */
+      padding: var(--spacing-unit);
+      border-radius: var(--border-radius-small);
+      font-size: 0.875rem;
+      margin-bottom: var(--spacing-unit);
+      display: flex;
+      align-items: center;
+      gap: 5px; /* Khoảng cách giữa icon và text */
+   }
+  
+  
+  /* --- Debug Block --- */
+  .block-type-debug .block-content-area {
+      background-color: var(--bg-secondary); border: 1px solid var(--border-color);
+      padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); border-radius: var(--border-radius);
+  }
+  /* Style cho tiêu đề và khu vực cài đặt */
+  .debug-content h4 {
+      font-size: 0.9rem; color: var(--text-primary);
+      margin: calc(var(--spacing-unit)*1.5) 0 var(--spacing-unit) 0;
+      font-weight: 600;
+      border-top: 1px solid var(--border-color-secondary);
+      padding-top: calc(var(--spacing-unit)*1.5);
+      letter-spacing: 0.3px;
+  }
+  .debug-content h4:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+  .explanation-content { margin-bottom: calc(var(--spacing-unit) * 1.5); }
+  .install-suggestion-area { margin-top: calc(var(--spacing-unit) * 1.5); }
+  .install-suggestion-area p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--spacing-unit); }
+  .install-suggestion-area p code { background-color: var(--bg-tertiary); color: var(--text-accent); padding: 0.1em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; font-family: var(--code-font-family); border: 1px solid var(--border-color); white-space: nowrap; }
+  /* Style nút Install */
+  .install-library-button {
+      background-color: var(--bg-tertiary); border: 1px solid var(--border-color);
+      padding: calc(var(--spacing-unit)*0.7) calc(var(--spacing-unit)*1.2);
+      font-size: 0.85rem; font-weight: 500; color: var(--info-color); /* Màu xanh info */
+      border-color: rgba(var(--info-color), 0.3); /* Border màu info nhạt */
+      transition: all 0.15s ease-out; cursor: pointer; display: inline-flex;
+      align-items: center; gap: calc(var(--spacing-unit) * 0.75);
+      border-radius: var(--border-radius-small);
+  }
+  .install-library-button:hover:not(:disabled) { background-color: rgba(var(--info-color), 0.15); border-color: rgba(var(--info-color), 0.5); color: #99d9f7; }
+  .install-library-button svg { font-size: 1rem; }
+  .install-library-button span { font-family: var(--code-font-family); font-size: inherit; color: inherit; }
+  /* Code block trong debug (cho corrected code) */
+  .block-type-debug .code-block-container { margin-top: var(--spacing-unit); }
+  
+  /* --- Installation Block --- */
+  .block-type-installation .block-content-area {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2);
+      border-radius: var(--border-radius);
+  }
+  .installation-content { font-size: 0.9rem; }
+  .installation-content .install-message {
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+      margin-bottom: calc(var(--spacing-unit) * 1.5);
+      color: var(--text-primary);
+      line-height: 1.4;
+  }
+  .installation-content .install-message strong { /* Tên package */
+      color: var(--text-accent);
+      margin: 0 4px;
+      font-family: var(--code-font-family); /* Font code cho tên package */
+      font-size: 0.95em;
+  }
+  .installation-content.error .install-message {
+      color: var(--danger-color); /* Màu đỏ cho message lỗi */
+  }
+  .installation-content.error .install-message strong {
+       color: var(--danger-color); /* Tên package cũng màu đỏ */
+  }
+  /* Style cho output/error của pip */
+  .installation-content .output-section pre.output-pre {
+       font-size: 0.8rem; /* Font nhỏ hơn cho log */
+       max-height: var(--preview-height, 10em); /* Cho phép xem nhiều dòng hơn mặc định */
+       line-height: 1.4;
+       background-color: var(--bg-primary); /* Nền tối hơn */
+       border-color: var(--border-color);
+  }
+  .installation-content .output-section.stderr-section pre.output-pre {
+      color: var(--warning-color); /* Màu vàng cho lỗi/warning của pip */
+      background-color: rgba(253, 214, 99, 0.05);
+      border-color: rgba(253, 214, 99, 0.2);
+  }
+  
+  /* --- Loading & Error Block --- */
+  .block-type-loading .block-content-area { background-color: transparent; border: none; padding: 0; }
+  .loading-content { display: flex; align-items: center; gap: var(--spacing-unit); color: var(--text-muted); font-style: italic; font-size: 0.9rem; padding: calc(var(--spacing-unit)*0.5) 0; }
+  .loading-content svg { font-size: 1rem; }
+  .block-type-error .block-content-area { background-color: transparent; border: none; padding: 0; }
+  .error-inline { color: var(--danger-color); background-color: rgba(242, 139, 130, 0.1); border: 1px solid rgba(242, 139, 130, 0.2); padding: var(--spacing-unit); border-radius: var(--border-radius-small); font-size: 0.875rem; }
+  
+  /* --- Info Block --- */
+  .block-type-info .block-content-area { padding: 0; }
+  .info-message { /* Style cho chính text message */
+     color: var(--info-color); background-color: rgba(120, 201, 245, 0.1);
+     border: 1px solid rgba(120, 201, 245, 0.2); padding: var(--spacing-unit);
+     border-radius: var(--border-radius-small); font-size: 0.875rem;
+  }
+  
+  
+  /* --- Block Action Area --- */
+  .block-actions-area {
+      padding: 0; display: flex; gap: var(--spacing-unit); flex-wrap: wrap;
+      justify-content: flex-start; margin-top: calc(var(--spacing-unit) * 1.5);
+  }
+  .block-actions-area button {
+      background-color: var(--bg-tertiary); border: 1px solid var(--border-color);
+      padding: calc(var(--spacing-unit)*0.6) var(--spacing-unit); font-size: 0.8rem;
+      font-weight: 500; color: var(--text-secondary); transition: all 0.15s ease-out;
+  }
+  .block-actions-area button:hover:not(:disabled) { background-color: #40444b; border-color: #50555b; color: var(--text-primary); }
+  .block-actions-area button svg { font-size: 0.9rem; margin-right: calc(var(--spacing-unit)*0.5);}
+  .block-actions-area button.execute { color: var(--success-color); border-color: rgba(var(--success-color), 0.3); }
+  .block-actions-area button.execute:hover:not(:disabled) { background-color: rgba(var(--success-color), 0.15); border-color: rgba(var(--success-color), 0.5); }
+  .block-actions-area button.debug { color: var(--warning-color); border-color: rgba(var(--warning-color), 0.3); }
+  .block-actions-area button.debug:hover:not(:disabled) { background-color: rgba(var(--warning-color), 0.15); border-color: rgba(var(--warning-color), 0.5); }
+  .block-actions-area button.apply-code { color: var(--info-color); border-color: rgba(var(--info-color), 0.3); }
+  .block-actions-area button.apply-code:hover:not(:disabled) { background-color: rgba(var(--info-color), 0.15); border-color: rgba(var(--info-color), 0.5); }
+  
+  /* Nút Apply code trong Debug block */
+  .apply-action-area {
+      margin-top: var(--spacing-unit);
+      padding-top: var(--spacing-unit);
+      border-top: 1px solid var(--border-color-secondary);
+  }
+  
+  /* --- Style cho phần Suggestion & Nút Install Package trong Block Debug --- */
+  .install-suggestion-area {
+      margin-top: calc(var(--spacing-unit) * 1.5);
+      margin-bottom: calc(var(--spacing-unit) * 0.5);
+  }
+  
+  .install-package-button {
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--info-color); /* Màu xanh dương */
+      padding: calc(var(--spacing-unit)*0.6) var(--spacing-unit);
+      font-size: 0.8rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: calc(var(--spacing-unit) * 0.75);
+      border-radius: var(--border-radius-small);
+      cursor: pointer;
+      transition: all 0.15s ease-out;
+  }
+  .install-package-button:hover:not(:disabled) {
+      background-color: rgba(120, 201, 245, 0.15);
+      border-color: rgba(120, 201, 245, 0.4);
+      color: var(--accent-primary);
+  }
+  .install-package-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background-color: var(--bg-tertiary) !important;
+      color: var(--text-muted) !important;
+      border-color: var(--border-color) !important;
+  }
+  .install-package-button svg { font-size: 1rem; }
+  .install-package-button code {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 2px 5px;
+      border-radius: 3px;
+      margin-left: 4px;
+      font-family: var(--code-font-family);
+      font-size: 0.95em;
+      color: var(--text-accent);
+  }

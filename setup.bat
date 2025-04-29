@@ -1,9 +1,9 @@
 @echo off
 echo ==========================================================
-echo       Auto Setup ᓚᘏᗢ ^(Backend ^& Frontend^) 
+echo       Auto Setup ^(Backend ^& Frontend^) 
 echo ==========================================================
 echo.
-echo Kich ban nay se dung lai ^(pause^) sau cac buoc quan trong.
+echo Script nay se dung lai ^(pause^) sau cac buoc quan trong.
 echo Neu cua so dong ngay lap tuc o buoc "npm install",
 echo hay mo CMD, di chuyen toi thu muc 'frontend' va chay lenh: npm install
 echo De xem loi chi tiet.

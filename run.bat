@@ -1,9 +1,9 @@
 @echo off
 echo ==========================================================
-echo                Khoi Dong Ung Dung ᓚᘏᗢ
+echo                Khoi Dong Ung Dung 
 echo ==========================================================
 echo.
-echo Kich ban nay se mo HAI cua so lenh moi:
+echo Script nay se mo HAI cua so lenh moi:
 echo   1. Mot cua so de chay Backend Server (Python/Flask).
 echo   2. Mot cua so de chay Frontend Dev Server (Node/Vite).
 echo.

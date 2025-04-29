@@ -105,30 +105,36 @@ if %errorlevel% neq 0 (
 )
 echo [INFO] Da tim thay npm.
 echo.
-echo [*] Nhan phim bat ky de cai dat cac goi Node.js (npm install). Buoc nay co the mat vai phut...
+echo [*] Nhan phim bat ky de cai dat cac goi Node.js (npm install).
+echo     Output va loi (neu co) se duoc ghi vao file 'npm_install_log.txt'
+echo     trong thu muc goc du an (%cd%).
+echo     Buoc nay co the mat vai phut...
 pause
 echo.
 
 echo [INFO] Dang chay "npm install" trong thu muc 'frontend'...
-REM Chay npm install truc tiep trong thu muc frontend
-npm install --prefix frontend
+REM Chay npm install va GHI LOG vao file npm_install_log.txt o thu muc GOC (.)
+npm install --prefix frontend > npm_install_log.txt 2>&1
+set NPM_ERRORLEVEL=%errorlevel% REM Luu lai ma loi
 
-REM *** PAUSE NGAY SAU KHI NPM INSTALL CHAY XONG DE XEM OUTPUT ***
+REM *** LUON LUON PAUSE DE XEM LOG HOAC KET QUA ***
 echo.
-echo [DEBUG] Lenh "npm install --prefix frontend" DA CHAY XONG.
-echo        Kiem tra xem co thong bao loi/canh bao nao o tren khong.
-echo        Ma loi tra ve (0 la thanh cong): %errorlevel%
+echo [DEBUG] Lenh "npm install --prefix frontend" DA THUC THI XONG.
+echo        Ma loi tra ve: %NPM_ERRORLEVEL% (0 la thanh cong).
+echo        Vui long kiem tra file 'npm_install_log.txt' trong thu muc goc (%cd%)
+echo        de xem chi tiet output va loi (neu co).
 echo.
-echo [*] Nhan phim bat ky de tiep tuc kiem tra ket qua...
+echo [*] Nhan phim bat ky de tiep tuc kiem tra ma loi...
 pause
 echo.
 
 REM *** KIEM TRA LOI SAU KHI DA PAUSE ***
-if %errorlevel% neq 0 (
+if %NPM_ERRORLEVEL% neq 0 (
     echo.
-    echo [CANH BAO/LOI] "npm install" ket thuc voi ma loi %errorlevel%.
+    echo [CANH BAO/LOI] "npm install" ket thuc voi ma loi %NPM_ERRORLEVEL%.
     echo [CANH BAO/LOI] Ma loi khac 0 co the do loi thuc su HOAC chi la canh bao (vi du: vulnerabilities).
-    echo [CANH BAO/LOI] Vui long xem ky output o tren. Neu chi la canh bao (WARN), ban co the bo qua.
+    echo [CANH BAO/LOI] Vui long xem ky file 'npm_install_log.txt'.
+    echo [CANH BAO/LOI] Neu chi la canh bao (WARN), ban co the bo qua.
     echo [CANH BAO/LOI] Neu co loi (ERR!), hay thu chay lai lenh sau thu cong trong CMD tai thu muc goc du an:
     echo                 cd frontend ^&^& npm install
     echo.

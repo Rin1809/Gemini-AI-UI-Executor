@@ -34,6 +34,7 @@
   transform: translateX(100%); /* Ẩn bên phải */
   transition: transform 0.3s ease-in-out;
   overflow: hidden; /* Ngăn nội dung tràn ra ngoài */
+  border-top-left-radius: 30px;
 }
 .sidebar-container.open {
   transform: translateX(0); /* Hiện ra */

@@ -15,8 +15,8 @@ echo.
 
 REM --- Khoi dong Backend Server ---
 echo [+] Dang khoi dong Backend Server trong cua so moi...
-REM Dau tien kich hoat venv, sau do chay python app.py
-start "Backend Server" cmd /k "echo Dang kich hoat venv Backend... && backend\venv\Scripts\activate.bat && echo Dang chay Backend Server... && python backend/app.py"
+REM Dau tien chuyen ve thu muc goc cua script, sau do kich hoat venv va chay python
+start "Backend Server" cmd /k "echo Dang chuyen ve thu muc du an... && cd /d "%~dp0" && echo Dang kich hoat venv Backend... && backend\venv\Scripts\activate.bat && echo Dang chay Backend Server... && python backend/app.py"
 if %errorlevel% neq 0 (
     echo [LOI] Co loi khi co gang khoi dong Backend Server. Kiem tra cua so 'Backend Server'.
     goto :loi_thoat
@@ -29,8 +29,8 @@ timeout /t 2 /nobreak > nul
 
 REM --- Khoi dong Frontend Server ---
 echo [+] Dang khoi dong Frontend Dev Server trong cua so moi...
-REM Chuyen thu muc va chay npm run dev
-start "Frontend Server" cmd /k "echo Dang di chuyen toi thu muc Frontend... && cd frontend && echo Dang chay Frontend Server (npm run dev)... && npm run dev"
+REM Dau tien chuyen ve thu muc goc cua script, sau do vao frontend va chay npm
+start "Frontend Server" cmd /k "echo Dang chuyen ve thu muc du an... && cd /d "%~dp0" && echo Dang di chuyen toi thu muc Frontend... && cd frontend && echo Dang chay Frontend Server (npm run dev)... && npm run dev"
 if %errorlevel% neq 0 (
     echo [LOI] Co loi khi co gang khoi dong Frontend Server. Kiem tra cua so 'Frontend Server'.
     goto :loi_thoat

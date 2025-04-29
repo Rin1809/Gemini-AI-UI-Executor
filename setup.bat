@@ -92,32 +92,36 @@ if %errorlevel% neq 0 (
     cd ..
     goto :loi_thoat_co_pause
 )
-echo [DEBUG] Tim thay npm. Nhan phim bat ky de chay "npm install". Luu y buoc nay co the lau va co the khien cua so bi dong neu co loi nghiem trong.
+echo [DEBUG] Tim thay npm. Nhan phim bat ky de chay "npm install". Luu y buoc nay co the lau.
 pause
 echo.
 
 echo [INFO] Dang chay "npm install" ^(Co the mat vai phut^)...
 npm install
 
-REM *** KIEM TRA LOI NGAY SAU NPM INSTALL ***
-if %errorlevel% neq 0 (
-    echo.
-    echo [LOI] "npm install" THAT BAI voi ma loi: %errorlevel%.
-    echo [LOI] Nguyen nhan co the do loi mang, thieu quyen, xung dot goi,...
-    echo [LOI] Hay thu chay lai lenh sau thu cong trong CMD tai thu muc 'frontend':
-    echo   npm install
-    goto :loi_thoat_co_pause
-)
-
-REM *** PAUSE NGAY SAU KHI NPM INSTALL CHAY XONG (THANH CONG HAY KHONG) DE XEM OUTPUT ***
+REM *** PAUSE NGAY SAU KHI NPM INSTALL CHAY XONG DE XEM OUTPUT ***
 echo.
-echo [DEBUG] Lenh "npm install" DA CHAY XONG. Kiem tra xem co thong bao loi nao o tren khong. Ma loi tra ve: %errorlevel%.
-echo [DEBUG] Nhan phim bat ky de tiep tuc...
+echo [DEBUG] Lenh "npm install" DA CHAY XONG. Kiem tra xem co thong bao loi/canh bao nao o tren khong. Ma loi tra ve: %errorlevel%.
+echo [DEBUG] Nhan phim bat ky de kiem tra ket qua va tiep tuc...
 pause
 echo.
 
-REM Neu den duoc day va errorlevel la 0 thi moi la thanh cong
-echo [INFO] Da cai dat xong cac goi Node.js (Neu errorlevel o tren la 0).
+
+REM *** KIEM TRA LOI SAU KHI DA PAUSE ***
+if %errorlevel% neq 0 (
+    echo.
+    echo [CANH BAO/LOI] "npm install" ket thuc voi ma loi: %errorlevel%.
+    echo [CANH BAO/LOI] Ma loi khac 0 co the do loi thuc su HOAC chi la canh bao (vi du: vulnerabilities).
+    echo [CANH BAO/LOI] Vui long xem ky output o tren. Neu chi la vulnerabilities/warnings, ban co the bo qua.
+    echo [CANH BAO/LOI] Neu co loi khac, hay thu chay lai lenh sau thu cong trong CMD tai thu muc 'frontend':
+    echo   npm install
+    echo.
+    echo [DEBUG] Nhan phim bat ky de tiep tuc toi buoc tiep theo (hoac thoat neu loi nghiem trong)...
+    pause
+)
+
+
+echo [INFO] Da chay xong "npm install".
 echo [DEBUG] Nhan phim bat ky de thoat thu muc frontend...
 pause
 
@@ -136,7 +140,7 @@ goto :ket_thuc_co_pause
 
 :loi_thoat_co_pause
 echo.
-echo [!!!] Cai dat that bai do co loi. Cua so se dung lai de ban xem loi.
+echo [!!!] Cai dat that bai hoac co loi nghiem trong. Cua so se dung lai de ban xem loi.
 echo.
 pause
 goto :ket_thuc

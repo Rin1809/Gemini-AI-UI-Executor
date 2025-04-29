@@ -87,79 +87,45 @@ cd .. || ( echo [LOI] Khong the thoat khoi thu muc backend tam thoi. && goto :lo
 echo [+] Thiet lap Backend hoan tat.
 echo.
 echo [*] Nhan phim bat ky de bat dau thiet lap Frontend...
-pause
+pause  REM <--- Diem ban bi crash sau khi nhan phim
+
+echo [DEBUG] Da qua buoc pause chinh. Nhan phim de tiep tuc...
+pause  REM <--- Them PAUSE 1
+
 echo.
+echo [DEBUG] Da qua buoc echo rong. Nhan phim de tiep tuc...
+pause  REM <--- Them PAUSE 2
+
 
 REM === Thiet lap Frontend ===
 echo [+] Dang chuan bi thiet lap Frontend...
+echo [DEBUG] Da qua buoc echo header Frontend. Nhan phim de tiep tuc...
+pause  REM <--- Them PAUSE 3
+
 if not exist frontend (
     echo [LOI] Khong tim thay thu muc 'frontend' o thu muc goc.
     goto :loi_thoat_co_pause
 )
+echo [DEBUG] Da qua buoc kiem tra 'if not exist frontend'. Nhan phim de tiep tuc...
+pause  REM <--- Them PAUSE 4
+
 
 echo [INFO] Dang kiem tra npm (Node.js)...
-where npm >nul 2>nul
-if %errorlevel% neq 0 (
-    echo [LOI] Khong tim thay 'npm' trong PATH. Vui long cai dat Node.js (bao gom npm) va dam bao no nam trong PATH.
-    goto :loi_thoat_co_pause
-)
+
+echo [DEBUG] Da qua buoc kiem tra loi npm. Nhan phim de tiep tuc...
+pause REM <--- Them PAUSE 6
+
+REM --- Phan con lai cua Frontend (Mo cua so moi) ---
 echo [INFO] Da tim thay npm.
 echo.
-echo [*] Nhan phim bat ky de cai dat cac goi Node.js (npm install).
-echo     Output va loi (neu co) se duoc ghi vao file 'npm_install_log.txt'
-echo     trong thu muc goc du an (%cd%).
-echo     Buoc nay co the mat vai phut...
+echo [*] CHUAN BI MO CUA SO MOI DE CAI DAT FRONTEND (npm install).
+echo     Cua so moi nay se chi chay lenh 'cd frontend', 'npm install' va sau do 'pause'.
+echo     Hay quan sat xem no co hien thi loi nao tu npm install truoc khi pause khong.
+echo     Buoc nay co the mat vai phut.
+echo.
+echo [*] Nhan phim bat ky de mo cua so moi...
 pause
 echo.
 
-echo [INFO] Dang chay "npm install" trong thu muc 'frontend'...
-REM Chay npm install va GHI LOG vao file npm_install_log.txt o thu muc GOC (.)
-npm install --prefix frontend > npm_install_log.txt 2>&1
-set NPM_ERRORLEVEL=%errorlevel% REM Luu lai ma loi
-
-REM *** LUON LUON PAUSE DE XEM LOG HOAC KET QUA ***
-echo.
-echo [DEBUG] Lenh "npm install --prefix frontend" DA THUC THI XONG.
-echo        Ma loi tra ve: %NPM_ERRORLEVEL% (0 la thanh cong).
-echo        Vui long kiem tra file 'npm_install_log.txt' trong thu muc goc (%cd%)
-echo        de xem chi tiet output va loi (neu co).
-echo.
-echo [*] Nhan phim bat ky de tiep tuc kiem tra ma loi...
-pause
-echo.
-
-REM *** KIEM TRA LOI SAU KHI DA PAUSE ***
-if %NPM_ERRORLEVEL% neq 0 (
-    echo.
-    echo [CANH BAO/LOI] "npm install" ket thuc voi ma loi %NPM_ERRORLEVEL%.
-    echo [CANH BAO/LOI] Ma loi khac 0 co the do loi thuc su HOAC chi la canh bao (vi du: vulnerabilities).
-    echo [CANH BAO/LOI] Vui long xem ky file 'npm_install_log.txt'.
-    echo [CANH BAO/LOI] Neu chi la canh bao (WARN), ban co the bo qua.
-    echo [CANH BAO/LOI] Neu co loi (ERR!), hay thu chay lai lenh sau thu cong trong CMD tai thu muc goc du an:
-    echo                 cd frontend ^&^& npm install
-    echo.
-    echo [*] Nhan phim bat ky de tiep tuc (hoac dong cua so neu loi nghiem trong)...
-    pause
-)
-
-echo [+] Thiet lap Frontend hoan tat.
-echo.
-
-goto :ket_thuc_thanh_cong
-
-:loi_thoat_co_pause
-echo.
-echo [!!!] Cai dat that bai hoac co loi nghiem trong. Cua so se dung lai de ban xem loi.
-echo.
-pause
-exit /b 1
-
-:ket_thuc_thanh_cong
-echo ==========================================================
-echo                  CAI DAT HOAN TAT!
-echo ==========================================================
-echo.
-echo De chay ung dung, hay su dung file 'run.bat' trong thu muc 'windows'.
-echo.
-pause
-exit /b 0
+echo [INFO] Dang mo cua so moi de chay "npm install" trong thu muc 'frontend'...
+start "NPM Install Test - Kiem tra cua so nay" cmd /k "cd frontend && echo Da vao 'frontend'. Dang chay npm install... && npm install && echo. && echo === NPM INSTALL DA HOAN TAT  === && echo Neu khong thay loi nao o tren va thay dong nay, co the la OK. && echo  === Su dung run.bat === 

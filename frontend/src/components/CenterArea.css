@@ -1,493 +1,649 @@
 /* frontend/src/components/CenterArea.css */
 
-/* --- Kế thừa từ App.css hoặc định nghĩa tại đây --- */
-:root {
-    /*(các biến màu, font, spacing)*/
-    --border-radius: 8px;
-    --border-radius-small: 4px;
-    --spacing-unit: 8px;
-    --border-color: #303030;
-    --border-color-secondary: #202123;
-    --bg-primary: #131314;
-    --bg-secondary: #1e1f20;
-    --bg-tertiary: #2a2b2c;
-    --text-primary: #e3e3e3;
-    --text-secondary: #bdc1c6;
-    --text-muted: #85888c;
-    --text-accent: #8ab4f8;
-    --code-bg: #161617;
-    --code-font-family: 'Roboto Mono', monospace;
-    --success-color: #81c995;
-    --danger-color: #f28b82;
-    --warning-color: #fdd663;
-    --info-color: #78c9f5; /* Màu cho info */
-  }
-  
-  /* --- Main Layout --- */
-  .center-area-wrapper {
-      display: flex; flex-direction: column;
-      height: 100%;
-      background-color: var(--bg-primary);
-      overflow: hidden;
-      width: 100%; max-width: 100%;
-  }
-  
-  .top-bar {
-    padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit) * 3);
-    border-bottom: 1px solid #131314;
-    background-color: var(--bg-primary);
-    flex-shrink: 0;
+/* Kế thừa biến từ App.css */
+
+/* --- Center Area Layout --- */
+.center-area-wrapper {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .top-bar h2 { color: var(--text-primary); font-size: 1.1rem; font-weight: 600; margin: 0; }
-  .settings-trigger-button { color: var(--text-muted); }
-  .settings-trigger-button:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
-  
-  .interaction-container {
-      flex-grow: 1;
-      overflow-y: auto;
-      padding: 0 calc(var(--spacing-unit) * 3);
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-  }
-  
-  /* --- Interaction Round & Placeholder --- */
-  .interaction-round { border-bottom: 1px solid var(--border-color-secondary); margin: 0; padding: 0; }
-  .interaction-round:last-child { border-bottom: none; }
-  .placeholder-round { border-bottom: 1px solid var(--border-color-secondary); }
-  .placeholder-round:last-child { border-bottom: none; }
-  
-  /* --- General Interaction Block --- */
-  .interaction-block {
-      display: flex; gap: var(--spacing-unit); align-items: flex-start;
-      max-width: 850px; margin-left: auto; margin-right: auto; width: 100%;
-      padding: calc(var(--spacing-unit) * 1.5) 0; position: relative;
-  }
-  
-  /* Animation cho block mới xuất hiện */
-  @keyframes slideInUpFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  .interaction-block.newly-added { animation: slideInUpFade 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
-  
-  .block-avatar { margin-top: calc(var(--spacing-unit)*0.25); flex-shrink: 0; }
-  .block-icon {
-      font-size: 1.1rem; color: var(--text-muted); width: 32px; height: 32px;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 50%; background-color: var(--bg-secondary); border: 1px solid var(--border-color);
-  }
-  /* Icon styles per type */
-  .block-icon.user-icon { background-color: var(--accent-primary); color: var(--bg-primary); }
-  .block-icon.ai-icon { background-color: #9333ea; color: white; }
-  .block-icon.review-icon { background-color: #34a853; color: white;}
-  .block-icon.execution-icon.success { background-color: var(--bg-tertiary); }
-  .block-icon.execution-icon.success svg { color: var(--success-color); }
-  .block-icon.execution-icon.error { background-color: var(--bg-tertiary); }
-  .block-icon.execution-icon.error svg { color: var(--danger-color); }
-  .block-icon.debug-icon { background-color: #fbbc04; color: var(--bg-primary);}
-  .block-icon.loading-icon { background-color: var(--bg-tertiary); }
-  .block-icon.error-icon { background-color: var(--bg-tertiary); }
-  .block-icon.error-icon svg { color: var(--danger-color); }
-  .block-icon.info-icon { background-color: var(--bg-tertiary); } /* Style icon info */
-  .block-icon.info-icon svg { color: var(--info-color); } /* Style icon info */
-  .block-icon.installation-icon { background-color: var(--bg-tertiary); } /* Style icon install */
-  .block-icon.installation-icon.success svg { color: var(--success-color); } /* Style icon install success */
-  .block-icon.installation-icon.error svg { color: var(--danger-color); } /* Style icon install error */
-  
-  
-  .block-main-content { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: calc(var(--spacing-unit) * 1); }
-  .block-content-area { padding: 0; border-radius: var(--border-radius); }
-  
-  /* --- User Block Specific Styles --- */
-  .block-type-user .block-header.user-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: calc(var(--spacing-unit) * 0.5); }
-  .user-header-title { font-weight: 500; color: var(--text-primary); font-size: 0.9rem; text-transform: none; letter-spacing: normal; }
-  .block-timestamp { font-size: 0.75rem; color: var(--text-muted); }
-  .block-type-user .block-content-area { background-color: transparent; border: none; }
-  .block-type-user .prompt-text { color: var(--text-primary); font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; font-weight: 400; padding: 0; }
-  
-  /* --- Collapsed Section Block (FIXED) --- */
-  .collapsed-section-block {
-    background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius);
-    padding: calc(var(--spacing-unit)*1.25) calc(var(--spacing-unit) * 1.5);
-    margin-bottom: var(--spacing-unit); cursor: pointer;
-    transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
-    display: flex; flex-direction: column; gap: calc(var(--spacing-unit) * 0.5);
-    /* --- FIX: Add max-width and margin auto --- */
-    max-width: 850px; /* Giống .interaction-block */
-    margin-left: auto;
-    margin-right: auto;
-    width: 100%; /* Đảm bảo chiếm đủ không gian tới max-width */
-    /* --- End FIX --- */
-  }
-  .collapsed-section-block.interactive:hover { background-color: var(--bg-tertiary); border-color: #444; } /* Add .interactive for clarity */
-  .collapsed-section-header { display: flex; justify-content: space-between; align-items: center; }
-  .collapsed-title-group { display: flex; align-items: center; gap: calc(var(--spacing-unit) * 0.75); }
-  .collapsed-sparkle-icon { color: var(--text-accent); font-size: 1rem; }
-  .collapsed-title-text { font-weight: 500; color: var(--text-primary); font-size: 0.9rem; }
-  .block-timestamp.collapsed-timestamp { font-size: 0.75rem; margin-left: auto; }
-  .collapsed-section-body { margin-top: 2px; }
-  .collapsed-prompt-summary { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin: 0; padding-left: calc(1rem + var(--spacing-unit) * 0.75); }
-  .collapsed-section-footer { display: flex; justify-content: space-between; align-items: center; margin-top: calc(var(--spacing-unit) * 0.75); padding-left: calc(1rem + var(--spacing-unit) * 0.75); }
-  .expand-prompt-text { font-size: 0.8rem; color: var(--text-muted); }
-  .expand-icon { color: var(--text-muted); font-size: 1rem; }
-  
-  /* --- Collapsible Content & Animation (FIXED) --- */
-  .collapsible-content {
-    overflow: hidden;
-    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-in-out, margin-top 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-top-color 0.35s ease-out;
-    max-height: 0; opacity: 0; border-top: 1px solid transparent; margin-top: 0;
-    /* --- FIX: Remove margin-left, add max-width and margin auto --- */
-    /* Xóa: margin-left: calc(32px + var(--spacing-unit)); */
-    max-width: 850px; /* Giống .interaction-block */
+    flex-direction: column;
+    height: 100%; /* Chiếm hết chiều cao còn lại */
+    background-color: var(--bg-primary);
+    overflow: hidden; /* Ngăn cuộn ở đây */
+    width: 100%;
+    max-width: 100%;
+}
+
+/* --- Top Bar --- */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 3);
+  border-bottom: 1px solid #131314; /* Đường kẻ phaan cách */
+  background-color: var(--bg-primary);
+  flex-shrink: 0; /* Không co lại */
+}
+.top-bar h2 {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+.settings-trigger-button {
+  color: var(--text-muted);
+}
+.settings-trigger-button:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+}
+
+/* --- Interaction Container (Scrollable Area) --- */
+.interaction-container {
+    flex-grow: 1; /* Chiếm không gian còn lại */
+    overflow-y: auto; /* Cho phép cuộn dọc */
+    padding: 0 calc(var(--spacing-unit) * 3); /* Padding trái phải */
+    display: flex;
+    flex-direction: column;
+    gap: 0; /* Không cần gap vì dùng border */
+}
+
+/* --- Interaction Round Separator --- */
+.interaction-round {
+  /*  padding trên dưới cho khoảng cách giữa các round */
+  padding: calc(var(--spacing-unit) * 1) 0;
+  border-bottom: 1px solid var(--border-color-secondary);
+  margin: 0;
+}
+.interaction-round:last-child {
+  border-bottom: none;
+}
+.placeholder-round { /* Dùng cho lỗi khởi tạo */
+    border-bottom: 1px solid var(--border-color-secondary);
+}
+.placeholder-round:last-child { border-bottom: none; }
+
+
+/* --- Base Interaction Block Layout --- */
+.interaction-block {
+    display: flex;
+    gap: var(--spacing-unit);
+    align-items: flex-start;
+    max-width: var(--max-content-width); /* Giới hạn chiều rộng */
     margin-left: auto;
     margin-right: auto;
     width: 100%;
-    /* --- End FIX --- */
-    display: block; will-change: max-height, opacity; box-sizing: border-box;
-  }
-  .collapsible-content.expanded {
-    max-height: 5000px; /* Increase max-height */
-    opacity: 1; border-top-color: var(--border-color-secondary); margin-top: calc(var(--spacing-unit) * 1.5);
-  }
-  
-  /* --- Collapse Round Button (FIXED) --- */
-  .collapse-round-wrapper {
-      text-align: left;
-      margin-top: calc(var(--spacing-unit) * 1.5);
-      padding-top: calc(var(--spacing-unit) * 1.5);
-      border-top: 1px solid var(--border-color-secondary);
-      padding-bottom: var(--spacing-unit);
-      box-sizing: border-box;
-      /* --- FIX: Add max-width and margin auto, adjust padding-left --- */
-      max-width: 850px; /* Giống .interaction-block */
-      margin-left: auto;
-      margin-right: auto;
-      width: 100%;
-      padding-left: calc(var(--spacing-unit) * 1); /* Điều chỉnh nếu cần để nút thụt vào */
-      /* --- End FIX --- */
-  }
-  .collapse-round-button {
-      background: none; border: none; color: var(--text-muted); cursor: pointer;
-      padding: calc(var(--spacing-unit)*0.5) 0; font-size: 0.8rem; display: inline-flex;
-      align-items: center; gap: calc(var(--spacing-unit)*0.5);
-      border-radius: var(--border-radius-small); transition: color 0.2s ease-out;
-  }
-  .collapse-round-button:hover { color: var(--text-primary); }
-  .collapse-round-button svg { font-size: 0.9rem; }
-  
-  /* --- AI Code Block --- */
-  .block-type-ai-code .block-content-area {
-      background-color: var(--bg-secondary); border: 1px solid var(--border-color);
-      border-radius: var(--border-radius); overflow: hidden;
-  }
-  .code-block-container { border-radius: inherit; overflow: hidden; }
-  .code-block-header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit) calc(var(--spacing-unit)*0.75) calc(var(--spacing-unit)*1.5);
-      background-color: var(--bg-tertiary); color: var(--text-muted);
-      font-size: 0.8rem; font-family: var(--code-font-family); border-bottom: 1px solid var(--border-color);
-  }
-  .code-block-header > div { display: flex; gap: calc(var(--spacing-unit)*0.5); }
-  .code-block-header .icon-button.subtle.small { color: var(--text-muted); font-size: 0.9rem; padding: calc(var(--spacing-unit)*0.5); }
-  .code-block-header .icon-button.subtle.small:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
-  .main-code-block pre {
-      margin: 0 !important; padding: var(--spacing-unit) calc(var(--spacing-unit)*1.5) !important;
-      border-radius: 0 !important; font-size: 0.875rem !important; background-color: transparent !important; line-height: 1.45 !important;
-  }
-  .main-code-block code { font-family: var(--code-font-family) !important; }
-  
-  /* --- Review Block --- */
-  .block-type-review .block-content-area {
-      background-color: var(--bg-secondary); border: 1px solid var(--border-color);
-      padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); border-radius: var(--border-radius);
-  }
-  .markdown-content { font-size: 0.9rem; line-height: 1.7; color: var(--text-secondary); }
-  .markdown-content p { margin-bottom: var(--spacing-unit); }
-  .markdown-content ul, .markdown-content ol { margin-left: calc(var(--spacing-unit) * 2); margin-bottom: var(--spacing-unit); }
-  .markdown-content li { margin-bottom: calc(var(--spacing-unit) * 0.5); }
-  .markdown-content strong { font-weight: 600; color: var(--text-primary); }
-  .markdown-content a { color: var(--text-accent); text-decoration: none; }
-  .markdown-content a:hover { text-decoration: underline; }
-  .markdown-content blockquote { border-left: 3px solid var(--border-color); padding-left: var(--spacing-unit); margin: var(--spacing-unit) 0; color: var(--text-muted); font-style: italic; }
-  /* Markdown Code Block (inside review/debug) */
-  .markdown-code-block { margin: var(--spacing-unit) 0; background-color: var(--code-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius-small); overflow: hidden; }
-  .markdown-code-block .code-block-header { padding: calc(var(--spacing-unit)*0.5) var(--spacing-unit) calc(var(--spacing-unit)*0.5) calc(var(--spacing-unit)*1); font-size: 0.75rem; }
-  .markdown-code-block .code-block-header .copy-button { color: var(--text-muted); font-size: 0.9rem; padding: calc(var(--spacing-unit)*0.5); background: none; border: none; cursor: pointer; }
-  .markdown-code-block .code-block-header .copy-button:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
-  .markdown-code-block .syntax-highlighter pre { margin: 0 !important; padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit) !important; border-radius: 0 !important; font-size: 0.8rem !important; background-color: transparent !important; line-height: 1.4 !important; }
-  .markdown-code-block .syntax-highlighter code { font-family: var(--code-font-family) !important; }
-  .inline-code { background-color: var(--bg-tertiary); color: var(--text-accent); padding: 0.1em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; font-family: var(--code-font-family); border: 1px solid var(--border-color); white-space: nowrap; }
-  
-  /* --- Execution Block --- */
-  .block-type-execution .block-content-area {
-      background-color: var(--bg-secondary); border: 1px solid var(--border-color);
-      padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); border-radius: var(--border-radius);
-  }
-  .execution-content { font-size: 0.85rem; }
-  .exec-message { font-style: italic; color: var(--text-muted); font-size: 0.85rem; margin-bottom: var(--spacing-unit);}
-  .output-section { margin-top: var(--spacing-unit); }
-  .output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-  .output-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; display: block; }
-  .expand-output-button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 4px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; border-radius: var(--border-radius-small); }
-  .expand-output-button:hover { background-color: var(--bg-tertiary); color: var(--text-primary); }
-  .expand-output-button svg { font-size: 0.8rem; }
-  .output-section pre.output-pre { background-color: var(--bg-tertiary); border: 1px solid var(--border-color-secondary); color: var(--text-secondary); padding: calc(var(--spacing-unit)*0.75) var(--spacing-unit); margin-top: 0; border-radius: var(--border-radius-small); overflow: hidden; white-space: pre-wrap; word-break: break-all; font-family: var(--code-font-family); font-size: 0.8rem; transition: max-height 0.3s ease-in-out; max-height: var(--preview-height, 7.5em); }
-  .output-section pre.output-pre.expanded { max-height: 500px; overflow-y: auto; }
-  .output-section.stderr-section pre.output-pre { color: var(--danger-color); background-color: rgba(242, 139, 130, 0.05); border-color: rgba(242, 139, 130, 0.2); }
-  .return-code { margin-top: var(--spacing-unit); font-weight: 500; color: var(--text-muted); font-size: 0.8rem; }
-  
-  /* Style cho cảnh báo của execution */
-  .exec-warning {
-      color: var(--warning-color); /* Màu vàng */
-      background-color: rgba(253, 214, 99, 0.1); /* Nền vàng nhạt */
-      border: 1px solid rgba(253, 214, 99, 0.2); /* Viền vàng nhạt */
-      padding: var(--spacing-unit);
-      border-radius: var(--border-radius-small);
-      font-size: 0.875rem;
-      margin-bottom: var(--spacing-unit);
-      display: flex;
-      align-items: center;
-      gap: 5px; /* Khoảng cách giữa icon và text */
-   }
-  
-  
-  /* --- Debug Block --- */
-  .block-type-debug .block-content-area {
-      background-color: var(--bg-secondary); border: 1px solid var(--border-color);
-      padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2); border-radius: var(--border-radius);
-  }
-  /* Style cho tiêu đề và khu vực cài đặt */
-  .debug-content h4 {
-      font-size: 0.9rem; color: var(--text-primary);
-      margin: calc(var(--spacing-unit)*1.5) 0 var(--spacing-unit) 0;
-      font-weight: 600;
-      border-top: 1px solid var(--border-color-secondary);
-      padding-top: calc(var(--spacing-unit)*1.5);
-      letter-spacing: 0.3px;
-  }
-  .debug-content h4:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
-  .explanation-content { margin-bottom: calc(var(--spacing-unit) * 1.5); }
-  .install-suggestion-area { margin-top: calc(var(--spacing-unit) * 1.5); }
-  .install-suggestion-area p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--spacing-unit); }
-  .install-suggestion-area p code { background-color: var(--bg-tertiary); color: var(--text-accent); padding: 0.1em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; font-family: var(--code-font-family); border: 1px solid var(--border-color); white-space: nowrap; }
-  /* Style nút Install */
-  .install-library-button {
-      background-color: var(--bg-tertiary); border: 1px solid var(--border-color);
-      padding: calc(var(--spacing-unit)*0.7) calc(var(--spacing-unit)*1.2);
-      font-size: 0.85rem; font-weight: 500; color: var(--info-color); /* Màu xanh info */
-      border-color: rgba(var(--info-color), 0.3); /* Border màu info nhạt */
-      transition: all 0.15s ease-out; cursor: pointer; display: inline-flex;
-      align-items: center; gap: calc(var(--spacing-unit) * 0.75);
-      border-radius: var(--border-radius-small);
-  }
-  .install-library-button:hover:not(:disabled) { background-color: rgba(var(--info-color), 0.15); border-color: rgba(var(--info-color), 0.5); color: #99d9f7; }
-  .install-library-button svg { font-size: 1rem; }
-  .install-library-button span { font-family: var(--code-font-family); font-size: inherit; color: inherit; }
-  /* Code block trong debug (cho corrected code) */
-  .block-type-debug .code-block-container { margin-top: var(--spacing-unit); }
-  
-  /* --- Installation Block --- */
-  .block-type-installation .block-content-area {
-      background-color: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2);
-      border-radius: var(--border-radius);
-  }
-  .installation-content { font-size: 0.9rem; }
-  .installation-content .install-message {
-      display: flex;
-      align-items: center;
-      font-weight: 500;
-      margin-bottom: calc(var(--spacing-unit) * 1.5);
-      color: var(--text-primary);
-      line-height: 1.4;
-  }
-  .installation-content .install-message strong { /* Tên package */
-      color: var(--text-accent);
-      margin: 0 4px;
-      font-family: var(--code-font-family); /* Font code cho tên package */
-      font-size: 0.95em;
-  }
-  .installation-content.error .install-message {
-      color: var(--danger-color); /* Màu đỏ cho message lỗi */
-  }
-  .installation-content.error .install-message strong {
-       color: var(--danger-color); /* Tên package cũng màu đỏ */
-  }
-  /* Style cho output/error của pip */
-  .installation-content .output-section pre.output-pre {
-       font-size: 0.8rem; /* Font nhỏ hơn cho log */
-       max-height: var(--preview-height, 10em); /* Cho phép xem nhiều dòng hơn mặc định */
-       line-height: 1.4;
-       background-color: var(--bg-primary); /* Nền tối hơn */
-       border-color: var(--border-color);
-  }
-  .installation-content .output-section.stderr-section pre.output-pre {
-      color: var(--warning-color); /* Màu vàng cho lỗi/warning của pip */
-      background-color: rgba(253, 214, 99, 0.05);
-      border-color: rgba(253, 214, 99, 0.2);
-  }
-  
-  /* --- Loading & Error Block --- */
-  .block-type-loading .block-content-area { background-color: transparent; border: none; padding: 0; }
-  .loading-content { display: flex; align-items: center; gap: var(--spacing-unit); color: var(--text-muted); font-style: italic; font-size: 0.9rem; padding: calc(var(--spacing-unit)*0.5) 0; }
-  .loading-content svg { font-size: 1rem; }
-  .block-type-error .block-content-area { background-color: transparent; border: none; padding: 0; }
-  .error-inline { color: var(--danger-color); background-color: rgba(242, 139, 130, 0.1); border: 1px solid rgba(242, 139, 130, 0.2); padding: var(--spacing-unit); border-radius: var(--border-radius-small); font-size: 0.875rem; }
-  
-  /* --- Info Block --- */
-  .block-type-info .block-content-area { padding: 0; }
-  .info-message { /* Style cho chính text message */
-     color: var(--info-color); background-color: rgba(120, 201, 245, 0.1);
-     border: 1px solid rgba(120, 201, 245, 0.2); padding: var(--spacing-unit);
-     border-radius: var(--border-radius-small); font-size: 0.875rem;
-  }
-  
-  
-  /* --- Block Action Area --- */
-  .block-actions-area {
-      padding: 0; display: flex; gap: var(--spacing-unit); flex-wrap: wrap;
-      justify-content: flex-start; margin-top: calc(var(--spacing-unit) * 1.5);
-  }
-  .block-actions-area button {
-      background-color: var(--bg-tertiary); border: 1px solid var(--border-color);
-      padding: calc(var(--spacing-unit)*0.6) var(--spacing-unit); font-size: 0.8rem;
-      font-weight: 500; color: var(--text-secondary); transition: all 0.15s ease-out;
-  }
-  .block-actions-area button:hover:not(:disabled) { background-color: #40444b; border-color: #50555b; color: var(--text-primary); }
-  .block-actions-area button svg { font-size: 0.9rem; margin-right: calc(var(--spacing-unit)*0.5);}
-  .block-actions-area button.execute { color: var(--success-color); border-color: rgba(var(--success-color), 0.3); }
-  .block-actions-area button.execute:hover:not(:disabled) { background-color: rgba(var(--success-color), 0.15); border-color: rgba(var(--success-color), 0.5); }
-  .block-actions-area button.debug { color: var(--warning-color); border-color: rgba(var(--warning-color), 0.3); }
-  .block-actions-area button.debug:hover:not(:disabled) { background-color: rgba(var(--warning-color), 0.15); border-color: rgba(var(--warning-color), 0.5); }
-  .block-actions-area button.apply-code { color: var(--info-color); border-color: rgba(var(--info-color), 0.3); }
-  .block-actions-area button.apply-code:hover:not(:disabled) { background-color: rgba(var(--info-color), 0.15); border-color: rgba(var(--info-color), 0.5); }
-  
-  /* Nút Apply code trong Debug block */
-  .apply-action-area {
-      margin-top: var(--spacing-unit);
-      padding-top: var(--spacing-unit);
-      border-top: 1px solid var(--border-color-secondary);
-  }
-  
-  /* --- Style cho phần Suggestion & Nút Install Package trong Block Debug --- */
-  .install-suggestion-area {
-      margin-top: calc(var(--spacing-unit) * 1.5);
-      margin-bottom: calc(var(--spacing-unit) * 0.5);
-  }
-  
-  .install-package-button {
-      background-color: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      color: var(--info-color); /* Màu xanh dương */
-      padding: calc(var(--spacing-unit)*0.6) var(--spacing-unit);
-      font-size: 0.8rem;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: calc(var(--spacing-unit) * 0.75);
-      border-radius: var(--border-radius-small);
-      cursor: pointer;
-      transition: all 0.15s ease-out;
-  }
-  .install-package-button:hover:not(:disabled) {
-      background-color: rgba(120, 201, 245, 0.15);
-      border-color: rgba(120, 201, 245, 0.4);
-      color: var(--accent-primary);
-  }
-  .install-package-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      background-color: var(--bg-tertiary) !important;
-      color: var(--text-muted) !important;
-      border-color: var(--border-color) !important;
-  }
-  .install-package-button svg { font-size: 1rem; }
-  .install-package-button code {
-      background-color: rgba(255, 255, 255, 0.1);
-      padding: 2px 5px;
-      border-radius: 3px;
-      margin-left: 4px;
-      font-family: var(--code-font-family);
-      font-size: 0.95em;
-      color: var(--text-accent);
-  }
+    padding: calc(var(--spacing-unit) * 1.5) 0; /* Padding trên dưới cho mỗi block */
+    position: relative;
+}
 
+/* Animation cho block mới */
+@keyframes slideInUpFade {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.interaction-block.newly-added {
+  animation: slideInUpFade 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
 
-/* Style cho nút Giải thích */
-.block-actions-area button.explain, /* Nếu dùng chung class */
-.explain-action-area button { /* Nếu dùng class riêng */
-    color: var(--info-color); /* Màu xanh dương */
-    border-color: rgba(120, 201, 245, 0.3); /* Màu viền nhạt */
-    background-color: var(--bg-tertiary);
-    /* Kế thừa padding, font-size, font-weight từ .block-actions-area button nếu muốn */
-    padding: calc(var(--spacing-unit)*0.6) var(--spacing-unit);
-    font-size: 0.8rem;
-    font-weight: 500;
-    /* Các thuộc tính button chung khác */
-    display: inline-flex;
+/* Block Avatar/Icon */
+.block-avatar {
+  margin-top: calc(var(--spacing-unit) * 0.25); /* Align icon với dòng text đầu */
+  flex-shrink: 0;
+}
+.block-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
     align-items: center;
-    gap: calc(var(--spacing-unit) * 0.5);
-    border-radius: var(--border-radius-small);
-    cursor: pointer;
-    transition: all 0.15s ease-out;
-}
-.block-actions-area button.explain:hover:not(:disabled),
-.explain-action-area button:hover:not(:disabled) {
-    background-color: rgba(120, 201, 245, 0.1);
-    border-color: rgba(120, 201, 245, 0.5);
-    color: var(--accent-primary);
-}
-.block-actions-area button.explain:disabled,
-.explain-action-area button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background-color: var(--bg-tertiary) !important;
-    color: var(--text-muted) !important;
-    border-color: var(--border-color) !important;
-}
-.block-actions-area button.explain svg,
-.explain-action-area button svg {
-    font-size: 0.9rem;
-    /* margin-right đã có trong gap */
-}
-
-/* --- Style cho khối Explanation mới --- */
-.block-type-explanation .block-content-area {
+    justify-content: center;
+    border-radius: 50%;
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
-    padding: calc(var(--spacing-unit)*1.5) calc(var(--spacing-unit)*2);
-    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    color: var(--text-muted); /* Màu mặc định */
 }
-.explanation-content { /* Style cho nội dung Markdown bên trong */
-     font-size: 0.9rem; line-height: 1.7; color: var(--text-secondary);
-}
-/* Kế thừa các style Markdown khác từ .markdown-content nếu cần */
-.explanation-content p { margin-bottom: var(--spacing-unit); }
-.explanation-content ul, .explanation-content ol { margin-left: calc(var(--spacing-unit) * 2); margin-bottom: var(--spacing-unit); }
-.explanation-content li { margin-bottom: calc(var(--spacing-unit) * 0.5); }
-.explanation-content strong { font-weight: 600; color: var(--text-primary); }
-.explanation-content a { color: var(--text-accent); text-decoration: none; }
-.explanation-content a:hover { text-decoration: underline; }
-.explanation-content blockquote { border-left: 3px solid var(--border-color); padding-left: var(--spacing-unit); margin: var(--spacing-unit) 0; color: var(--text-muted); font-style: italic; }
-.explanation-content .markdown-code-block { margin: var(--spacing-unit) 0; } /* Style code block nếu có */
-.explanation-content .inline-code { /* Style code inline nếu có */
-    background-color: var(--bg-tertiary); color: var(--text-accent); padding: 0.1em 0.4em;
-    border-radius: var(--border-radius-small); font-size: 0.85em; font-family: var(--code-font-family);
-    border: 1px solid var(--border-color); white-space: nowrap;
-}
-.explanation-content .error-inline { /* Style khi có lỗi giải thích */
-     margin-bottom: 0; /* Bỏ margin nếu không cần */
-     color: var(--danger-color); background-color: rgba(242, 139, 130, 0.1);
-     border: 1px solid rgba(242, 139, 130, 0.2); padding: var(--spacing-unit);
-     border-radius: var(--border-radius-small); font-size: 0.875rem;
+/* Icon styles per type */
+.block-icon.user-icon        { background-color: var(--accent-primary); color: var(--bg-primary); }
+.block-icon.ai-icon          { background-color: #9333ea; color: white; } /*  cho AI */
+.block-icon.review-icon      { background-color: #34a853; color: white; } /*  cho review */
+.block-icon.execution-icon   { background-color: var(--bg-tertiary); }
+.block-icon.execution-icon.success svg { color: var(--success-color); }
+.block-icon.execution-icon.error   svg { color: var(--danger-color); }
+.block-icon.debug-icon       { background-color: #fbbc04; color: var(--bg-primary); } /* cho debug */
+.block-icon.loading-icon     { background-color: var(--bg-tertiary); }
+.block-icon.error-icon       { background-color: var(--bg-tertiary); }
+.block-icon.error-icon svg   { color: var(--danger-color); }
+.block-icon.installation-icon { background-color: var(--bg-tertiary); }
+.block-icon.installation-icon.success svg { color: var(--success-color); }
+.block-icon.installation-icon.error svg { color: var(--danger-color); }
+.block-icon.info-icon        { background-color: var(--bg-tertiary); } /* explanation */
+.block-icon.info-icon svg    { color: var(--info-color); }
+
+
+/* Block Main Content Area */
+.block-main-content {
+  flex-grow: 1; /* Chiếm hết không gian còn lại */
+  min-width: 0; /* Cho phép nội dung co lại */
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-unit) * 1); /* Khoảng cách giữa header, content, actions */
 }
 
-/* Icon cho khối Explanation (Dùng lại style info-icon) */
-.block-icon.info-icon {
-   background-color: var(--bg-tertiary);
+
+/* Container cho nội dung chính (code, markdown, output) */
+.block-content-area {
+  border-radius: var(--border-radius);
+  /* Padding/background/border sẽ được định nghĩa theo từng loại block */
 }
-.block-icon.info-icon svg {
-   color: var(--info-color); /* Màu xanh dương */
+.block-timestamp {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-left: auto; /* Đẩy timestamp sang phải */
 }
+
+
+/* --- User Block Styles --- */
+.block-type-user .block-header.user-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: calc(var(--spacing-unit) * 0.5);
+}
+.user-header-title {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+.block-type-user .block-content-area {
+    /* User prompt không cần background/border */
+}
+.block-type-user .prompt-text {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    white-space: pre-wrap; /* xuống dòng và khoảng trắng */
+    word-break: break-word; /* Ngắt từ nếu quá dài */
+}
+
+/* --- Collapsed Section Block --- */
+.collapsed-section-block {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-unit) * 0.5);
+  padding: calc(var(--spacing-unit) * 1.25) calc(var(--spacing-unit) * 1.5);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
+  /* Căn giữa và giới hạn chiều rộng */
+  max-width: var(--max-content-width);
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+.collapsed-section-block:hover {
+  background-color: var(--bg-tertiary);
+  border-color: #444;
+}
+.collapsed-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.collapsed-title-group {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing-unit) * 0.75);
+}
+.collapsed-sparkle-icon {
+  color: var(--text-accent);
+  font-size: 1rem;
+}
+.collapsed-title-text {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+.block-timestamp.collapsed-timestamp {
+  margin-left: 0; /* Ghi đè margin auto */
+}
+.collapsed-section-body {
+  margin-top: 2px;
+}
+.collapsed-prompt-summary {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin: 0;
+  padding-left: calc(1rem + var(--spacing-unit) * 0.75); /* Thụt lề */
+}
+.collapsed-section-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: calc(var(--spacing-unit) * 0.75);
+  padding-left: calc(1rem + var(--spacing-unit) * 0.75); /* Thụt lề */
+}
+.expand-prompt-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.expand-icon {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+/* --- Collapsible Content Area --- */
+.collapsible-content {
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-in-out, margin-top 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  /* Căn giữa và giới hạn chiều rộng */
+  max-width: var(--max-content-width);
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước */
+}
+.collapsible-content.expanded {
+  max-height: 5000px; /* Đủ lớn để chứa nhiều block */
+  opacity: 1;
+  margin-top: calc(var(--spacing-unit) * 1.5); /* Khoảng cách với block user */
+  
+}
+/* Nút thu gọn bên trong collapsible content */
+.collapse-round-wrapper {
+  text-align: left;
+  margin-top: calc(var(--spacing-unit) * 1.5);
+  padding-top: calc(var(--spacing-unit) * 1.5);
+  border-top: 1px solid var(--border-color-secondary);
+  /* Căn giữa và giới hạn chiều rộng */
+  max-width: var(--max-content-width);
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  padding-left: calc(var(--spacing-unit) * 1); /* Thụt lề cho nút */
+  padding-bottom: 0; /* vứt padding bottom */
+}
+.collapse-round-button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: calc(var(--spacing-unit) * 0.5) 0;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--spacing-unit) * 0.5);
+  border-radius: var(--border-radius-small);
+  transition: color 0.2s ease-out;
+}
+.collapse-round-button:hover {
+  color: var(--text-primary);
+}
+.collapse-round-button svg {
+  font-size: 0.9rem;
+}
+
+
+/* --- AI Code Block --- */
+.block-type-ai-code .block-content-area {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    overflow: hidden; /* cho bo tròn hoạt động juan */
+}
+.code-block-container {
+  /* Chỉ chứa header và code */
+}
+.code-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: calc(var(--spacing-unit) * 0.75) var(--spacing-unit) calc(var(--spacing-unit) * 0.75) calc(var(--spacing-unit) * 1.5);
+    background-color: var(--bg-tertiary);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-family: var(--code-font-family);
+    border-bottom: 1px solid var(--border-color);
+}
+.code-block-header > div { /* Container cho các nút */
+  display: flex;
+  gap: calc(var(--spacing-unit) * 0.5);
+}
+.code-block-header .icon-button.subtle.small {
+  color: var(--text-muted);
+}
+.code-block-header .icon-button.subtle.small:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+}
+.main-code-block pre { /* SyntaxHighlighter render ra thẻ <pre> */
+    margin: 0 !important; /* Ghi đè style mặc định của library */
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 1.5) !important;
+    border-radius: 0 !important; /* Header đã có bo tròn */
+    font-size: 0.875rem !important;
+    background-color: transparent !important; /* Nền được đặt bởi container */
+    line-height: 1.45 !important;
+    overflow-x: auto; /* cuộn ngang nếu code quá dài */
+}
+.main-code-block code { /* Thẻ <code> bên trong <pre> */
+  font-family: var(--code-font-family) !important;
+}
+
+/* --- Review & Explanation Block (Dùng chung Markdown) --- */
+.block-type-review .block-content-area,
+.block-type-explanation .block-content-area {
+    background-color: #131314;
+    border: 1px solid var(--border-color);
+    padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2);
+}
+.markdown-content { /* Style chung cho nội dung render từ Markdown */
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  word-wrap: break-word; /* Ngắt từ nếu cần */
+}
+.markdown-content p { margin-bottom: var(--spacing-unit); }
+.markdown-content ul,
+.markdown-content ol {
+  margin-left: calc(var(--spacing-unit) * 2.5); /* Thụt lề list */
+  margin-bottom: var(--spacing-unit);
+  padding-left: 0; /* Reset padding mặc định */
+}
+.markdown-content li { margin-bottom: calc(var(--spacing-unit) * 0.5); }
+.markdown-content li > p { margin-bottom: calc(var(--spacing-unit) * 0.5); } /* Giảm khoảng cách p trong li */
+.markdown-content strong { font-weight: 600; color: var(--text-primary); }
+.markdown-content a { color: var(--text-accent); text-decoration: none; }
+.markdown-content a:hover { text-decoration: underline; }
+.markdown-content blockquote {
+  border-left: 3px solid var(--border-color);
+  padding-left: var(--spacing-unit);
+  margin: var(--spacing-unit) 0;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.markdown-content h4 { /* Dùng cho tiêu đề trong Debug */
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin: calc(var(--spacing-unit)*1.5) 0 var(--spacing-unit) 0;
+    font-weight: 600;
+    border-top: 1px solid var(--border-color-secondary);
+    padding-top: calc(var(--spacing-unit)*1.5);
+}
+.markdown-content h4:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+/* Code Block bên trong Markdown */
+.markdown-code-block {
+  margin: var(--spacing-unit) 0;
+  background-color: var(--bg-code);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-small);
+  overflow: hidden;
+}
+.markdown-code-block .code-block-header { /* Header của code block nhỏ */
+  padding: calc(var(--spacing-unit) * 0.5) var(--spacing-unit) calc(var(--spacing-unit) * 0.5) calc(var(--spacing-unit) * 1);
+  font-size: 0.75rem;
+}
+.markdown-code-block .code-block-header .copy-button {
+  /* style từ icon-button */
+}
+.markdown-code-block .syntax-highlighter pre { /* Pre bên trong code block nhỏ */
+  margin: 0 !important;
+  padding: calc(var(--spacing-unit) * 0.75) var(--spacing-unit) !important;
+  border-radius: 0 !important;
+  font-size: 0.8rem !important;
+  background-color: transparent !important;
+  line-height: 1.4 !important;
+}
+.markdown-code-block .syntax-highlighter code {
+  font-family: var(--code-font-family) !important;
+}
+/* Inline Code bên trong Markdown */
+.inline-code {
+  background-color: var(--bg-tertiary);
+  color: var(--text-accent);
+  padding: 0.1em 0.4em;
+  border-radius: var(--border-radius-small);
+  font-size: 0.85em;
+  font-family: var(--code-font-family);
+  border: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+/* --- Execution Block --- */
+.block-type-execution .block-content-area {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2);
+}
+.execution-content { font-size: 0.85rem; }
+.exec-message {
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: var(--spacing-unit);
+}
+.exec-warning { /* Style warning riêng của execution */
+    /*  từ .warning-inline trong App.css */
+    margin-bottom: var(--spacing-unit); /* Khoảng cách dưới */
+ }
+.output-section {
+  margin-top: var(--spacing-unit);
+}
+.output-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: calc(var(--spacing-unit) * 0.5); /* khoảng cách */
+}
+.output-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.expand-output-button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--border-radius-small);
+}
+.expand-output-button:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+.expand-output-button svg { font-size: 0.8rem; }
+.output-section pre.output-pre {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color-secondary);
+  color: var(--text-secondary);
+  padding: calc(var(--spacing-unit) * 0.75) var(--spacing-unit);
+  margin-top: 0;
+  border-radius: var(--border-radius-small);
+  overflow: hidden; /* Ẩn scrollbar khi thu gọn */
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: var(--code-font-family);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  transition: max-height 0.3s ease-in-out;
+  max-height: var(--preview-height, 7.5em); /* 5 dòng * 1.4 line-height */
+}
+.output-section pre.output-pre.expanded {
+  max-height: 500px; /* Hoặc giá trị lớn hơn nếu cần */
+  overflow-y: auto; /* Hiện scrollbar khi mở rộng */
+}
+.output-section.stderr-section pre.output-pre {
+  color: var(--danger-color);
+  background-color: rgba(242, 139, 130, 0.05);
+  border-color: rgba(242, 139, 130, 0.2);
+}
+.return-code {
+  margin-top: var(--spacing-unit);
+  font-weight: 500;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* --- Debug Block --- */
+.block-type-debug .block-content-area {
+    background-color: #131314;
+    border: 1px solid var(--border-color);
+    padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2);
+}
+.debug-content .explanation-content { /* Nội dung giải thích trong debug */
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
+}
+/* Khu vực đề xuất cài đặt */
+.install-suggestion-area {
+    margin-top: calc(var(--spacing-unit) * 1.5);
+    margin-bottom: calc(var(--spacing-unit) * 0.5);
+    /* Nút install sẽ nằm trong .block-actions-area được render riêng */
+}
+.install-package-button { /* Style nút Install trong debug */
+    /* từ style button chung */
+    color: var(--info-color);
+    border-color: rgba(var(--info-color), 0.3);
+}
+.install-package-button:hover:not(:disabled) {
+    background-color: rgba(var(--info-color), 0.15);
+    border-color: rgba(var(--info-color), 0.5);
+    color: #99d9f7; /* Sáng  chút */
+}
+.install-package-button svg { font-size: 1rem; }
+.install-package-button code { /* Tên package trong nút */
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-left: 4px;
+    font-family: var(--code-font-family);
+    font-size: 0.95em;
+    color: var(--text-accent);
+}
+/* Code block cho code đã sửa lỗi */
+.block-type-debug .code-block-container {
+  margin-top: var(--spacing-unit);
+}
+.apply-action-area { /* Khu nút Apply code */
+    margin-top: var(--spacing-unit);
+    padding-top: var(--spacing-unit);
+    border-top: 1px solid var(--border-color-secondary);
+}
+/* Nút Apply code */
+.block-actions-area button.apply-code {
+    color: #9e94d8;
+    border-color: rgba(var(--info-color), 0.3);
+}
+.block-actions-area button.apply-code:hover:not(:disabled) {
+    background-color: rgba(var(--info-color), 0.15);
+    border-color: rgba(var(--info-color), 0.5);
+}
+
+/* --- Installation Block --- */
+.block-type-installation .block-content-area {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2);
+}
+.installation-content { font-size: 0.9rem; }
+.installation-content .install-message {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+.installation-content .install-message strong { /* Tên package */
+    color: var(--text-accent);
+    margin: 0 4px;
+    font-family: var(--code-font-family); /* Dùng font code cho tên package */
+}
+.installation-content.error .install-message { color: var(--danger-color); }
+.installation-content.error .install-message strong { color: var(--danger-color); }
+/* Output/error của pip */
+.installation-content .output-section pre.output-pre {
+     font-size: 0.8rem;
+     max-height: var(--preview-height, 10em);
+     line-height: 1.4;
+     background-color: var(--bg-primary); /* Nền tối hơn log thường */
+     border-color: var(--border-color);
+}
+.installation-content .output-section.stderr-section pre.output-pre {
+    color: var(--warning-color); /* Màu vàng cho lỗi pip */
+    background-color: rgba(253, 214, 99, 0.05);
+    border-color: rgba(253, 214, 99, 0.2);
+}
+
+/* --- Loading & Error Block --- */
+.block-type-loading .block-content-area {
+  padding: calc(var(--spacing-unit)*0.5) 0; /* Padding cho loading */
+}
+.loading-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-unit);
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+.loading-content svg { font-size: 1rem; }
+.block-type-error .block-content-area {
+   /* Error sẽ dùng .error-inline đã style ở App.css */
+
+    padding: 0;
+    border: none;
+    background: none;
+}
+.block-type-error .error-inline {
+    margin-top: 0; /* Reset margin nếu không cần */
+}
+
+/* --- Block Actions Area (Chứa các nút Review, Execute, Debug, Explain) --- */
+.block-actions-area {
+    padding: 0; /* Không cần padding ở container */
+    display: flex;
+    gap: var(--spacing-unit);
+    flex-wrap: wrap; /*  xuống dòng nếu không đủ chỗ */
+    justify-content: flex-start; /* Căn trái */
+    margin-top: calc(var(--spacing-unit) * 1.5); /* Khoảng cách với content */
+}
+
+
+/* Style cơ bản cho các nút trong khu vực này */
+.block-actions-area button {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    padding: calc(var(--spacing-unit) * 0.6) var(--spacing-unit);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    /* Icon và text đã được style bởi button global */
+}
+.block-actions-area button:hover:not(:disabled) {
+  background-color: #40444b;
+  border-color: #50555b;
+  color: var(--text-primary);
+}
+/* Style riêng cho từng loại nút */
+.block-actions-area button.execute { color: var(--success-color); border-color: rgba(var(--success-color), 0.3); }
+.block-actions-area button.execute:hover:not(:disabled) { background-color: rgba(var(--success-color), 0.15); border-color: rgba(var(--success-color), 0.5); }
+.block-actions-area button.debug { color: var(--warning-color); border-color: rgba(var(--warning-color), 0.3); }
+.block-actions-area button.debug:hover:not(:disabled) { background-color: rgba(var(--warning-color), 0.15); border-color: rgba(var(--warning-color), 0.5); }
+.block-actions-area button.explain { color: var(--info-color); border-color: rgba(var(--info-color), 0.3); }
+.block-actions-area button.explain:hover:not(:disabled) { background-color: rgba(var(--info-color), 0.15); border-color: rgba(var(--info-color), 0.5); }
+
+
+/* Đang thi công ....*/

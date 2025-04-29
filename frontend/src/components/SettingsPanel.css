@@ -1,230 +1,234 @@
 /* frontend/src/components/SettingsPanel.css */
 
-/* Lấy một phần từ App.css */
-
 /* --- Panel Layout --- */
 .settings-panel {
-    /* Nằm trong Sidebar nên không cần background/border ở đây */
-    padding: calc(var(--spacing-unit) * 2);
-    overflow-y: auto;
-    height: 100%;
-  }
-  
-  .settings-content {
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--spacing-unit) * 2); /* gap giữa các section */
-    max-width: 100%;
-    margin: 0;
-  }
-  
-  /* --- Setting Section --- */
-  .settings-section {
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--spacing-unit) * 0.75); /* Gap giữa label và input */
-  }
-  
-  .settings-section > label { /* Label chính của section */
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 2px; /* Khoảng cách với input/group bên dưới */
-    display: flex; /*  icon nếu cần */
-    align-items: center;
-    gap: calc(var(--spacing-unit) * 0.75);
-  }
-  .settings-section > label svg { /* Icon trong label chính */
-     font-size: 1rem;
-  }
-  
-  /* --- Input/Select trong Settings --- */
-  /* Ghi đè style global nếu cần */
-  .settings-panel input[type="text"],
-  .settings-panel input[type="number"],
-  .settings-panel input[type="password"],
-  .settings-panel select {
-      background-color: var(--bg-tertiary); /* Nền khác biệt */
-      border: 1px solid var(--border-color);
-      font-size: 0.85rem; /* Hơi nhỏ hơn global */
-      padding: calc(var(--spacing-unit) * 0.75) var(--spacing-unit); /* Padding khác */
-      border-radius: var(--border-radius-small);
-      color: var(--text-primary);
-      width: 100%; /* Luôn chiếm full width */
-  }
-  .settings-panel input:focus,
-  .settings-panel select:focus {
-      border-color: var(--accent-primary);
-      box-shadow: 0 0 0 1px var(--accent-primary); /* focus style */
-  }
-  
-  /* --- Model Selection --- */
-  .model-select-group {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-unit);
-  }
-  .model-input { /* Input tên model */
-    flex-grow: 1;
-  }
-  .save-button { /* Nút Save Model */
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color) !important;
-    padding: calc(var(--spacing-unit) * 0.75) !important; /* Padding vuông cho nút icon */
-    flex-shrink: 0; /* Không co lại */
-  }
-  .save-button:hover:not(:disabled) {
-    background-color: var(--accent-primary);
-    border-color: var(--accent-primary) !important;
-    color: var(--bg-primary);
-  }
-  
-  /* --- Parameter Sliders --- */
-  .parameter-section {
-    /* Không cần style đặc biệt cho section này */
-  }
-  .parameter-section label { /* Label cho slider (Temp, TopP) */
-    text-transform: none;
-    font-weight: 500;
-    letter-spacing: normal;
+  padding: calc(var(--spacing-unit) * 2);
+  overflow-y: auto;
+  height: 100%;
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-unit) * 2); /* gap giữa các section */
+  max-width: 100%;
+  margin: 0;
+}
+
+/* --- Setting Section --- */
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-unit) * 0.75); /* Gap giữa label và input */
+}
+
+.settings-section > label { /* Label chính của section */
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px; /* Khoảng cách với input/group bên dưới */
+  display: flex; /*  icon nếu cần */
+  align-items: center;
+  gap: calc(var(--spacing-unit) * 0.75);
+}
+.settings-section > label svg { /* Icon trong label chính */
+   font-size: 1rem;
+   flex-shrink: 0; /* Prevent icon shrinking */
+}
+
+/* --- Input/Select trong Settings --- */
+.settings-panel input[type="text"],
+.settings-panel input[type="number"],
+.settings-panel input[type="password"],
+.settings-panel select {
+    background-color: #1d1e1e; /* Nền khác biệt */
+    border: 1px solid var(--border-color);
+    font-size: 0.85rem; /* Hơi nhỏ hơn global */
+    padding: calc(var(--spacing-unit) * 0.75) var(--spacing-unit); /* Padding khác */
+    border-radius: 8px;
     color: var(--text-primary);
-    font-size: 0.8rem;
-    margin-bottom: 0; /* Reset margin */
-  }
-  .slider-container {
+    width: 100%; /* Luôn chiếm full width */
+}
+.settings-panel input:focus,
+.settings-panel select:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 1px var(--accent-primary); /* focus style */
+    outline: none;
+}
+
+/* --- Model Selection --- */
+.model-select-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-unit);
+}
+.model-input { /* Input tên model */
+  flex-grow: 1;
+}
+.save-button { /* Nút Save Model */
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color) !important;
+  padding: calc(var(--spacing-unit) * 0.75) !important; /* Padding vuông cho nút icon */
+  flex-shrink: 0; /* Không co lại */
+  color: var(--text-secondary); /* Reset color */
+  width: 34px; 
+  height: 34px;
+}
+.save-button:hover:not(:disabled) {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary) !important;
+  color: var(--bg-primary);
+}
+
+/* --- Parameter Sliders --- */
+.parameter-section label { /*(Temp, TopP) */
+  text-transform: none;
+  font-weight: 500;
+  letter-spacing: normal;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  margin-bottom: 0; /* Reset margin */
+}
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-unit);
+}
+.slider-container input[type="range"] {
+  flex-grow: 1;
+  cursor: pointer;
+  height: 6px;
+  background-color: var(--bg-tertiary);
+  border-radius: 3px;
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--border-color); /* border nhẹ */
+}
+/* Webkit Thumb */
+.slider-container input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--text-accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--bg-secondary);
+  margin-top: -4px; /* Căn giữa thumb */
+}
+/* Firefox Thumb */
+.slider-container input[type="range"]::-moz-range-thumb {
+  width: 10px; /* Hơi nhỏ hơn webkit */
+  height: 10px;
+  background: var(--text-accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--bg-secondary);
+}
+.slider-value { /* Hiển thị giá trị slider */
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  min-width: 35px; /* Đảm bảo đủ chỗ cho 0.00 */
+  text-align: right;
+  background-color: #1d1e1e;
+  padding: 3px 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  font-family: var(--code-font-family); /* Dùng font code cho số */
+}
+
+/* --- Top K Input --- */
+.topk-input {
+  text-align: right;
+  padding-right: var(--spacing-unit);
+  max-width: 80px; /* Giới hạn chiều rộng */
+  margin-left: auto; /* Đẩy sang phải nếu section rộng hơn */
+}
+
+/* --- API Key Section --- */
+.api-key-section {
+  margin-top: var(--spacing-unit);
+  padding-top: calc(var(--spacing-unit) * 1.5);
+  border-top: 1px solid var(--border-color);
+}
+.api-key-input { /* Input field */
+    background-color: var(--bg-primary) !important; /* Nền tối hơn để phân biệt */
+    font-family: var(--code-font-family);
+    letter-spacing: 0.5px;
+}
+.api-key-actions { /* Container cho 2 nút */
     display: flex;
-    align-items: center;
     gap: var(--spacing-unit);
-  }
-  .slider-container input[type="range"] {
-    flex-grow: 1;
-    cursor: pointer;
-    height: 6px;
-    background-color: var(--bg-tertiary);
-    border-radius: 3px;
-    -webkit-appearance: none;
-    appearance: none;
-    padding: 0;
-    margin: 0;
-    border: 1px solid var(--border-color); /* border nhẹ */
-  }
-  /* Webkit Thumb */
-  .slider-container input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 14px;
-    height: 14px;
-    background: var(--text-accent);
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid var(--bg-secondary);
-    margin-top: -4px; /* Căn giữa thumb */
-  }
-  /* Firefox Thumb */
-  .slider-container input[type="range"]::-moz-range-thumb {
-    width: 10px; /* Hơi nhỏ hơn webkit */
-    height: 10px;
-    background: var(--text-accent);
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid var(--bg-secondary);
-  }
-  .slider-value { /* Hiển thị giá trị slider */
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    min-width: 35px; /* Đảm bảo đủ chỗ cho 0.00 */
-    text-align: right;
-    background-color: var(--bg-tertiary);
-    padding: 3px 6px;
+    margin-top: calc(var(--spacing-unit) * 0.75);
+}
+.api-action-button { /* Style chung cho 2 nút */
+    flex-grow: 1; /* Chia sẻ không gian */
+    padding: calc(var(--spacing-unit) * 0.7) var(--spacing-unit); /* Hơi nhỏ hơn nút thường */
+    font-size: 0.8rem;
+    font-weight: 500;
     border-radius: var(--border-radius-small);
     border: 1px solid var(--border-color);
-    font-family: var(--code-font-family); /* Dùng font code cho số */
-  }
-  
-  /* --- Top K Input --- */
-  .topk-input {
-    text-align: right;
-    padding-right: var(--spacing-unit);
-    max-width: 80px; /* Giới hạn chiều rộng */
-    margin-left: auto; /* Đẩy sang phải nếu section rộng hơn */
-  }
-  
-  /* --- API Key Section --- */
-  .api-key-section {
-    margin-top: var(--spacing-unit);
-    padding-top: calc(var(--spacing-unit) * 1.5);
-    border-top: 1px solid var(--border-color);
-  }
-  .api-key-input { /* Input field */
-      background-color: var(--bg-primary) !important; /* Nền tối hơn để phân biệt */
-      font-family: var(--code-font-family);
-      letter-spacing: 0.5px;
-  }
-  .api-key-actions { /* Container cho 2 nút */
-      display: flex;
-      gap: var(--spacing-unit);
-      margin-top: calc(var(--spacing-unit) * 0.75);
-  }
-  .api-action-button { /* Style chung cho 2 nút */
-      flex-grow: 1; /* Chia sẻ không gian */
-      padding: calc(var(--spacing-unit) * 0.7) var(--spacing-unit); /* Hơi nhỏ hơn nút thường */
-      font-size: 0.8rem;
-      font-weight: 500;
-      border-radius: var(--border-radius-small);
-      border: 1px solid var(--border-color);
-      background-color: var(--bg-tertiary);
-      transition: all 0.15s ease;
-      color: var(--text-secondary);
-  }
-  .api-action-button.apply-key { /* Nút "Use This Key" */
-       color: var(--accent-primary);
-       border-color: rgba(138, 180, 248, 0.3);
-  }
-  .api-action-button.apply-key:hover:not(:disabled) {
-      background-color: rgba(138, 180, 248, 0.1);
-      border-color: rgba(138, 180, 248, 0.5);
-  }
-  .api-action-button.use-env-key { /* Nút "Use .env Key" */
-       /* Kế thừa style chung */
-  }
-  .api-action-button.use-env-key:hover:not(:disabled) {
-      background-color: #40444b;
-      border-color: #50555b;
-      color: var(--text-primary);
-  }
-  .api-action-button:disabled { /* Style khi bị disable */
-      opacity: 0.5;
-      cursor: not-allowed;
-      background-color: var(--bg-tertiary) !important;
-      border-color: var(--border-color) !important;
-      color: var(--text-muted) !important;
-  }
-  .api-key-status { /* Text hiển thị trạng thái */
-      font-size: 0.75rem;
-      font-style: italic;
-      color: var(--accent-primary);
-      margin-top: calc(var(--spacing-unit)*0.75); /* khoảng cách */
-      display: block;
-      text-align: center;
-  }
-  .api-key-status.faded { color: var(--text-muted); }
-  .api-key-note { /* Ghi chú nhỏ */
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      margin-top: calc(var(--spacing-unit)*1); /*  khoảng cách */
-      line-height: 1.3;
-  }
-  
-  
-  /* --- Advanced Settings Section --- */
-  .advanced-settings-section {
-    margin-top: var(--spacing-unit);
-    padding-top: calc(var(--spacing-unit) * 1.5);
-    border-top: 1px solid var(--border-color);
-  }
-  .advanced-settings-section h4 { /* Tiêu đề "Cài đặt Nâng cao" */
+    background-color: var(--bg-tertiary);
+    transition: all 0.15s ease;
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(var(--spacing-unit) * 0.75);
+}
+.api-action-button.apply-key { /* Nút "Use This Key" */
+     color: var(--accent-primary);
+     border-color: rgba(138, 180, 248, 0.3);
+}
+.api-action-button.apply-key:hover:not(:disabled) {
+    background-color: rgba(138, 180, 248, 0.1);
+    border-color: rgba(138, 180, 248, 0.5);
+    color: #a6c9ff; 
+}
+.api-action-button.use-env-key { /* Nút "Use .env Key" */
+     /* Kế thừa style chung */
+}
+.api-action-button.use-env-key:hover:not(:disabled) {
+    background-color: #40444b;
+    border-color: #50555b;
+    color: var(--text-primary);
+}
+.api-action-button:disabled { /* Style khi bị disable */
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-muted) !important;
+}
+.api-key-status { /* Text hiển thị trạng thái */
+    font-size: 0.75rem;
+    font-style: italic;
+    color: var(--accent-primary);
+    margin-top: calc(var(--spacing-unit)*0.75); /* khoảng cách */
+    display: block;
+    text-align: center;
+}
+.api-key-status.faded { color: var(--text-muted); }
+.api-key-note { /* Ghi chú nhỏ */
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: calc(var(--spacing-unit)*1); /*  khoảng cách */
+    line-height: 1.3;
+}
+
+
+/* --- Target Environment Section (NEW) --- */
+.target-environment-section {
+  margin-top: var(--spacing-unit);
+  padding-top: calc(var(--spacing-unit) * 1.5);
+  border-top: 1px solid var(--border-color);
+}
+
+.target-environment-section h4 {
     display: flex;
     align-items: center;
     gap: var(--spacing-unit);
@@ -234,81 +238,144 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: var(--spacing-unit); /* Khoảng cách với control đầu tiên */
-  }
-  .advanced-settings-section h4 svg { font-size: 0.9rem; }
-  
-  
-  /* --- Run As Admin Checkbox --- */
-  .admin-checkbox-container {
-      display: flex;
-      align-items: center;
-      gap: calc(var(--spacing-unit) * 0.75);
-      margin-top: calc(var(--spacing-unit) * 1.5); /* Khoảng cách với Safety setting */
-  }
-  .admin-checkbox {
-      appearance: none;
-      -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      border: 1px solid var(--border-color);
-      border-radius: var(--border-radius-small);
-      background-color: var(--bg-tertiary);
-      cursor: pointer;
-      position: relative;
-      flex-shrink: 0;
-      margin: 0;
-      transition: background-color 0.15s, border-color 0.15s;
-  }
-  .admin-checkbox:checked {
-      background-color: var(--warning-color);
-      border-color: var(--warning-color);
-  }
-  /* Dấu check */
-  .admin-checkbox:checked::after {
-      content: '';
-      display: block;
-      width: 4px;
-      height: 8px;
-      border: solid var(--bg-primary);
-      border-width: 0 2px 2px 0;
-      transform: rotate(45deg) translate(-1px, -1px);
-      position: absolute;
-      left: 5px;
-      top: 2px;
-  }
-  .admin-checkbox:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-  }
-  .admin-checkbox:disabled:checked {
-      background-color: #8e6d13;
-      border-color: #8e6d13;
-  }
-  .admin-checkbox-label { /* Label cho checkbox */
-      display: flex;
-      align-items: center;
-      gap: calc(var(--spacing-unit) * 0.5);
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text-primary);
-      cursor: pointer;
-      margin: 0;
-      /* Ghi đè style label của section */
-      text-transform: none;
-      letter-spacing: normal;
-  }
-  .admin-checkbox-label .warning-icon { /* Icon cảnh báo */
-      color: var(--warning-color);
-      font-size: 1rem;
-      flex-shrink: 0;
-  }
-  .admin-warning-note { /* Ghi chú cảnh báo */
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: calc(var(--spacing-unit)*0.5);
-      /* Thụt lề align với text của label */
-      padding-left: calc(16px + var(--spacing-unit) * 0.75 + var(--spacing-unit) * 0.5);
-      line-height: 1.4;
-  }
+}
+ .target-environment-section h4 svg { font-size: 0.9rem; }
 
-  /* Đang thi công ....*/
+ .settings-section select {
+    margin-bottom: calc(var(--spacing-unit) * 1.5); 
+ }
+
+ .custom-file-input-container {
+    margin-top: calc(var(--spacing-unit) * -0.5); 
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 0.5);
+    margin-bottom: var(--spacing-unit); 
+ }
+
+ .custom-file-input-container label {
+
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-transform: none;
+    letter-spacing: normal;
+    margin-bottom: 2px;
+    display: block; 
+ }
+
+ .custom-file-input {
+
+    margin-bottom: 0;
+ }
+
+ .custom-file-note,
+ .target-env-note {
+     font-size: 0.75rem;
+     color: var(--text-muted);
+     margin-top: calc(var(--spacing-unit)*0.5);
+     line-height: 1.4;
+ }
+ .target-env-note {
+     margin-top: 0;
+ }
+
+
+/* --- Advanced Settings Section --- */
+.advanced-settings-section {
+  margin-top: var(--spacing-unit);
+  padding-top: calc(var(--spacing-unit) * 1.5);
+  border-top: 1px solid var(--border-color);
+}
+.advanced-settings-section h4 { /* Tiêu đề "Cài đặt Nâng cao" */
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-unit);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-unit); /* Khoảng cách với control đầu tiên */
+}
+.advanced-settings-section h4 svg { font-size: 0.9rem; }
+
+.advanced-settings-section > label { /* Label for Safety Setting */
+    margin-bottom: calc(var(--spacing-unit) * 0.5); /* Reduce space below label */
+}
+
+/* --- Run As Admin Checkbox --- */
+.admin-checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 0.75);
+    margin-top: calc(var(--spacing-unit) * 1.5); /* Khoảng cách với Safety setting */
+}
+.admin-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
+    background-color: var(--bg-tertiary);
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    margin: 0;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+.admin-checkbox:checked {
+    background-color: var(--warning-color);
+    border-color: var(--warning-color);
+}
+/* Dấu check */
+.admin-checkbox:checked::after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 8px;
+    border: solid var(--bg-primary);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translate(-1px, -1px);
+    position: absolute;
+    left: 5px;
+    top: 2px;
+}
+.admin-checkbox:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.admin-checkbox:disabled:checked {
+    background-color: #8e6d13;
+    border-color: #8e6d13;
+}
+.admin-checkbox-label { /* Label cho checkbox */
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 0.5);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    margin: 0;
+    /* Ghi đè style label của section */
+    text-transform: none;
+    letter-spacing: normal;
+}
+.admin-checkbox-label .warning-icon { /* Icon cảnh báo */
+    color: var(--warning-color);
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+.admin-warning-note { /* Ghi chú cảnh báo */
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: calc(var(--spacing-unit)*0.5);
+    /* Thụt lề align với text của label */
+    padding-left: calc(16px + var(--spacing-unit) * 0.75 + var(--spacing-unit) * 0.5);
+    line-height: 1.4;
+}
+
+
+/* đang thi công...

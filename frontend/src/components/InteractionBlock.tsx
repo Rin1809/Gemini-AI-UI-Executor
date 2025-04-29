@@ -13,13 +13,13 @@ import './CenterArea.css';
 // --- Props Interface ---
 interface InteractionBlockProps {
     block: ConversationBlock;
-    isBusy: boolean; // Dùng isBusy chung thay vì các state riêng lẻ
-    onReview: (codeToReview: string, blockId: string) => void; // Thêm blockId
-    onExecute: (codeToExecute: string, blockId: string) => void; // Thêm blockId
-    onDebug: (codeToDebug: string, executionResult: ExecutionResult, blockId: string) => void; // Thêm blockId
-    onApplyCorrectedCode: (code: string, originalDebugBlockId: string) => void; // Thêm blockId
-    onInstallPackage: (packageName: string, originalDebugBlockId: string) => Promise<void>; // Thêm blockId
-    onExplain: (blockId: string, contentToExplain: any, context: string) => void; // Hàm explain mới
+    isBusy: boolean;
+    onReview: (codeToReview: string, blockId: string) => void;
+    onExecute: (codeToExecute: string, blockId: string) => void;
+    onDebug: (codeToDebug: string, executionResult: ExecutionResult, blockId: string) => void;
+    onApplyCorrectedCode: (code: string, originalDebugBlockId: string) => void;
+    onInstallPackage: (packageName: string, originalDebugBlockId: string) => Promise<void>;
+    onExplain: (blockId: string, contentToExplain: any, context: string) => void;
     expandedOutputs: Record<string, { stdout: boolean; stderr: boolean }>;
     onToggleOutputExpand: (blockId: string, type: 'stdout' | 'stderr') => void;
     'data-block-id'?: string;
@@ -49,7 +49,15 @@ const MarkdownComponents = {
                 <span>{match[1]}</span>
                 <button onClick={handleCopyMdCode} className="icon-button subtle small copy-button" title="Sao chép mã"><FiCopy /></button>
              </div>
-            <SyntaxHighlighter style={vscDarkPlus as any} language={match[1]} PreTag="div" {...props} >
+            <SyntaxHighlighter
+                style={vscDarkPlus as any}
+                language={match[1]}
+                PreTag="div"
+                showLineNumbers
+                wrapLines
+                lineProps={{style: {wordBreak: 'break-all', whiteSpace: 'pre-wrap'}}}
+                {...props}
+            >
                 {codeString}
             </SyntaxHighlighter>
         </div>
@@ -62,12 +70,11 @@ const MarkdownComponents = {
 
 const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
     block, isBusy, onReview, onExecute, onDebug, onApplyCorrectedCode,
-    onInstallPackage, onExplain, // Nhận onExplain
+    onInstallPackage, onExplain,
     expandedOutputs, onToggleOutputExpand
  }) => {
-  const { type, data, id, timestamp, isNew } = block;
+  const { type, data, id, timestamp, isNew, generatedType } = block;
 
-  // --- Hàm xử lý Sao chép / Tải xuống code ---
   const handleCopy = (text: string | null | undefined) => {
     if (typeof text === 'string') {
       navigator.clipboard.writeText(text).then(() => toast.info("Đã sao chép mã!"));
@@ -85,51 +92,67 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
       URL.revokeObjectURL(element.href);
     }
   };
-  // -----------------------------------------
 
-  // --- Hàm kiểm tra dấu hiệu lỗi ---
   const hasErrorSignal = (execData: any): boolean => {
       if (!execData) return false;
       const hasStdErr = !!execData?.error?.trim();
       const nonZeroReturn = execData?.return_code !== 0;
       const stdoutErrorKeywords = ['lỗi', 'error', 'fail', 'cannot', 'unable', 'traceback', 'exception', 'not found', 'không tìm thấy', 'invalid'];
       const stdoutLooksError = !!execData?.output?.trim() && stdoutErrorKeywords.some(kw => execData.output!.toLowerCase().includes(kw));
-      // Coi lỗi API (-200) cũng là tín hiệu lỗi để debug/explain
       return !!(nonZeroReturn || hasStdErr || stdoutLooksError || execData?.return_code === -200);
   };
-  // ------------------------------------------------------
 
-   // --- Hàm render nội dung chính của khối ---
-   // Đổi tên lại thành renderContent (không cần trả về nút explain nữa)
-  const renderContent = (): JSX.Element | null => {
+   const renderContent = (): JSX.Element | null => {
     let mainContentElement: JSX.Element | null = null;
 
-    // Logic render nội dung chính cho từng loại block (TƯƠNG TỰ NHƯ TRƯỚC, chỉ bỏ phần gán explainButtonElement)
     switch (type) {
       case 'user':
         mainContentElement = <div className="prompt-text">{String(data ?? '')}</div>;
         break;
 
       case 'ai-code':
-        const codeStr = String(data ?? '').trim();
-        if (codeStr) {
-            mainContentElement = (
-                <div className="code-block-container">
-                   <div className="code-block-header">
-                       <span>python</span>
-                       <div>
-                           <button onClick={() => handleCopy(codeStr)} className="icon-button subtle small" title="Sao chép"><FiCopy /></button>
-                           <button onClick={() => handleDownload("script.py", codeStr)} className="icon-button subtle small" title="Tải xuống"><FiDownload /></button>
+        if (typeof data === 'string') {
+            const codeStr = data.trim();
+            const getLanguageForHighlighter = (ext?: string): string => {
+                switch (ext?.toLowerCase()) {
+                    case 'py': return 'python'; case 'sh': return 'bash';
+                    case 'js': return 'javascript'; case 'ts': return 'typescript';
+                    case 'html': return 'html'; case 'css': return 'css';
+                    case 'json': return 'json'; case 'yaml': return 'yaml';
+                    case 'md': return 'markdown'; case 'bat': return 'batch';
+                    case 'ps1': return 'powershell'; case 'diff': return 'diff';
+                    case 'sql': return 'sql';
+                    default: return 'plaintext';
+                }
+            };
+            const displayLang = generatedType || 'py'; // Fallback hiển thị 'py'
+            const highlighterLang = getLanguageForHighlighter(displayLang);
+            const looksLikeCode = codeStr.length > 5 || generatedType; // Heuristic đơn giản
+
+            if (looksLikeCode && codeStr) {
+                mainContentElement = (
+                    <div className="code-block-container">
+                       <div className="code-block-header">
+                           <span>{displayLang}</span>
+                           <div>
+                               <button onClick={() => handleCopy(codeStr)} className="icon-button subtle small" title="Sao chép"><FiCopy /></button>
+                               <button onClick={() => handleDownload(`script.${displayLang}`, codeStr)} className="icon-button subtle small" title="Tải xuống"><FiDownload /></button>
+                           </div>
                        </div>
-                   </div>
-                   <SyntaxHighlighter language="python" style={vscDarkPlus as any} className="main-code-block">
-                       {codeStr}
-                   </SyntaxHighlighter>
-                </div>
-            );
-        } else {
-             mainContentElement = <p className="error-inline">Nhận được khối mã rỗng.</p>;
-        }
+                       <SyntaxHighlighter
+                            language={highlighterLang}
+                            style={vscDarkPlus as any}
+                            className="main-code-block"
+                            showLineNumbers={true} wrapLines={true}
+                            lineProps={{style: {wordBreak: 'break-all', whiteSpace: 'pre-wrap'}}}
+                       >
+                           {codeStr}
+                       </SyntaxHighlighter>
+                    </div>
+                );
+            } else if (codeStr) { mainContentElement = <p className="error-inline">{codeStr}</p>; }
+            else { mainContentElement = <p className="error-inline">Nhận được khối mã rỗng.</p>; }
+        } else { mainContentElement = <p className="error-inline">Dữ liệu mã không hợp lệ.</p>; }
         break;
 
       case 'review':
@@ -162,6 +185,12 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
         const debugData = data as DebugResult;
         const correctedCode = debugData?.corrected_code?.trim();
         const suggestedPackage = debugData?.suggested_package;
+        // Hiển thị nút Install chỉ nếu backend trả về suggested_package (chỉ xảy ra với Python hiện tại)
+        const showInstallButton = !!suggestedPackage;
+        // Xác định ngôn ngữ cho code sửa lỗi (nếu có)
+        const correctedCodeLang = debugData?.original_language || 'code';
+        const correctedHighlighterLang = getLanguageForHighlighter(correctedCodeLang);
+
         mainContentElement = (
             <div className="debug-content">
                 {debugData?.error && <p className="error-inline">{debugData.error}</p>}
@@ -171,7 +200,7 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
                         <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>{debugData.explanation}</ReactMarkdown>
                     </div>
                  )}
-                 {suggestedPackage && (
+                 {showInstallButton && suggestedPackage && (
                      <div className="install-suggestion-area block-actions-area">
                          <button onClick={() => onInstallPackage(suggestedPackage, id)} disabled={isBusy} className="install-package-button" title={`Cài đặt package '${suggestedPackage}' bằng pip`} ><FiDownload /> Cài đặt <code>{suggestedPackage}</code></button>
                      </div>
@@ -181,13 +210,15 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
                         <h4>Mã đề xuất</h4>
                         <div className="code-block-container">
                             <div className="code-block-header">
-                                <span>python (đã sửa)</span>
+                                <span>{correctedCodeLang} (đã sửa)</span>
                                 <div>
                                     <button onClick={() => handleCopy(correctedCode)} className="icon-button subtle small" title="Sao chép"><FiCopy /></button>
-                                    <button onClick={() => handleDownload("corrected_script.py", correctedCode)} className="icon-button subtle small" title="Tải xuống"><FiDownload /></button>
+                                    <button onClick={() => handleDownload(`corrected_script.${correctedCodeLang}`, correctedCode)} className="icon-button subtle small" title="Tải xuống"><FiDownload /></button>
                                 </div>
                             </div>
-                            <SyntaxHighlighter language="python" style={vscDarkPlus as any} className="main-code-block corrected-code">{correctedCode}</SyntaxHighlighter>
+                            <SyntaxHighlighter language={correctedHighlighterLang} style={vscDarkPlus as any} className="main-code-block corrected-code" showLineNumbers wrapLines lineProps={{style: {wordBreak: 'break-all', whiteSpace: 'pre-wrap'}}}>
+                                {correctedCode}
+                            </SyntaxHighlighter>
                             <div className="block-actions-area apply-action-area">
                                 <button onClick={() => onApplyCorrectedCode(correctedCode, id)} disabled={isBusy} className="apply-code" title="Sử dụng mã này">Sử dụng Mã Này</button>
                             </div>
@@ -228,22 +259,16 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
       case 'loading':
          mainContentElement = <div className="loading-content"><FiLoader className="spinner" /> <p>{String(data ?? 'Đang tải...')}</p></div>;
          break;
-
       case 'error':
-          const errorMsg = String(data ?? '');
-          mainContentElement = <div className="error-inline">{errorMsg || 'Đã xảy ra lỗi không xác định.'}</div>;
+          mainContentElement = <div className="error-inline">{String(data ?? 'Đã xảy ra lỗi không xác định.')}</div>;
           break;
-
       default:
          console.warn("Gặp phải loại khối không xác định:", type, block);
          mainContentElement = <div className="unknown-block error-inline">Loại khối không xác định: {type}</div>;
     }
-
     return mainContentElement;
   };
-  // ---------------------------------------------------
 
-  // --- Hàm render icon ---
   const renderIcon = () => {
        switch(type) {
            case 'user': return <span className="block-icon user-icon"><FiUser/></span>;
@@ -262,55 +287,41 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
            default: return <span className="block-icon unknown-icon">?</span>;
        }
    };
-  // ---------------------------------------
 
-   // --- Tạo mảng chứa tất cả các nút hành động ---
    const renderActionButtons = (): JSX.Element[] => {
         const actionButtons: JSX.Element[] = [];
+        const currentFileType = generatedType || (type === 'ai-code' ? 'py' : undefined);
 
-        // Nút Review và Execute cho AI Code
-        if (type === 'ai-code' && data) {
-            actionButtons.push(<button key="review" onClick={() => onReview(data, id)} disabled={isBusy} title="Đánh giá mã"><FiEye /> Đánh giá</button>);
-            actionButtons.push(<button key="execute" onClick={() => onExecute(data, id)} disabled={isBusy} className="execute" title="Thực thi mã"><FiPlay /> Thực thi</button>);
+        if (type === 'ai-code' && typeof data === 'string' && data.trim()) {
+            const codeString = data;
+            actionButtons.push(<button key="review" onClick={() => onReview(codeString, id)} disabled={isBusy} title={`Đánh giá mã ${currentFileType ? `(.${currentFileType})` : ''}`}><FiEye /> Đánh giá</button>);
+            actionButtons.push(<button key="execute" onClick={() => onExecute(codeString, id)} disabled={isBusy} className="execute" title="Thực thi mã"><FiPlay /> Thực thi</button>);
         }
 
-        // Nút Debug cho Execution có lỗi
         if (type === 'execution' && hasErrorSignal(data)) {
             const codeThatFailed = (data as ExecutionResult)?.codeThatFailed;
+            const execResult = data as ExecutionResult;
             if (codeThatFailed) {
-                 actionButtons.push(<button key="debug" onClick={() => onDebug(codeThatFailed, data as ExecutionResult, id)} disabled={isBusy} className="debug" title="Gỡ lỗi"><FiTool /> Gỡ lỗi</button>);
+                 actionButtons.push(<button key="debug" onClick={() => onDebug(codeThatFailed, execResult, id)} disabled={isBusy} className="debug" title="Gỡ lỗi"><FiTool /> Gỡ lỗi</button>);
             }
         }
 
-        // Nút Explain (hiển thị cho nhiều loại block)
         let explainContent: any = data;
         let explainContext: string = type;
         let showExplainButton = false;
 
-        if (type === 'ai-code' && data) {
-            explainContent = String(data).trim();
-            explainContext = 'python_code';
-            showExplainButton = !!explainContent;
+        if (type === 'ai-code' && typeof data === 'string' && data.trim()) {
+            explainContent = data; explainContext = 'code'; showExplainButton = true;
         } else if (type === 'review' && (data as ReviewResult)?.review && !(data as ReviewResult)?.error) {
-            explainContent = (data as ReviewResult).review;
-            explainContext = 'review_text';
-            showExplainButton = true;
+            explainContent = (data as ReviewResult).review; explainContext = 'review_text'; showExplainButton = true;
         } else if (type === 'execution') {
-            explainContent = data; // Giữ nguyên object
-            explainContext = 'execution_result';
-            showExplainButton = true;
+            explainContent = data; explainContext = 'execution_result'; showExplainButton = true;
         } else if (type === 'debug' && !(data as DebugResult)?.error && ((data as DebugResult)?.explanation || (data as DebugResult)?.corrected_code || (data as DebugResult)?.suggested_package)) {
-            explainContent = data; // Giữ nguyên object
-            explainContext = 'debug_result';
-            showExplainButton = true;
+            explainContent = data; explainContext = 'debug_result'; showExplainButton = true;
         } else if (type === 'installation') {
-            explainContent = data;
-            explainContext = 'installation_result';
-            showExplainButton = true;
+            explainContent = data; explainContext = 'installation_result'; showExplainButton = true;
         } else if (type === 'error' && data) {
-             explainContent = String(data);
-             explainContext = 'error_message';
-             showExplainButton = true;
+             explainContent = String(data); explainContext = 'error_message'; showExplainButton = true;
         }
 
         if (showExplainButton) {
@@ -319,11 +330,11 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
 
         return actionButtons;
    };
-   // --------------------------------------------------------
 
   const mainContentElement = renderContent();
   const actionButtonElements = renderActionButtons();
 
+  // Thêm data-block-id vào div ngoài cùng
   return (
     <div className={`interaction-block block-type-${type} ${isNew ? 'newly-added' : ''}`} data-block-id={id}>
       <div className="block-avatar"> {renderIcon()} </div>
@@ -335,8 +346,6 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
             </div>
          )}
         <div className="block-content-area">{mainContentElement}</div>
-
-        {/* Render tất cả các nút hành động trong cùng một khu vực */}
         {actionButtonElements.length > 0 && (
              <div className="block-actions-area">{actionButtonElements}</div>
         )}
@@ -344,5 +353,20 @@ const InteractionBlock: React.FC<InteractionBlockProps> = React.memo(({
     </div>
    );
 });
+
+// Thêm hàm getLanguageForHighlighter bên ngoài component để tái sử dụng nếu cần
+const getLanguageForHighlighter = (ext?: string): string => {
+    switch (ext?.toLowerCase()) {
+        case 'py': return 'python'; case 'sh': return 'bash';
+        case 'js': return 'javascript'; case 'ts': return 'typescript';
+        case 'html': return 'html'; case 'css': return 'css';
+        case 'json': return 'json'; case 'yaml': return 'yaml';
+        case 'md': return 'markdown'; case 'bat': return 'batch';
+        case 'ps1': return 'powershell'; case 'diff': return 'diff';
+        case 'sql': return 'sql';
+        default: return 'plaintext';
+    }
+};
+
 
 export default InteractionBlock;

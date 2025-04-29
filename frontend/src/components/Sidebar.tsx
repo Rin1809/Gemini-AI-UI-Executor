@@ -2,11 +2,10 @@
 import React, { ChangeEvent } from 'react';
 import { FiX } from 'react-icons/fi'; // Icon đóng sidebar
 import SettingsPanel from './SettingsPanel';
-import { ModelConfig } from '../App';
+import { ModelConfig, TargetOS } from '../App'; // Import TargetOS
 import './Sidebar.css';
 
 // --- Props Interface ---
-// Interface này nhận tất cả props cần thiết cho cả Sidebar và SettingsPanel bên trong
 interface SidebarProps {
   isOpen: boolean;              // Trạng thái mở/đóng
   onClose: () => void;          // Hàm xử lý khi đóng sidebar
@@ -20,6 +19,10 @@ interface SidebarProps {
   useUiApiKey: boolean;
   onApplyUiApiKey: () => void;
   onUseEnvKey: () => void;
+  // Add new props for target environment
+  targetOs: TargetOS;
+  fileType: string;
+  customFileName: string;
 }
 // ---------------------
 
@@ -36,6 +39,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   useUiApiKey,
   onApplyUiApiKey,
   onUseEnvKey,
+  // Destructure new props
+  targetOs,
+  fileType,
+  customFileName,
 }) => {
 
   return (
@@ -47,7 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({
          aria-hidden={!isOpen} // Hỗ trợ accessibility
        ></div>
        {/* Container chính của sidebar */}
-      <aside className={`sidebar-container ${isOpen ? 'open' : ''}`} aria-label="Sidebar Settingss%">
+      <aside className={`sidebar-container ${isOpen ? 'open' : ''}`} aria-label="Sidebar Settings">
         {/* Header của sidebar */}
         <div className="sidebar-header">
           <h3>ᓚᘏᗢ | Run Setting</h3>
@@ -63,13 +70,17 @@ const Sidebar: React.FC<SidebarProps> = ({
             modelConfig={modelConfig}
             onConfigChange={onConfigChange}
             onSaveSettings={onSaveSettings}
-            isDisabled={isBusy} // Sử dụng isBusy đã cập nhật
+            isDisabled={isBusy}
             // Truyền các props mới liên quan đến admin và API key
             runAsAdmin={runAsAdmin}
             uiApiKey={uiApiKey}
             useUiApiKey={useUiApiKey}
             onApplyUiApiKey={onApplyUiApiKey}
             onUseEnvKey={onUseEnvKey}
+             // Pass new props down for target environment
+            targetOs={targetOs}
+            fileType={fileType}
+            customFileName={customFileName}
           />
         </div>
       </aside>

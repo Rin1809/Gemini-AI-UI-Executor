@@ -1,14 +1,15 @@
 // frontend/src/components/SettingsPanel.tsx
 import React, { ChangeEvent } from 'react';
-import { FiSave, FiSettings, FiKey, FiAlertTriangle } from 'react-icons/fi'; 
+// Import FiGlobe or similar for Target Environment section
+import { FiSave, FiSettings, FiKey, FiAlertTriangle, FiGlobe, FiFileText } from 'react-icons/fi';
+import { TargetOS } from '../App'; // Import TargetOS type
 import './SettingsPanel.css';
 
 // --- Props Interface ---
-// Định nghĩa rõ các props cần thiết thay vì dùng ModelConfig đầy đủ
 interface SettingsPanelProps {
   modelConfig: { modelName: string; temperature: number; topP: number; topK: number; safetySetting: string; };
   onConfigChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void; // Hàm xử lý thay đổi input/select
-  onSaveSettings: () => void; // Hàm lưu cài đặt (chỉ model name)
+  onSaveSettings: () => void; // Hàm lưu cài đặt
   isDisabled: boolean;        // Trạng thái disable các control
   // Props mới từ Sidebar
   runAsAdmin: boolean;        // Trạng thái checkbox "Run as Admin"
@@ -16,6 +17,10 @@ interface SettingsPanelProps {
   useUiApiKey: boolean;       // Cờ cho biết đang dùng key UI hay không
   onApplyUiApiKey: () => void; // Hàm xử lý khi nhấn "Use This Key"
   onUseEnvKey: () => void;     // Hàm xử lý khi nhấn "Use .env Key"
+  // Add new props for target environment
+  targetOs: TargetOS;
+  fileType: string;
+  customFileName: string;
 }
 // ----------------------
 
@@ -30,7 +35,44 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   useUiApiKey,
   onApplyUiApiKey,
   onUseEnvKey,
+   // Destructure new props for target environment
+  targetOs,
+  fileType,
+  customFileName,
 }) => {
+
+    // --- OS ---
+    const getSuggestedFileTypes = (os: TargetOS): { value: string; label: string }[] => {
+      switch (os) {
+        case 'windows':
+          return [
+            { value: 'bat', label: '.bat (Batch Script)' },
+            { value: 'ps1', label: '.ps1 (PowerShell)' },
+            { value: 'py', label: '.py (Python Script)' },
+            { value: 'other', label: 'Tên khác...' },
+          ];
+        case 'linux':
+        case 'macos':
+          return [
+            { value: 'sh', label: '.sh (Shell Script)' },
+            { value: 'py', label: '.py (Python Script)' },
+            { value: 'other', label: 'Tên khác...' },
+          ];
+        case 'auto': 
+        default:
+          return [
+             { value: 'py', label: '.py (Python Script)' },
+             { value: 'sh', label: '.sh (Shell Script)' },
+             { value: 'bat', label: '.bat (Batch Script)' },
+             { value: 'ps1', label: '.ps1 (PowerShell)' },
+             { value: 'other', label: 'Tên khác...' },
+          ];
+      }
+    };
+
+    const suggestedTypes = getSuggestedFileTypes(targetOs);
+
+
   return (
     <div className="settings-panel">
       <div className="settings-content">
@@ -38,19 +80,17 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <div className="settings-section">
           <label htmlFor="modelName">Model</label>
           <div className="model-select-group">
-            {/* Input cho tên model */}
             <input
               type="text" id="modelName" name="modelName"
               value={modelConfig.modelName} onChange={onConfigChange}
               disabled={isDisabled} placeholder="Ví dụ: gemini-1.5-flash"
               className="model-input"
             />
-            {/* Nút lưu tên model */}
             <button
               onClick={onSaveSettings} disabled={isDisabled}
               className="save-button icon-button"
-              title="Lưu lựa chọn model (lưu cục bộ)"
-              aria-label="Lưu tên model"
+              title="Lưu các lựa chọn (Model, OS, File Type)" // Update tooltip
+              aria-label="Lưu cài đặt"
             >
               <FiSave />
             </button>
@@ -59,51 +99,32 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
         {/* --- Khu vực API Key --- */}
         <div className="settings-section api-key-section">
-            {/* Label và icon */}
-            <label htmlFor="uiApiKey"><FiKey />API Key</label>
-            {/* Input nhập API Key */}
+            <label htmlFor="uiApiKey"><FiKey /> API Key (Tùy chọn)</label>
             <input
-                type="password" // Kiểu password để ẩn key
-                id="uiApiKey"
-                name="uiApiKey" // Phải khớp với handler trong App.tsx
-                value={uiApiKey}
-                onChange={onConfigChange} // Dùng handler chung
+                type="password" id="uiApiKey" name="uiApiKey"
+                value={uiApiKey} onChange={onConfigChange}
                 disabled={isDisabled}
                 placeholder="Nhập API Key để dùng thay cho .env"
-                className="api-key-input"
-                autoComplete="new-password" // Tránh tự động điền
+                className="api-key-input" autoComplete="new-password"
             />
-            {/* Các nút hành động */}
             <div className="api-key-actions">
-                 {/* Nút "Sử dụng Key này" */}
-                 <button
-                    onClick={onApplyUiApiKey}
-                    // Disable nếu đang bận hoặc chưa nhập key
-                    disabled={isDisabled || !uiApiKey.trim()}
+                 <button onClick={onApplyUiApiKey} disabled={isDisabled || !uiApiKey.trim()}
                     className="api-action-button apply-key"
-                    title="Sử dụng key đã nhập ở trên cho các yêu cầu API"
-                 >
+                    title="Sử dụng key đã nhập ở trên cho các yêu cầu API" >
                     Sử dụng Key Này
                  </button>
-                 {/* Nút "Sử dụng Key .env" */}
-                 <button
-                    onClick={onUseEnvKey}
-                    // Disable nếu đang bận hoặc đang không dùng key UI
-                    disabled={isDisabled || !useUiApiKey}
+                 <button onClick={onUseEnvKey} disabled={isDisabled || !useUiApiKey}
                     className="api-action-button use-env-key"
-                    title="Sử dụng GOOGLE_API_KEY từ file .env (nếu có ở backend)"
-                 >
+                    title="Sử dụng GOOGLE_API_KEY từ file .env (nếu có ở backend)" >
                     Sử dụng Key .env
                  </button>
             </div>
-            {/* Hiển thị trạng thái key đang sử dụng */}
             {useUiApiKey ? (
                  <span className="api-key-status">Đang dùng API Key từ ô nhập này</span>
             ) : (
-                 <span className="api-key-status faded">Đang dùng API Key từ .env (nếu có)</span>
+                 <span className="api-key-status faded">Đang dùng API Key từ .env (nếu set)</span>
             )}
-            {/* Ghi chú */}
-            <p className="api-key-note">Key chỉ được gửi tới backend cục bộ cho các lệnh gọi API liên quan. Không lưu trữ.</p>
+            <p className="api-key-note">Key chỉ được gửi tới backend cục bộ. Không lưu trữ.</p>
         </div>
 
 
@@ -127,11 +148,51 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           <input type="number" id="topK" name="topK" min="1" step="1" value={modelConfig.topK} onChange={onConfigChange} disabled={isDisabled} className="topk-input" />
         </div>
 
-        {/* --- Cài đặt nâng cao (Safety, Run as Admin) --- */}
+         {/* --- Chọn HĐH --- */}
+         <div className="settings-section target-environment-section">
+           <h4><FiGlobe /> Môi trường Mục tiêu</h4>
+           
+           <label htmlFor="targetOs">Hệ điều hành Mục tiêu</label>
+           <select id="targetOs" name="targetOs" value={targetOs} onChange={onConfigChange} disabled={isDisabled}>
+             <option value="auto">Tự động check</option>
+             <option value="windows">Windows</option>
+             <option value="linux">Linux</option>
+             <option value="macos">macOS</option>
+           </select>
+
+           {/* File Type Selection */}
+           <label htmlFor="fileType"><FiFileText /> Loại File Thực thi</label>
+           <select id="fileType" name="fileType" value={fileType} onChange={onConfigChange} disabled={isDisabled}>
+             {suggestedTypes.map(type => (
+                <option key={type.value} value={type.value}>{type.label}</option>
+             ))}
+           </select>
+
+            {/* Khu nhập file extention */}
+            {fileType === 'other' && (
+                <div className="custom-file-input-container">
+                    <label htmlFor="customFileName">Tên File Tùy chỉnh</label>
+                    <input
+                        type="text" id="customFileName" name="customFileName"
+                        value={customFileName} onChange={onConfigChange}
+                        disabled={isDisabled}
+                        placeholder="Ví dụ: ps1 / cpp / py"
+                        className="custom-file-input"
+                     />
+                     <p className="custom-file-note">Nhập tên file đầy đủ. Backend sẽ cố gắng thực thi nó (ví dụ: dùng `bash` cho file không đuôi trên Linux/macOS).</p>
+                 </div>
+             )}
+
+            <p className="target-env-note">
+                Lựa chọn này sẽ hướng dẫn AI tạo code phù hợp và cách backend thực thi code.
+            </p>
+         </div>
+
+
+        {/* --- Cài đặt nâng cao --- */}
         <div className="settings-section advanced-settings-section">
-          <h4><FiSettings/> Cài đặt Nâng cao</h4>
-          {/* Chọn mức độ an toàn */}
-          <label htmlFor="safetySetting">ᓚᘏᗢ | Safe Settings</label>
+          <h4><FiSettings/> Cài đặt Khác</h4>
+          <label htmlFor="safetySetting">Lọc Nội dung An toàn</label>
           <select id="safetySetting" name="safetySetting" value={modelConfig.safetySetting} onChange={onConfigChange} disabled={isDisabled} >
             <option value="BLOCK_NONE">BLOCK_NONE (Rủi ro)</option>
             <option value="BLOCK_ONLY_HIGH">BLOCK_ONLY_HIGH</option>
@@ -139,25 +200,18 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <option value="BLOCK_LOW_AND_ABOVE">BLOCK_LOW_AND_ABOVE</option>
           </select>
 
-          {/* Checkbox "Run as Admin" */}
+          {/* Run as Admin Checkbox */}
           <div className="admin-checkbox-container">
-             <input
-               type="checkbox"
-               id="runAsAdmin"
-               name="runAsAdmin" // Phải khớp với handler trong App.tsx
-               checked={runAsAdmin}
-               onChange={onConfigChange} // Dùng handler chung
-               disabled={isDisabled}
-               className="admin-checkbox"
+             <input type="checkbox" id="runAsAdmin" name="runAsAdmin"
+               checked={runAsAdmin} onChange={onConfigChange}
+               disabled={isDisabled} className="admin-checkbox"
              />
-             {/* Label cho checkbox */}
             <label htmlFor="runAsAdmin" className="admin-checkbox-label">
-              <FiAlertTriangle className="warning-icon" /> Chạy mã với quyền Admin/Root
+              <FiAlertTriangle className="warning-icon" /> Chạy với quyền Admin/Root
             </label>
           </div>
-          {/* Cảnh báo về Run as Admin */}
           <p className="admin-warning-note">
-              Cực kỳ nguy hiểm! Chỉ sử dụng nếu bạn hiểu hoàn toàn mã và rủi ro. Có thể yêu cầu tiến trình backend phải được khởi động với quyền admin/root. Hiệu quả phụ thuộc vào HĐH và quyền của backend.
+              Rủi ro! Chỉ bật nếu hiểu mã. Backend cần chạy với quyền tương ứng.
           </p>
         </div>
       </div>

@@ -87,33 +87,33 @@ cd .. || ( echo [LOI] Khong the thoat khoi thu muc backend tam thoi. && goto :lo
 echo [+] Thiet lap Backend hoan tat.
 echo.
 echo [*] Nhan phim bat ky de bat dau thiet lap Frontend...
-pause  REM <--- Diem ban bi crash sau khi nhan phim
+pause  REM 
 
 echo [DEBUG] Da qua buoc pause chinh. Nhan phim de tiep tuc...
-pause  REM <--- Them PAUSE 1
+pause  REM 
 
 echo.
 echo [DEBUG] Da qua buoc echo rong. Nhan phim de tiep tuc...
-pause  REM <--- Them PAUSE 2
+pause  REM 
 
 
 REM === Thiet lap Frontend ===
 echo [+] Dang chuan bi thiet lap Frontend...
 echo [DEBUG] Da qua buoc echo header Frontend. Nhan phim de tiep tuc...
-pause  REM <--- Them PAUSE 3
+pause  REM 
 
 if not exist frontend (
     echo [LOI] Khong tim thay thu muc 'frontend' o thu muc goc.
     goto :loi_thoat_co_pause
 )
 echo [DEBUG] Da qua buoc kiem tra 'if not exist frontend'. Nhan phim de tiep tuc...
-pause  REM <--- Them PAUSE 4
+pause  REM 
 
 
 echo [INFO] Dang kiem tra npm (Node.js)...
 
 echo [DEBUG] Da qua buoc kiem tra loi npm. Nhan phim de tiep tuc...
-pause REM <--- Them PAUSE 6
+pause REM
 
 REM --- Phan con lai cua Frontend (Mo cua so moi) ---
 echo [INFO] Da tim thay npm.

@@ -2,11 +2,11 @@
 
 
 ## Image 1: 
-![image](https://github.com/user-attachments/assets/bdc63cad-b598-46e9-8575-14ab35b718d5)
+![image](https://github.com/user-attachments/assets/78c1b08e-8f24-4395-9f22-a4fe9676fe60)
 
 
 ## Image 2:
-![image](https://github.com/user-attachments/assets/9dfd42a1-263e-4707-8c43-a3ab3c920f91)
+![image](https://github.com/user-attachments/assets/c025d77e-0913-46a9-a5f7-cd6d5e739262)
 
 
 <!-- Vietnamese -->

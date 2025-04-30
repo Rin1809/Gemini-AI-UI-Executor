@@ -501,10 +501,7 @@ gemini-ui-executor/
 
 </details>
 
-## Image 1: 
-![image](https://github.com/user-attachments/assets/78c1b08e-8f24-4395-9f22-a4fe9676fe60)
+## Image: 
 
-
-## Image 2:
 ![image](https://github.com/user-attachments/assets/c025d77e-0913-46a9-a5f7-cd6d5e739262)
 

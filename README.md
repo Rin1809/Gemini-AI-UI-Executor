@@ -1,14 +1,6 @@
 # Gemini UI Executor - Giao diện UI - AI tạo sinh và thực thi code ᓚᘏᗢ
 
 
-## Image 1: 
-![image](https://github.com/user-attachments/assets/78c1b08e-8f24-4395-9f22-a4fe9676fe60)
-
-
-## Image 2:
-![image](https://github.com/user-attachments/assets/c025d77e-0913-46a9-a5f7-cd6d5e739262)
-
-
 <!-- Vietnamese -->
 <details>
 <summary>🇻🇳 Tiếng Việt</summary>
@@ -508,3 +500,11 @@ gemini-ui-executor/
 ```
 
 </details>
+
+## Image 1: 
+![image](https://github.com/user-attachments/assets/78c1b08e-8f24-4395-9f22-a4fe9676fe60)
+
+
+## Image 2:
+![image](https://github.com/user-attachments/assets/c025d77e-0913-46a9-a5f7-cd6d5e739262)
+

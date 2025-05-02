@@ -134,7 +134,7 @@ Sau khi cài đặt thành công:
 ## Cấu trúc thư mục
 ```
 gemini-ui-executor/
-├── .env                  # Chứa API Key của bạn (KHÔNG commit!)
+├── .env                  # Chứa API Key của bạn 
 ├── .gitignore            # Các file/thư mục bị Git bỏ qua
 ├── backend/              # Mã nguồn server Flask Python
 │   ├── app.py            # File Flask chính
@@ -300,7 +300,7 @@ After successful installation:
 ## Folder Structure
 ```
 gemini-ui-executor/
-├── .env                  # Contains your API Key (DO NOT commit!)
+├── .env                  # Contains your API Key 
 ├── .gitignore            # Files/folders ignored by Git
 ├── backend/              # Flask Python server source code
 │   ├── app.py            # Main Flask file
@@ -468,7 +468,7 @@ Gemini UI Executorは、Google Geminiと対話するためのWebベースのユ�
 ## フォルダ構造
 ```
 gemini-ui-executor/
-├── .env                  # APIキーを格納（コミットしないでください！）
+├── .env                  # APIキーを格納
 ├── .gitignore            # Gitで無視されるファイル/フォルダ
 ├── backend/              # Flask Pythonサーバーのソースコード
 │   ├── app.py            # メインFlaskファイル

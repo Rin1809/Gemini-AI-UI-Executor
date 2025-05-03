@@ -26,7 +26,6 @@
   width: 320px; /* Chiều rộng sidebar */
   max-width: 90vw; /* Giới hạn trên màn hình nhỏ */
   background-color: var(--bg-secondary);
-  border-left: 1px solid var(--border-color);
   box-shadow: -2px 0 15px rgba(0, 0, 0, 0.3);
   z-index: 999; /* Trên cùng */
   display: flex;

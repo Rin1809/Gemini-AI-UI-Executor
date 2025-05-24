@@ -1,4 +1,4 @@
-# Gemini UI Executor - Giao diện UI - AI tạo sinh và thực thi code ᓚᘏᗢ
+# Gemini UI Executor - Giao diện UI - AI Generates And Executes Code ᓚᘏᗢ
 
 
 <!-- Vietnamese -->

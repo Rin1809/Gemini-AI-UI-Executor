@@ -507,9 +507,18 @@ gemini-ui-executor/
 
 ![image](https://github.com/user-attachments/assets/c025d77e-0913-46a9-a5f7-cd6d5e739262)
 
+## Safety Assessment:
+
+![image](https://github.com/user-attachments/assets/e5df3f40-3fac-443d-9539-b3ca682633bb)
+
+
 ## Auto Debug:
 
 ![image](https://github.com/user-attachments/assets/a9321d6d-1969-4a4c-829f-917c58a4b1f1)
+
+## Auto Download Python Package:
+
+![image](https://github.com/user-attachments/assets/1a7923ed-edb5-4b11-b6b8-d2d7e82a87c7)
 
 
 ## Explain Result:

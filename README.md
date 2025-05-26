@@ -503,6 +503,11 @@ gemini-ui-executor/
 
 # Image: 
 
+## Setting Control:
+
+![image](https://github.com/user-attachments/assets/9e1443da-5c4d-4697-8ee0-bf3181cd12f8)
+
+
 ## Test Run: 
 
 ![image](https://github.com/user-attachments/assets/c025d77e-0913-46a9-a5f7-cd6d5e739262)

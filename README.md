@@ -501,16 +501,18 @@ gemini-ui-executor/
 
 </details>
 
-## Image test run: 
+# Image: 
+
+## Test Run: 
 
 ![image](https://github.com/user-attachments/assets/c025d77e-0913-46a9-a5f7-cd6d5e739262)
 
-## Image Auto Debug:
+## Auto Debug:
 
 ![image](https://github.com/user-attachments/assets/a9321d6d-1969-4a4c-829f-917c58a4b1f1)
 
 
-## Image Explain Result:
+## Explain Result:
 
 ![image](https://github.com/user-attachments/assets/a9b380ef-7ddb-42d1-9eff-bd5348f648b7)
 

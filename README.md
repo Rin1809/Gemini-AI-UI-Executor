@@ -505,7 +505,8 @@ gemini-ui-executor/
 
 ## Setting Control:
 
-![image](https://github.com/user-attachments/assets/9e1443da-5c4d-4697-8ee0-bf3181cd12f8)
+![image](https://github.com/user-attachments/assets/cf218ac0-88cd-412c-863c-6dcd59286a16)
+![image](https://github.com/user-attachments/assets/eeab5475-eca7-4491-b835-187a602229b2)
 
 
 ## Test Run: 
